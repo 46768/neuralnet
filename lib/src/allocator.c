@@ -13,6 +13,15 @@ void* allocate(size_t size) {
 	return ptr;
 }
 
+void* callocate(size_t size, size_t t_size) {
+	void* ptr = calloc(size, t_size);
+	if (ptr == NULL) {
+		fatal("Failed to allocate a pointer sized %zu bytes", size);
+		exit(1);
+	}
+	return ptr;
+}
+
 void* reallocate(void* ptr, size_t size) {
 	if (ptr == NULL) {
 		fatal("Provided pointer is NULL");
@@ -29,6 +38,5 @@ void* reallocate(void* ptr, size_t size) {
 void deallocate(void* ptr) {
 	if (ptr != NULL) {
 		free(ptr);
-		ptr = NULL;
 	}
 }

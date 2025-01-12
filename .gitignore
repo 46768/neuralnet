@@ -1,5 +1,6 @@
 # CMake target
 target/
+debug/
 
 # Clang cache
 .cache/
