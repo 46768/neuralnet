@@ -1,27 +1,45 @@
 #include "activation.h"
 
 #include <math.h>
+#include <string.h>
 
-activation_fn resolve_activation_fn(ActivationFN fn_type) {
+ActivationFn resolve_activation_fn(ActivationFNEnum fn_type) {
 	switch (fn_type) {
 		case ReLU:
 			return nn_relu;
 		case Sigmoid:
 			return nn_sigmoid;
+		case None:
+			return nn_none_fn;
 		default:
 			return NULL;
 	}
 }
 
-activation_fn_d resolve_activation_fn_d(ActivationFN fn_type) {
+ActivationFnD resolve_activation_fn_d(ActivationFNEnum fn_type) {
 	switch (fn_type) {
 		case ReLU:
 			return nn_relu_d;
 		case Sigmoid:
 			return nn_sigmoid_d;
+		case None:
+			return nn_none_fn_d;
 		default:
 			return NULL;
 	}
+}
+
+//////////
+// None //
+//////////
+
+Vector* nn_none_fn(Vector* z) {
+	return vec_dup(z);
+}
+Vector* nn_none_fn_d(Vector* z) {
+	Vector* a = vec_zero(z->dimension);
+	memset(a->data, 1, a->dimension*sizeof(float));
+	return a;
 }
 
 //////////
@@ -62,4 +80,31 @@ Vector* nn_sigmoid_d(Vector* z) {
 		d->data[i] = sig*(1-sig);
 	}
 	return d;
+}
+
+/////////////
+// Softmax //
+/////////////
+
+Vector* nn_softmax(Vector* z) {
+	if (z->dimension == 1) {
+		return nn_sigmoid(z);
+	}
+	float exp_sum = 0;
+	float z_max = 0;
+	for (int i = 0; i < z->dimension; i++) {
+		if (z->data[i] > z_max) {
+			z_max = z->data[i];
+		}
+	}
+	Vector* a = vec_zero(z->dimension);
+	for (int i = 0; i < z->dimension; i++) {
+		float z_exp = exp(z->data[i] - z_max);
+		exp_sum += exp(z->data[i] - z_max);
+		a->data[i] = z_exp;
+	}
+	for (int i = 0; i < z->dimension; i++) {
+		a->data[i] /= exp_sum;
+	}
+	return a;
 }

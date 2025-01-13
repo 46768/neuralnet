@@ -2,6 +2,7 @@
 #define FFN_TYPE_H
 
 #include "activation.h"
+#include "cost.h"
 
 #include <stdlib.h>
 
@@ -11,7 +12,7 @@
 
 typedef struct {
 	size_t node_cnt;
-	ActivationFN fn_type;
+	ActivationFNEnum fn_type;
 } LayerData;
 
 // Feed forwad network type definition
@@ -19,11 +20,17 @@ typedef struct {
 	size_t hidden_size;	// Number of layers
 	size_t hidden_capacity; // Maximum layer count
 
-	size_t* hidden_layers; // Layer size array
+	LayerData** hidden_layers; // Layer size array
 	booltype immutable; // Network's immutability
 
 	Matrix** weights; // Weight array, weight[0] belongs to layer[0] going forward
 	Vector** biases; // Bias array, bias[0] belongs to layer[1]
+	
+	ActivationFn* layer_activation; // Activation Functions
+	ActivationFnD* layer_activation_d; // Activation Function Derivatives
+	
+	CostFn cost_fn;
+	CostFnD cost_fn_d;
 } FFN;
 
 #endif

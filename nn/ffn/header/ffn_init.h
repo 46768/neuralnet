@@ -8,8 +8,11 @@
 // Creation
 FFN* ffn_init(); // Create a feed forward network
 
+// Network Settings
+void ffn_set_cost_fn(FFN*, CostFnEnum); // Set network's cost function
+
 // Layer initialization
-void ffn_init_dense(FFN*, size_t); // Push a dense (fully connected) layer
+void ffn_init_dense(FFN*, size_t, ActivationFNEnum); // Push a dense (fully connected) layer
 void ffn_init_params(FFN*); // Finalize a network's layer
 
 // Memory management

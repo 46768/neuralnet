@@ -6,6 +6,8 @@
 #ifndef COM_LOGGER_H
 #define COM_LOGGER_H
 
+#include <stdio.h>
+
 // Level - type
 // 0 - INFO
 // 1 - WARN
@@ -23,8 +25,12 @@ void newline();
 
 #ifdef DEBUG_MODE
 #	define debug(format, ...) _log(3, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#	define printr_d(format, ...) fprintf(stderr, format, ##__VA_ARGS__)
+#	define newline_d() newline()
 #else
 #	define debug(format, ...)
+#	define printr_d(format, ...)
+#	define newline_d()
 #endif
 
 #ifdef VERBOSE_MODE

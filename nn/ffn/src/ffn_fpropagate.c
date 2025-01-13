@@ -5,11 +5,16 @@
 #include "vector.h"
 
 Vector* ffn_fpropagate(FFN* nn, Vector* input) {
+	if (!(nn->immutable)) {
+		error("Unable to forward propagate: Network is mutable");
+		return vec_zero(1);
+	}
+
 	Matrix** weights = nn->weights;
 	Vector** biases = nn->biases;
 
 	// Check if the input is compatible with network input
-	if (input->dimension != nn->hidden_layers[0]) {
+	if (input->dimension != nn->hidden_layers[0]->node_cnt) {
 		fatal("Input vector size mismatched with input node count, %d to %d",
 				input->dimension,
 				nn->hidden_layers[0]
@@ -30,9 +35,12 @@ Vector* ffn_fpropagate(FFN* nn, Vector* input) {
 			for (int x = 0; x < weight->sx; x++) {
 				a_j += (output_activation->data)[x]*matrix_get(weight, x, y);
 			}
-			(activation->data)[y] = a_j > 0 ? a_j : 0;
+			(activation->data)[y] = a_j;
 		}
 		vec_deallocate(output_activation); // Deallocate previous layer activation
+		Vector* temp = activation;
+		activation = nn->layer_activation[l](activation);
+		vec_deallocate(temp);
 		output_activation = activation; // Override with the current layer activation
 	}
 

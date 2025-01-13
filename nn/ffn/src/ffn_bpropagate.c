@@ -19,9 +19,9 @@ void _ffn_bfpropagate(FFN* nn, Vector* input, Vector*** a, Vector*** z) {
 	Vector** preactivations = *z;
 
 	// Check input compatibility
-	if (input->dimension != nn->hidden_layers[0]) {
+	if (input->dimension != (nn->hidden_layers[0])->node_cnt) {
 		fatal("Input vector size mismatched with input node count, %d to %d", input->dimension,
-				nn->hidden_layers[0]);
+				(nn->hidden_layers[0])->node_cnt);
 		exit(1);
 	}
 
@@ -34,7 +34,6 @@ void _ffn_bfpropagate(FFN* nn, Vector* input, Vector*** a, Vector*** z) {
 		Matrix* weight = weights[l];
 		Vector* bias = biases[l];
 
-		Vector* activation = vec_zero(bias->dimension);
 		Vector* preactivation = vec_zero(bias->dimension);
 
 		// Matrix vector multiplication
@@ -43,9 +42,9 @@ void _ffn_bfpropagate(FFN* nn, Vector* input, Vector*** a, Vector*** z) {
 			for (int x = 0; x < weight->sx; x++) {
 				a_j += (activations[l]->data)[x]*matrix_get(weight, x, y);
 			}
-			(activation->data)[y] = a_j > 0 ? a_j : 0;
 			(preactivation->data)[y] = a_j;
 		}
+		Vector* activation = nn->layer_activation[l](preactivation);
 
 		// Assign next layer activation
 		preactivations[l+1] = preactivation;
@@ -81,22 +80,22 @@ Vector* _ffn_mse_derivative(Vector* target, Vector* wrt) {
 Vector* _ffn_next_error(FFN* nn, Vector** z, Vector* cur_error, int nxt_idx) {
 	// err_(l-1) = ((da[l-1]/dz[l-1]) hdm_p w[l-1]^T) * err_l
 	Matrix* weight_trsp = matrix_transpose(nn->weights[nxt_idx]); // w[l-1]^T
-	Vector* relu_deriv = _ffn_relu_derivative(z[nxt_idx]); // da[l-1]/dz[l-1]
-	Matrix* err_coef = vec_matrix_hadamard(relu_deriv, weight_trsp); // drelu hdm_p w_t)
+	Vector* a_deriv = nn->layer_activation_d[nxt_idx](z[nxt_idx]); // da[l-1]/dz[l-1]
+	Matrix* err_coef = vec_matrix_hadamard(a_deriv, weight_trsp); // drelu hdm_p w_t)
 	Vector* nxt_err = matrix_vec_mul(err_coef, cur_error); // coef * err_l
 
 	// Pointer cleanup
 	matrix_deallocate(weight_trsp);
 	matrix_deallocate(err_coef);
-	vec_deallocate(relu_deriv);
+	vec_deallocate(a_deriv);
 
 	return nxt_err;
 }
 
-void ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate) {
+float ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate) {
 	if (!nn->immutable) {
 		error("Network is mutable");
-		return;
+		return -1.0f;
 	}
 	size_t L = nn->hidden_size;
 
@@ -106,25 +105,27 @@ void ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate)
 	_ffn_bfpropagate(nn, input, &activation, &preactivation);
 
 	// Back propagation variables
-	Vector* gradient_aL_C = _ffn_mse_derivative(target, activation[L-1]);
-	Vector* relu_driv_L = _ffn_relu_derivative(preactivation[L-1]);
-	Vector* ld_l = vec_mul(relu_driv_L, gradient_aL_C);
-	vec_deallocate(relu_driv_L);
-	vec_deallocate(gradient_aL_C);
+	Vector* gradient_aL_C = nn->cost_fn_d(target, activation[L-1]);
+	Vector* a_driv_L = nn->layer_activation_d[L-2](preactivation[L-1]);
 	
-	Matrix** gradient_w = (Matrix**)calloc(L, sizeof(Matrix*));
-	float loss = _ffn_cost_mse(target, activation[L-1]);
+	Matrix** gradient_w = (Matrix**)callocate(L, sizeof(Matrix*));
+	Vector** gradient_b = (Vector**)callocate(L, sizeof(Vector*));
+	gradient_b[L-1] = vec_mul(a_driv_L, gradient_aL_C);
+	vec_deallocate(a_driv_L);
+	vec_deallocate(gradient_aL_C);
+	float loss = nn->cost_fn(target, activation[L-1]);
+	//info("Network loss: %f", loss);
 
 	// Backward propagation
-	// Going from L-1 to 0
+	// Going from L-1 to 1
 	for (int l = L-2; l >= 0; l--) {
+		// Get previous layer error signal
+		Vector* ld_l1 = gradient_b[l+1];
 		// Calculate weight gradient
 		// Storing gradient as to not skew next layer's error
-		gradient_w[l] = column_row_vec_mul(ld_l, activation[l]);
-
-		Vector* ld_temp = ld_l;
-		ld_l = _ffn_next_error(nn, preactivation, ld_l, l);
-		vec_deallocate(ld_temp);
+		gradient_w[l] = column_row_vec_mul(ld_l1, activation[l]);
+		// Storing the error signal for bias update
+		gradient_b[l] = _ffn_next_error(nn, preactivation, ld_l1, l);
 	}
 
 	// Apply backward propagation gradient
@@ -133,15 +134,20 @@ void ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate)
 		Matrix* gradient_w_l = gradient_w[l];
 
 		// Apply weight gradient
+		debug("Weight gradient l %d:", l);
 		for (int x = 0; x < gradient_w_l->sx; x++) {
 			for (int y = 0; y < gradient_w_l->sy; y++) {
+				printr_d("%f ", matrix_get(gradient_w_l, x, y));
 				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 
 					learning_rate*matrix_get(gradient_w_l, x, y);
 			}
+			newline_d();
 		}
+		newline_d();
 
-		// Deallocate weight gradient
+		// Deallocate gradients
 		matrix_deallocate(gradient_w[l]);
+		vec_deallocate(gradient_b[l]);
 	}
 
 	// Cleanup
@@ -149,8 +155,11 @@ void ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate)
 		vec_deallocate(preactivation[l]);
 		vec_deallocate(activation[l]);
 	}
+	vec_deallocate(gradient_b[L-1]);
 	deallocate(preactivation);
 	deallocate(activation);
 	deallocate(gradient_w);
-	vec_deallocate(ld_l);
+	deallocate(gradient_b);
+
+	return loss;
 }

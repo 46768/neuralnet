@@ -4,6 +4,6 @@
 #include "ffn_type.h"
 #include "vector.h"
 
-void ffn_bpropagate(FFN*, Vector*, Vector*, float); // Back propagation
+float ffn_bpropagate(FFN*, Vector*, Vector*, float); // Back propagation
 
 #endif

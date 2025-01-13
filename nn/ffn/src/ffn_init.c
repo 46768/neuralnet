@@ -1,5 +1,8 @@
 #include "ffn_init.h"
 
+#include "activation.h"
+#include "cost.h"
+
 #include <stdlib.h>
 #include <math.h>
 
@@ -18,7 +21,7 @@ float _ffn_he_init(size_t node_cnt) {
 
 	float z0 = sqrt(-2.0f * log(u1)) * cos(2.0f * M_PI * u2);
 
-	return z0 * sqrt(2.0 / node_cnt);
+	return z0 * sqrt(2.0f / node_cnt);
 }
 
 //////////////
@@ -28,9 +31,26 @@ float _ffn_he_init(size_t node_cnt) {
 // Create a feed forward network
 FFN* ffn_init() {
 	FFN* ffn = (FFN*)calloc(1, sizeof(FFN));
+	ffn->hidden_size = 0;
+	ffn->hidden_capacity = 10;
+	ffn->hidden_layers = (LayerData**)callocate(ffn->hidden_capacity, sizeof(LayerData*));
 	ffn->immutable = FALSE;
 
 	return ffn;
+}
+
+//////////////////////
+// Network settings //
+//////////////////////
+
+// Set network's cost function
+void ffn_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
+	if (nn->immutable) {
+		error("Unable to modify ffn: Immutable");
+		return;
+	}
+	nn->cost_fn = resolve_cost_fn(cost_type);
+	nn->cost_fn_d = resolve_cost_fn_d(cost_type);
 }
 
 //////////////////////////
@@ -38,39 +58,65 @@ FFN* ffn_init() {
 //////////////////////////
 
 // Push a dense (fully connected) layer
-void ffn_init_dense(FFN* nn, size_t dense_size) {
+void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type) {
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
 	}
 	size_t hidden_size = nn->hidden_size;
-	if (hidden_size <= nn->hidden_capacity) {
+	if (hidden_size >= nn->hidden_capacity) {
 		nn->hidden_capacity += 10;
-		nn->hidden_layers = realloc(nn->hidden_layers, nn->hidden_capacity*sizeof(size_t));		
-		nn->weights = realloc(nn->weights, nn->hidden_capacity*sizeof(Matrix*));		
-		nn->biases = realloc(nn->biases, nn->hidden_capacity*sizeof(Vector*));		
+		size_t hidden_cap = nn->hidden_capacity;
+		nn->hidden_layers = reallocate(nn->hidden_layers, hidden_cap*sizeof(size_t));		
+		nn->weights = reallocate(nn->weights, hidden_cap*sizeof(Matrix*));		
+		nn->biases = reallocate(nn->biases, hidden_cap*sizeof(Vector*));		
 	}
 
-	nn->hidden_layers[hidden_size] = dense_size;
+	(nn->hidden_layers)[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
+	LayerData* layer = (nn->hidden_layers)[hidden_size];
+	layer->node_cnt = dense_size;
+	layer->fn_type = fn_type;
 	nn->hidden_size++;
 }
 
 // Finalize a network's layer
 void ffn_init_params(FFN* nn) {
-	size_t* layer_size = nn->hidden_layers;
-	for (int i = 0; i < nn->hidden_size-1; i++) {
-		size_t sx = layer_size[i];
-		size_t sy = layer_size[i+1];
+	if (nn->cost_fn == NULL || nn->cost_fn_d == NULL) {
+		error("Network's cost function unset");
+		return;
+	}
+	if (nn->immutable) {
+		error("Unable to initialize ffn: Already initialized");
+		return;
+	}
 
-		//nn->weights[i] = matrix_rand(sx, sy, 0.0f, 1.0f);
-		//nn->biases[i] = vec_rand(sy, 0.0f, 1.0f);
-		nn->weights[i] = matrix_zero(sx, sy);
-		nn->biases[i] = vec_zero(sy);
+	// Allocate space for weights, biases, and activation functions and their derivative
+	size_t hidden_cnt = nn->hidden_size-1;
+	nn->weights = (Matrix**)allocate(hidden_cnt*sizeof(Matrix*));
+	nn->biases = (Vector**)allocate(hidden_cnt*sizeof(Vector*));
+	nn->layer_activation = (ActivationFn*)allocate((hidden_cnt+1)*sizeof(ActivationFn));
+	nn->layer_activation_d = (ActivationFnD*)allocate((hidden_cnt+1)*sizeof(ActivationFnD));
 
+	// Initialize the data
+	LayerData** layer_data = nn->hidden_layers;
+	for (int l = 0; l < nn->hidden_size-1; l++) {
+		LayerData* layer_cur = layer_data[l];
+		LayerData* layer_nxt = layer_data[l+1];
+
+		size_t sx = layer_cur->node_cnt;
+		size_t sy = layer_nxt->node_cnt;
+
+		// Initialize the data structure
+		(nn->weights)[l] = matrix_zero(sx, sy);
+		(nn->biases)[l] = vec_zero(sy);
+		(nn->layer_activation)[l] = resolve_activation_fn(layer_cur->fn_type);
+		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);
+
+		// Initialize the actual data
 		for (int y = 0; y < sy; y++) {
-			nn->biases[i]->data[y] = _ffn_he_init(sx);
+			((nn->biases[l])->data)[y] = f_random(-0.01f, 0.01f);
 			for (int x = 0; x < sx; x++) {
-				nn->weights[i]->data[y*sx + x] = _ffn_he_init(sx);
+				((nn->weights[l])->data)[y*sx + x] = _ffn_he_init(sx);
 			}
 		}
 	}
@@ -87,9 +133,13 @@ void ffn_deallocate(FFN* nn) {
 	for (int i = 0; i < nn->hidden_size-1; i++) {
 		matrix_deallocate(nn->weights[i]);
 		vec_deallocate(nn->biases[i]);
+		deallocate(nn->hidden_layers[i]);
 	}
+	deallocate(nn->hidden_layers[nn->hidden_size-1]);
 	deallocate(nn->weights);
 	deallocate(nn->biases);
 	deallocate(nn->hidden_layers);
+	deallocate(nn->layer_activation);
+	deallocate(nn->layer_activation_d);
 	deallocate(nn);
 }
