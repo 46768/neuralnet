@@ -11,6 +11,10 @@
 #include "allocator.h"
 #include "random.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
+
 //////////////////////////////
 // Parameter Initialization //
 //////////////////////////////
@@ -30,7 +34,7 @@ float _ffn_he_init(size_t node_cnt) {
 
 // Create a feed forward network
 FFN* ffn_init() {
-	FFN* ffn = (FFN*)calloc(1, sizeof(FFN));
+	FFN* ffn = (FFN*)callocate(1, sizeof(FFN));
 	ffn->hidden_size = 0;
 	ffn->hidden_capacity = 10;
 	ffn->hidden_layers = (LayerData**)callocate(ffn->hidden_capacity, sizeof(LayerData*));
