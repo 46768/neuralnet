@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # Define the project
 project(FCLNN C)
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 # Export compile_commands.json for clangd
