@@ -28,20 +28,45 @@ int main() {
 	ffn_set_cost_fn(nn, MSE);
 	ffn_init_params(nn);
 
-	float learning_rate = 0.01;
+	info("Pre train");
+	debug("Network weights:");
+	for (int l = 0; l < nn->hidden_size-1; l++) {
+		newline_d();
+		Matrix* mat = nn->weights[l];
+		debug("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
+		for (int y = 0; y < mat->sy; y++) {
+			for (int x = 0; x < mat->sx; x++) {
+				printr_d("%f ", matrix_get(mat, x, y));
+			}
+			newline_d();
+		}
+	}
+	newline_d();
+
+	debug("Network bias:");
+	for (int l = 0; l < nn->hidden_size-1; l++) {
+		newline_d();
+		Vector* b = nn->biases[l];
+		debug("layer %d: %zu", l, b->dimension);
+		for (int x = 0; x < b->dimension; x++) {
+			printr_d("node %d: %f\n", x, b->data[x]);
+		}
+		newline_d();
+	}
+	newline_d();
+
+	float learning_rate = 0.02;
 	// Trains 3 times
-	for (int t = 0; t < 1000; t++) {
+	for (int t = 0; t < 10; t++) {
 		float l = 0;
 		//l += ffn_bpropagate(nn, vecs[1], targets[1], learning_rate);
 		
 		for (int i = 0; i < 10; i++) {
 			Vector* x = vec_zero(1); x->data[0] = i;
-			Vector* y = vec_zero(1); x->data[0] = (5.0f*i) + 2.0f;
+			Vector* y = vec_zero(1); y->data[0] = (5.0f*i) + 2.0f;
 			l += ffn_bpropagate(nn, x, y, learning_rate);
 		}
-		if (t % 100 == 0) {
-			debug("Training loss: %f", l/4);
-		}
+		info("Training loss: %f", l/4);
 	}
 	newline();
 	info("Post train");

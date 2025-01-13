@@ -3,13 +3,6 @@
 #include "logger.h"
 #include "allocator.h"
 
-float _ffn_cost_mse(Vector* actual, Vector* target) {
-	Vector* diff = vec_sub(actual, target);
-	float cost = vec_dot(diff, diff)/diff->dimension;
-	vec_deallocate(diff);
-	return cost;
-}
-
 void _ffn_bfpropagate(FFN* nn, Vector* input, Vector*** a, Vector*** z) {
 	Matrix** weights = nn->weights;
 	Vector** biases = nn->biases;
@@ -52,31 +45,6 @@ void _ffn_bfpropagate(FFN* nn, Vector* input, Vector*** a, Vector*** z) {
 	}
 }
 
-Vector* _ffn_relu_derivative(Vector* wrt) {
-	// dReLU(x)/dx = x > 0 ? 1 : 0
-	Vector* driv = vec_zero(wrt->dimension);
-
-	for (int i = 0; i < wrt->dimension; i++) {
-		if (wrt->data[i] > 0) {
-			driv->data[i] = 1;
-		}
-	}
-
-	return driv;
-}
-
-Vector* _ffn_mse_derivative(Vector* target, Vector* wrt) {
-	// dMse/dwrt_x = 2(wrt_x - target_x)/wrt.dim
-	Vector* driv = vec_zero(target->dimension);
-	float driv_coef = 2/(float)target->dimension;
-
-	for (int i = 0; i < target->dimension; i++) {
-		driv->data[i] = driv_coef*(wrt->data[i] - target->data[i]);
-	}
-
-	return driv;
-}
-
 Vector* _ffn_next_error(FFN* nn, Vector** z, Vector* cur_error, int nxt_idx) {
 	// err_(l-1) = ((da[l-1]/dz[l-1]) hdm_p w[l-1]^T) * err_l
 	Matrix* weight_trsp = matrix_transpose(nn->weights[nxt_idx]); // w[l-1]^T
@@ -105,12 +73,22 @@ float ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate
 	_ffn_bfpropagate(nn, input, &activation, &preactivation);
 
 	// Back propagation variables
-	Vector* gradient_aL_C = nn->cost_fn_d(target, activation[L-1]);
+	Vector* gradient_aL_C = nn->cost_fn_d(activation[L-1], target);
 	Vector* a_driv_L = nn->layer_activation_d[L-2](preactivation[L-1]);
 	
 	Matrix** gradient_w = (Matrix**)callocate(L, sizeof(Matrix*));
 	Vector** gradient_b = (Vector**)callocate(L, sizeof(Vector*));
 	gradient_b[L-1] = vec_mul(a_driv_L, gradient_aL_C);
+	debug("a_driv_L:");
+	for (int i = 0; i < a_driv_L->dimension; i++) {
+		printr_d("%f ", a_driv_L->data[i]);
+	}
+	newline_d();
+	debug("gradiant_aL_C:");
+	for (int i = 0; i < gradient_aL_C->dimension; i++) {
+		printr_d("%f ", gradient_aL_C->data[i]);
+	}
+	newline_d();
 	vec_deallocate(a_driv_L);
 	vec_deallocate(gradient_aL_C);
 	float loss = nn->cost_fn(target, activation[L-1]);
@@ -121,6 +99,11 @@ float ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate
 	for (int l = L-2; l >= 0; l--) {
 		// Get previous layer error signal
 		Vector* ld_l1 = gradient_b[l+1];
+		debug("ld_l1:");
+		for (int i = 0; i < ld_l1->dimension; i++) {
+			printr_d("%f ", ld_l1->data[i]);
+		}
+		newline_d();
 		// Calculate weight gradient
 		// Storing gradient as to not skew next layer's error
 		gradient_w[l] = column_row_vec_mul(ld_l1, activation[l]);
@@ -132,10 +115,12 @@ float ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate
 	// Going from L-1 to 0
 	for (int l = L-2; l >= 0; l--) {
 		Matrix* gradient_w_l = gradient_w[l];
+		Vector* gradient_b_l = gradient_b[l];
 
 		// Apply weight gradient
 		debug("Weight gradient l %d:", l);
 		for (int x = 0; x < gradient_w_l->sx; x++) {
+			(nn->biases)[l]->data[x] -= learning_rate*gradient_b_l->data[x];
 			for (int y = 0; y < gradient_w_l->sy; y++) {
 				printr_d("%f ", matrix_get(gradient_w_l, x, y));
 				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 

@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include "logger.h"
+
 ActivationFn resolve_activation_fn(ActivationFNEnum fn_type) {
 	switch (fn_type) {
 		case ReLU:
@@ -38,7 +40,9 @@ Vector* nn_none_fn(Vector* z) {
 }
 Vector* nn_none_fn_d(Vector* z) {
 	Vector* a = vec_zero(z->dimension);
-	memset(a->data, 1, a->dimension*sizeof(float));
+	for (int i = 0; i < z->dimension; i++) {
+		a->data[i] = 1.0f;
+	}
 	return a;
 }
 
