@@ -29,72 +29,78 @@ int main() {
 	ffn_init_params(nn);
 
 	info("Pre train");
-	debug("Network weights:");
+	info("Network weights:");
 	for (int l = 0; l < nn->hidden_size-1; l++) {
-		newline_d();
+		newline();
 		Matrix* mat = nn->weights[l];
-		debug("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
+		info("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
 		for (int y = 0; y < mat->sy; y++) {
 			for (int x = 0; x < mat->sx; x++) {
-				printr_d("%f ", matrix_get(mat, x, y));
+				printr("%f ", matrix_get(mat, x, y));
 			}
-			newline_d();
+			newline();
 		}
 	}
-	newline_d();
+	newline();
 
-	debug("Network bias:");
+	info("Network bias:");
 	for (int l = 0; l < nn->hidden_size-1; l++) {
-		newline_d();
+		newline();
 		Vector* b = nn->biases[l];
-		debug("layer %d: %zu", l, b->dimension);
+		info("layer %d: %zu", l, b->dimension);
 		for (int x = 0; x < b->dimension; x++) {
-			printr_d("node %d: %f\n", x, b->data[x]);
+			printr("node %d: %f\n", x, b->data[x]);
 		}
-		newline_d();
+		newline();
 	}
-	newline_d();
+	newline();
 
-	float learning_rate = 0.02;
+	float learning_rate = 0.01;
 	// Trains 3 times
-	for (int t = 0; t < 10; t++) {
+	for (int t = 0; t < 3000; t++) {
 		float l = 0;
 		//l += ffn_bpropagate(nn, vecs[1], targets[1], learning_rate);
 		
 		for (int i = 0; i < 10; i++) {
 			Vector* x = vec_zero(1); x->data[0] = i;
-			Vector* y = vec_zero(1); y->data[0] = (5.0f*i) + 2.0f;
+			Vector* y = vec_zero(1); y->data[0] = (4.0f*i) + 10.0f;
 			l += ffn_bpropagate(nn, x, y, learning_rate);
+			vec_deallocate(x);
+			vec_deallocate(y);
 		}
-		info("Training loss: %f", l/4);
+		info("Training loss: %f", l/10);
+		if ((l/(float)10) <= 0.000000000001) {
+			break;
+		}
+
 	}
 	newline();
 	info("Post train");
-	debug("Network weights:");
+	info("Network weights:");
 	for (int l = 0; l < nn->hidden_size-1; l++) {
-		newline_d();
+		newline();
 		Matrix* mat = nn->weights[l];
-		debug("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
+		info("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
 		for (int y = 0; y < mat->sy; y++) {
 			for (int x = 0; x < mat->sx; x++) {
-				printr_d("%f ", matrix_get(mat, x, y));
+				printr("%f ", matrix_get(mat, x, y));
 			}
-			newline_d();
+			newline();
 		}
 	}
-	newline_d();
+	newline();
 
-	debug("Network bias:");
+	info("Network bias:");
 	for (int l = 0; l < nn->hidden_size-1; l++) {
-		newline_d();
+		newline();
 		Vector* b = nn->biases[l];
-		debug("layer %d: %zu", l, b->dimension);
+		info("layer %d: %zu", l, b->dimension);
 		for (int x = 0; x < b->dimension; x++) {
-			printr_d("node %d: %f\n", x, b->data[x]);
+			printr("node %d: %f\n", x, b->data[x]);
 		}
-		newline_d();
+		newline();
 	}
-	newline_d();
+	newline();
 
 	for (int i = 0; i < 4; i++) {
 		vec_deallocate(vecs[i]);

@@ -49,7 +49,7 @@ Vector* _ffn_next_error(FFN* nn, Vector** z, Vector* cur_error, int nxt_idx) {
 	// err_(l-1) = ((da[l-1]/dz[l-1]) hdm_p w[l-1]^T) * err_l
 	Matrix* weight_trsp = matrix_transpose(nn->weights[nxt_idx]); // w[l-1]^T
 	Vector* a_deriv = nn->layer_activation_d[nxt_idx](z[nxt_idx]); // da[l-1]/dz[l-1]
-	Matrix* err_coef = vec_matrix_hadamard(a_deriv, weight_trsp); // drelu hdm_p w_t)
+	Matrix* err_coef = vec_matrix_hadamard(a_deriv, weight_trsp); // a_deriv hdm_p w_t
 	Vector* nxt_err = matrix_vec_mul(err_coef, cur_error); // coef * err_l
 
 	// Pointer cleanup
@@ -118,15 +118,20 @@ float ffn_bpropagate(FFN* nn, Vector* input, Vector* target, float learning_rate
 		Vector* gradient_b_l = gradient_b[l];
 
 		// Apply weight gradient
-		debug("Weight gradient l %d:", l);
+		debug("Weight gradient applied to l %d:", l);
 		for (int x = 0; x < gradient_w_l->sx; x++) {
 			(nn->biases)[l]->data[x] -= learning_rate*gradient_b_l->data[x];
 			for (int y = 0; y < gradient_w_l->sy; y++) {
-				printr_d("%f ", matrix_get(gradient_w_l, x, y));
+				printr_d("%f ", -learning_rate*matrix_get(gradient_w_l, x, y));
 				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 
 					learning_rate*matrix_get(gradient_w_l, x, y);
 			}
 			newline_d();
+		}
+		newline_d();
+		debug("Bias gradient applied to l %d:", l);
+		for (int x = 0; x < gradient_w_l->sx; x++) {
+			printr_d("%f\n", -learning_rate*gradient_b_l->data[x]);
 		}
 		newline_d();
 

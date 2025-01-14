@@ -22,6 +22,7 @@ void newline();
 #define warn(format, ...) _log(1, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
 #define error(format, ...) _log(2, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
 #define fatal(format, ...) _log(4, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#define printr(format, ...) fprintf(stderr, format, ##__VA_ARGS__)
 
 #ifdef DEBUG_MODE
 #	define debug(format, ...) _log(3, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
