@@ -19,9 +19,9 @@ typedef struct {
 	Vector* a_deriv_L;
 
 	// Backpropagation Temp ptr
-	Matrix* weight_trsp;
-	Vector* a_deriv;
-	Matrix* err_coef;
+	Matrix** weight_trsp;
+	Vector** a_deriv;
+	Matrix** err_coef;
 } FFNMempool;
 
 // Creation

@@ -20,11 +20,16 @@ Matrix* matrix_dup(Matrix*); // Duplicate a matrix
 
 // Matrix operation
 float matrix_get(Matrix*, int, int); // Get a value at x, y
+
+void matrix_transpose_ip(Matrix*, Matrix*); // Transpose a matrix in place
 Matrix* matrix_transpose(Matrix*); // Transpose a matrix
 
 // Matrix vector operation
+void matrix_vec_mul_ip(Matrix*, Vector*, Vector*); // Multiply matrix with vector in place
 Vector* matrix_vec_mul(Matrix*, Vector*); // Multiply matrix with vector
+void vec_matrix_hadamard_ip(Vector*, Matrix*, Matrix*); // Get hadamard product of vector and matrix
 Matrix* vec_matrix_hadamard(Vector*, Matrix*); // Get hadamard product of vector and matrix
+void column_row_vec_mul_ip(Vector*, Vector*, Matrix*); // Multiply column vector with row vector
 Matrix* column_row_vec_mul(Vector*, Vector*); // Multiply column vector with row vector
 
 // Memory management

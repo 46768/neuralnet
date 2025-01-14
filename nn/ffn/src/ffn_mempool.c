@@ -9,13 +9,22 @@
 
 FFNMempool* ffn_init_pool(FFN* nn) {
 	FFNMempool* pool = (FFNMempool*)allocate(sizeof(FFNMempool));
-	pool->layer_cnt = nn->hidden_size;
+	size_t L = nn->hidden_size;
+	pool->layer_cnt = L;
 
-	pool->preactivations = (Vector**)callocate(nn->hidden_size, sizeof(Vector*));
-	pool->activations = (Vector**)callocate(nn->hidden_size, sizeof(Vector*));
+	// Forward propagation
+	pool->preactivations = (Vector**)callocate(L, sizeof(Vector*));
+	pool->activations = (Vector**)callocate(L, sizeof(Vector*));
 
-	pool->gradient_b = (Vector**)callocate(nn->hidden_size, sizeof(Vector*));
-	pool->gradient_w = (Matrix**)callocate(nn->hidden_size, sizeof(Matrix*));
+	// Backpropagation
+	pool->gradient_b = (Vector**)callocate(L, sizeof(Vector*));
+	pool->gradient_w = (Matrix**)callocate(L, sizeof(Matrix*));
+	pool->gradient_aL_C = vec_zero(nn->hidden_layers[L-1]->node_cnt);
+	pool->a_deriv_L = vec_zero(nn->hidden_layers[L-1]->node_cnt);
+
+	pool->weight_trsp = (Matrix**)callocate(L, sizeof(Matrix*));
+	pool->a_deriv = (Vector**)callocate(L, sizeof(Vector*));
+	pool->err_coef = (Matrix**)callocate(L, sizeof(Matrix*));
 
 	return pool;
 }

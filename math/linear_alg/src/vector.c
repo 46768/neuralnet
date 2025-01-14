@@ -50,43 +50,59 @@ void vec_deallocate(Vector* vec) {
 /////////////////////
 
 // Apply a function that operate on both vector
-Vector* _vec_apply(Vector* vec1, Vector* vec2, float(*fn)(float, float)) {
+void _vec_apply(Vector* vec1, Vector* vec2, Vector* res, float(*fn)(float, float)) {
 	if (vec1->dimension != vec2->dimension) {
 		fatal("Vector 1 and 2 dimension mismatched: %d to %d", vec1->dimension, vec2->dimension);
-		exit(1);
 	}
-	Vector* res_vec = vec_zero(vec1->dimension);
-
+	if (vec1->dimension != res->dimension) {
+		fatal("Vector 1 and result vector dimension mismatched: %d to %d",
+				vec1->dimension, res->dimension);
+	}
 	for (int i = 0; i < vec1->dimension; i++) {
-		(res_vec->data)[i] = fn((vec1->data)[i], (vec2->data)[i]);
+		(res->data)[i] = fn((vec1->data)[i], (vec2->data)[i]);
 	}
-
-	return res_vec;
 }
 
 static inline float f_add(float a, float b) { return a+b; }
+// Element wise addition in place
+void vec_add_ip(Vector* vec1, Vector* vec2, Vector* res) {
+	return _vec_apply(vec1, vec2, res, f_add);
+}
 // Element wise addition
 Vector* vec_add(Vector* vec1, Vector* vec2) {
-	return _vec_apply(vec1, vec2, f_add);
+	Vector* res = vec_zero(vec1->dimension);
+	vec_add_ip(vec1, vec2, res);
+	return res;
 }
 
 static inline float f_sub(float a, float b) { return a-b; }
+// Element wise subtraction in place
+void vec_sub_ip(Vector* vec1, Vector* vec2, Vector* res) {
+	return _vec_apply(vec1, vec2, res, f_sub);
+}
 // Element wise subtraction
 Vector* vec_sub(Vector* vec1, Vector* vec2) {
-	return _vec_apply(vec1, vec2, f_sub);
+	Vector* res = vec_zero(vec1->dimension);
+	vec_sub_ip(vec1, vec2, res);
+	return res;
 }
 
 static inline float f_mul(float a, float b) { return a*b; }
+// Element wise multiplication in place
+void vec_mul_ip(Vector* vec1, Vector* vec2, Vector* res) {
+	return _vec_apply(vec1, vec2, res, f_mul);
+}
 // Element wise multiplication
 Vector* vec_mul(Vector* vec1, Vector* vec2) {
-	return _vec_apply(vec1, vec2, f_mul);
+	Vector* res = vec_zero(vec1->dimension);
+	vec_mul_ip(vec1, vec2, res);
+	return res;
 }
 
 // Perform dot product between 2 vectors
 float vec_dot(Vector* vec1, Vector* vec2) {
 	if (vec1->dimension != vec2->dimension) {
 		fatal("Vector 1 and 2 dimension mismatched: %d to %d", vec1->dimension, vec2->dimension);
-		exit(1);
 	}
 	float dot_prod = 0;
 
