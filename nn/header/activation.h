@@ -4,8 +4,8 @@
 #include "vector.h"
 
 // Activation Function Type
-typedef Vector*(*ActivationFn)(Vector*); // Activation Function
-typedef Vector*(*ActivationFnD)(Vector*); // Activation Function Derivative
+typedef void(*ActivationFn)(Vector*, Vector*); // Activation Function
+typedef void(*ActivationFnD)(Vector*, Vector*); // Activation Function Derivative
 
 // Activation Function Enum
 typedef enum {
@@ -19,18 +19,18 @@ ActivationFn resolve_activation_fn(ActivationFNEnum);
 ActivationFnD resolve_activation_fn_d(ActivationFNEnum);
 
 // None
-Vector* nn_none_fn(Vector*);
-Vector* nn_none_fn_d(Vector*);
+void nn_none_fn(Vector*, Vector*);
+void nn_none_fn_d(Vector*, Vector*);
 
 // ReLU
-Vector* nn_relu(Vector*);
-Vector* nn_relu_d(Vector*);
+void nn_relu(Vector*, Vector*);
+void nn_relu_d(Vector*, Vector*);
 
 // Sigmoid
-Vector* nn_sigmoid(Vector*);
-Vector* nn_sigmoid_d(Vector*);
+void nn_sigmoid(Vector*, Vector*);
+void nn_sigmoid_d(Vector*, Vector*);
 
 // Softmax
-Vector* nn_softmax(Vector*);
+void nn_softmax(Vector*, Vector*);
 
 #endif

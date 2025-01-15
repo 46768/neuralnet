@@ -5,7 +5,7 @@
 
 // Cost Function Type
 typedef float(*CostFn)(Vector*, Vector*); // Cost Function
-typedef Vector*(*CostFnD)(Vector*, Vector*); // Cost Function Derivative
+typedef void(*CostFnD)(Vector*, Vector*, Vector*); // Cost Function Derivative
 
 // Cost Function Enum
 typedef enum {
@@ -19,10 +19,10 @@ CostFnD resolve_cost_fn_d(CostFnEnum);
 
 // Mean Squared Error
 float nn_mse(Vector*, Vector*);
-Vector* nn_mse_d(Vector*, Vector*);
+void nn_mse_d(Vector*, Vector*, Vector*);
 
 // Cross Entropy Loss
 float nn_cel(Vector*, Vector*);
-Vector* nn_cel_d(Vector*, Vector*);
+void nn_cel_d(Vector*, Vector*, Vector*);
 
 #endif

@@ -1,5 +1,5 @@
 // Uncomment to enable debugging
-//#define DEBUG_MODE
+#define DEBUG_MODE
 // Uncomment to enable verbose logging
 //#define VERBOSE_MODE
 

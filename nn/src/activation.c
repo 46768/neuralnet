@@ -35,34 +35,40 @@ ActivationFnD resolve_activation_fn_d(ActivationFNEnum fn_type) {
 // None //
 //////////
 
-Vector* nn_none_fn(Vector* z) {
-	return vec_dup(z);
-}
-Vector* nn_none_fn_d(Vector* z) {
-	Vector* a = vec_zero(z->dimension);
-	for (int i = 0; i < z->dimension; i++) {
-		a->data[i] = 1.0f;
+void nn_none_fn(Vector* z, Vector* a) {
+	if (z->dimension != a->dimension) {
+		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
 	}
-	return a;
+	memcpy(a->data, z->data, z->dimension*sizeof(float));
+}
+void nn_none_fn_d(Vector* z, Vector* d) {
+	if (z->dimension != d->dimension) {
+		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
+	}
+	for (int i = 0; i < z->dimension; i++) {
+		d->data[i] = 1.0f;
+	}
 }
 
 //////////
 // ReLU //
 //////////
 
-Vector* nn_relu(Vector* z) {
-	Vector* a = vec_zero(z->dimension);
+void nn_relu(Vector* z, Vector* a) {
+	if (z->dimension != a->dimension) {
+		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
+	}
 	for (int i = 0; i < z->dimension; i++) {
 		if (z->data[i] > 0) a->data[i] = z->data[i];
 	}
-	return a;
 }
-Vector* nn_relu_d(Vector* z) {
-	Vector* d = vec_zero(z->dimension);
+void nn_relu_d(Vector* z, Vector* d) {
+	if (z->dimension != d->dimension) {
+		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
+	}
 	for (int i = 0; i < z->dimension; i++) {
 		if (z->data[i] > 0) d->data[i] = 1.0f;
 	}
-	return d;
 }
 
 /////////////
@@ -70,29 +76,31 @@ Vector* nn_relu_d(Vector* z) {
 /////////////
 
 static inline float _sigmoid(float x) { return (float)1/(1+exp(-x)); }
-Vector* nn_sigmoid(Vector* z) {
-	Vector* a = vec_zero(z->dimension);
+void nn_sigmoid(Vector* z, Vector* a) {
+	if (z->dimension != a->dimension) {
+		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
+	}
 	for (int i = 0; i < z->dimension; i++) {
 		a->data[i] = _sigmoid(z->data[i]);
 	}
-	return a;
 }
-Vector* nn_sigmoid_d(Vector* z) {
-	Vector* d = vec_zero(z->dimension);
+void nn_sigmoid_d(Vector* z, Vector* d) {
+	if (z->dimension != d->dimension) {
+		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
+	}
 	for (int i = 0; i < z->dimension; i++) {
 		float sig = _sigmoid(z->data[i]);
 		d->data[i] = sig*(1-sig);
 	}
-	return d;
 }
 
 /////////////
 // Softmax //
 /////////////
 
-Vector* nn_softmax(Vector* z) {
+void nn_softmax(Vector* z, Vector* a) {
 	if (z->dimension == 1) {
-		return nn_sigmoid(z);
+		return nn_sigmoid(z, a);
 	}
 	float exp_sum = 0;
 	float z_max = 0;
@@ -101,7 +109,6 @@ Vector* nn_softmax(Vector* z) {
 			z_max = z->data[i];
 		}
 	}
-	Vector* a = vec_zero(z->dimension);
 	for (int i = 0; i < z->dimension; i++) {
 		float z_exp = exp(z->data[i] - z_max);
 		exp_sum += exp(z->data[i] - z_max);
@@ -110,5 +117,4 @@ Vector* nn_softmax(Vector* z) {
 	for (int i = 0; i < z->dimension; i++) {
 		a->data[i] /= exp_sum;
 	}
-	return a;
 }

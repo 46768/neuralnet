@@ -31,6 +31,8 @@ typedef struct {
 	
 	CostFn cost_fn;
 	CostFnD cost_fn_d;
+
+
 } FFN;
 
 #endif

@@ -1,17 +1,21 @@
 #include "ffn_fpropagate.h"
 
+#include <string.h>
+
 #include "logger.h"
 #include "matrix.h"
 #include "vector.h"
 
-Vector* ffn_fpropagate(FFN* nn, Vector* input) {
+void ffn_fpropagate(FFN* nn, FFNMempool* pool, Vector* input) {
 	if (!(nn->immutable)) {
-		error("Unable to forward propagate: Network is mutable");
-		return vec_zero(1);
+		fatal("Unable to forward propagate: Network is mutable");
 	}
 
 	Matrix** weights = nn->weights;
 	Vector** biases = nn->biases;
+	Vector** z = pool->preactivations;
+	Vector** a = pool->activations;
+
 
 	// Check if the input is compatible with network input
 	if (input->dimension != nn->hidden_layers[0]->node_cnt) {
@@ -21,28 +25,25 @@ Vector* ffn_fpropagate(FFN* nn, Vector* input) {
 		);
 		exit(1);
 	}
-	Vector* output_activation = vec_dup(input);
+	memcpy(z[0]->data, input->data, input->dimension*sizeof(float));
+	memcpy(a[0]->data, input->data, input->dimension*sizeof(float));
 
 	// Propagate input to each layer
 	for (int l = 0; l < nn->hidden_size-1; l++) {
 		Matrix* weight = weights[l];
 		Vector* bias = biases[l];
-		Vector* activation = vec_zero(bias->dimension);
+		Vector* zl = z[l];
+		Vector* zl1 = z[l+1];
+		Vector* al = a[l+1];
 
 		// Calculate the matrix vector multiplication
 		for (int y = 0; y < weight->sy; y++) {
 			float a_j = (bias->data)[y];
 			for (int x = 0; x < weight->sx; x++) {
-				a_j += (output_activation->data)[x]*matrix_get(weight, x, y);
+				a_j += (zl->data)[x]*matrix_get(weight, x, y);
 			}
-			(activation->data)[y] = a_j;
+			(zl1->data)[y] = a_j;
 		}
-		vec_deallocate(output_activation); // Deallocate previous layer activation
-		Vector* temp = activation;
-		activation = nn->layer_activation[l](activation);
-		vec_deallocate(temp);
-		output_activation = activation; // Override with the current layer activation
+		nn->layer_activation[l](zl, al);
 	}
-
-	return output_activation;
 }
