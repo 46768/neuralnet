@@ -43,6 +43,6 @@ void _log(
 	fprintf(stderr, "\n");
 }
 
-void inline newline() {
+inline void newline() {
 	fprintf(stderr, "\n");
 }

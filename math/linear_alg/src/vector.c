@@ -22,7 +22,7 @@ Vector* vec_zero(size_t dimension) {
 // Create a vector with random values
 Vector* vec_rand(size_t dimension, float lb, float ub) {
 	Vector* vec = vec_zero(dimension);
-	for (int i = 0; i < dimension; i++) {
+	for (size_t i = 0; i < dimension; i++) {
 		vec->data[i] = f_random(lb, ub);
 	}
 	return vec;
@@ -58,7 +58,7 @@ void _vec_apply(Vector* vec1, Vector* vec2, Vector* res, float(*fn)(float, float
 		fatal("Vector 1 and result vector dimension mismatched: %d to %d",
 				vec1->dimension, res->dimension);
 	}
-	for (int i = 0; i < vec1->dimension; i++) {
+	for (size_t i = 0; i < vec1->dimension; i++) {
 		(res->data)[i] = fn((vec1->data)[i], (vec2->data)[i]);
 	}
 }
@@ -106,7 +106,7 @@ float vec_dot(Vector* vec1, Vector* vec2) {
 	}
 	float dot_prod = 0;
 
-	for (int i = 0; i < vec1->dimension; i++) {
+	for (size_t i = 0; i < vec1->dimension; i++) {
 		dot_prod += (vec1->data)[i] * (vec2->data)[i];
 	}
 

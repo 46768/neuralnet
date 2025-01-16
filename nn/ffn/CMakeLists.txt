@@ -19,4 +19,5 @@ target_include_directories(FeedForwardNetwork PUBLIC
 # Link other libraries to the library
 target_link_libraries(FeedForwardNetwork PUBLIC MathLinearAlg)
 target_link_libraries(FeedForwardNetwork PUBLIC NeuralNetwork)
+target_link_libraries(FeedForwardNetwork PUBLIC compiler_flags)
 target_link_libraries(FeedForwardNetwork PRIVATE ComLib)

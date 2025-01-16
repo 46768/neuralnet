@@ -3,7 +3,7 @@
 #include "allocator.h"
 
 int get_section(FILE* file, char** str_buf, size_t* max_size, char delimiter) {
-	int buf_idx = 0;
+	size_t buf_idx = 0;
 	char char_buf;
 
 	while ((char_buf = fgetc(file)) != EOF && char_buf != delimiter && char_buf != '\n') {

@@ -38,16 +38,18 @@ float nn_mse(Vector* actual, Vector* target) {
 			 );
 	}
 	float cost = 0;
-	for (int i = 0; i < actual->dimension; i++) {
-		cost += (actual->data[i]-target->data[i])/(float)actual->dimension;
+	for (size_t i = 0; i < actual->dimension; i++) {
+		float diff = actual->data[i] - target->data[i];
+		cost += diff*diff;
+		debug("accumulated cost: %f", cost);
 	}
-	return cost;
+	return cost/(float)actual->dimension;
 }
 void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
 	// dMse/dwrt_x = 2(wrt_x - target_x)/wrt.dim
 	float driv_coef = 2/(float)target->dimension;
 
-	for (int i = 0; i < target->dimension; i++) {
+	for (size_t i = 0; i < target->dimension; i++) {
 		//debug("deriv[%d]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
 		driv->data[i] = driv_coef*(actual->data[i] - target->data[i]);
 	}
@@ -70,16 +72,16 @@ float nn_cel(Vector* actual, Vector* target) {
 	float loss = 0;
 	float exp_sum = 0;
 	float z_max = -INFINITY;
-	for (int i = 0; i < actual->dimension; i++) {
+	for (size_t i = 0; i < actual->dimension; i++) {
 		if (actual->data[i] > z_max) {
 			z_max = actual->data[i];
 		}
 	}
-	for (int i = 0; i < actual->dimension; i++) {
+	for (size_t i = 0; i < actual->dimension; i++) {
 		exp_sum += exp(actual->data[i] - z_max);
 	}
 	float cel_offset = log(exp_sum);
-	for (int i = 0; i < actual->dimension; i++) {
+	for (size_t i = 0; i < actual->dimension; i++) {
 		loss -= target->data[i] * (actual->data[i] - z_max - cel_offset);
 	}
 
@@ -104,16 +106,16 @@ void nn_cel_d(Vector* actual, Vector* target, Vector* res) {
 	}
 	float exp_sum = 0;
 	float z_max = -INFINITY;
-	for (int i = 0; i < actual->dimension; i++) {
+	for (size_t i = 0; i < actual->dimension; i++) {
 		if (actual->data[i] > z_max) {
 			z_max = actual->data[i];
 		}
 	}
-	for (int i = 0; i < actual->dimension; i++) {
+	for (size_t i = 0; i < actual->dimension; i++) {
 		exp_sum += exp(actual->data[i] - z_max);
 	}
 
-	for (int i = 0; i < actual->dimension; i++) {
+	for (size_t i = 0; i < actual->dimension; i++) {
 		res->data[i] = (exp(actual->data[i] - z_max)/exp_sum) - target->data[i];
 	}
 }

@@ -103,7 +103,7 @@ void ffn_init_params(FFN* nn) {
 
 	// Initialize the data
 	LayerData** layer_data = nn->hidden_layers;
-	for (int l = 0; l < nn->hidden_size-1; l++) {
+	for (size_t l = 0; l < nn->hidden_size-1; l++) {
 		LayerData* layer_cur = layer_data[l];
 		LayerData* layer_nxt = layer_data[l+1];
 
@@ -117,9 +117,9 @@ void ffn_init_params(FFN* nn) {
 		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);
 
 		// Initialize the actual data
-		for (int y = 0; y < sy; y++) {
+		for (size_t y = 0; y < sy; y++) {
 			((nn->biases[l])->data)[y] = f_random(-0.01f, 0.01f);
-			for (int x = 0; x < sx; x++) {
+			for (size_t x = 0; x < sx; x++) {
 				((nn->weights[l])->data)[y*sx + x] = _ffn_he_init(sx);
 			}
 		}
@@ -134,7 +134,7 @@ void ffn_init_params(FFN* nn) {
 
 // Deallocate a network
 void ffn_deallocate(FFN* nn) {
-	for (int i = 0; i < nn->hidden_size-1; i++) {
+	for (size_t i = 0; i < nn->hidden_size-1; i++) {
 		matrix_deallocate(nn->weights[i]);
 		vec_deallocate(nn->biases[i]);
 		deallocate(nn->hidden_layers[i]);

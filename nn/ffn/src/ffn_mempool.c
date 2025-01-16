@@ -26,7 +26,7 @@ FFNMempool* ffn_init_pool(FFN* nn) {
 	pool->a_deriv = (Vector**)callocate(L-1, sizeof(Vector*));
 	pool->err_coef = (Matrix**)callocate(L-1, sizeof(Matrix*));
 
-	for (int l = 0; l < L; l++) {
+	for (size_t l = 0; l < L; l++) {
 		size_t l_size = nn->hidden_layers[l]->node_cnt;
 		pool->preactivations[l] = vec_zero(l_size);
 		pool->activations[l] = vec_zero(l_size);
@@ -46,7 +46,7 @@ FFNMempool* ffn_init_pool(FFN* nn) {
 
 void ffn_deallocate_pool(FFNMempool* pool) {
 	size_t L = pool->layer_cnt;
-	for (int l = 0; l < L; l++) {
+	for (size_t l = 0; l < L; l++) {
 		vec_deallocate(pool->preactivations[l]);
 		vec_deallocate(pool->activations[l]);
 		vec_deallocate(pool->gradient_b[l]);

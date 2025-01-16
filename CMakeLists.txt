@@ -9,17 +9,29 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 # Export compile_commands.json for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Set compiler flags
+# Compiler flags library
 set(CMAKE_DEBUG_POSTFIX d)
 add_library(compiler_flags INTERFACE)
-target_compile_features(compiler_flags INTERFACE c_std_23)
+target_compile_features(compiler_flags INTERFACE c_std_17)
 
-set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
-set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+# Define options
+option(PROFILING "Profile the program" OFF)
 
+# Get compiler type
+set(gcc_like_c "$<COMPILE_LANG_AND_ID:C,ARMClang,AppleClang,Clang,GNU,LCC>")
+set(msvc_c "$<COMPILE_LANG_AND_ID:C,MSVC>")
+
+# Set compiler flags
 target_compile_options(compiler_flags INTERFACE
-	"$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Og;-g>>"
-	"$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>")
+	"$<${gcc_like_c}:$<BUILD_INTERFACE:-Wall;-Wextra;-Og;-g>>"
+	"$<${msvc_c}:$<BUILD_INTERFACE:/W3>>")
+
+if (PROFILING)
+	target_compile_options(compiler_flags INTERFACE
+		"$<${gcc_like_c}:$<BUILD_INTERFACE:-pg>>")
+	target_link_options(compiler_flags INTERFACE
+		"$<${gcc_like_c}:$<BUILD_INTERFACE:-g;-pg>>")
+endif()
 
 # Add the libraries
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib") # Common utilities
@@ -35,6 +47,7 @@ add_executable(FCLNN "${ENTRY_POINT}")
 set_target_properties(FCLNN PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 # Link libraries
+target_link_libraries(FCLNN PUBLIC compiler_flags) # Compiler Flags
 target_link_libraries(FCLNN PRIVATE ComLib) # Common Utility
 target_link_libraries(FCLNN PRIVATE NeuralNetwork) # Feed Forward Network
 target_link_libraries(FCLNN PRIVATE FeedForwardNetwork) # Feed Forward Network

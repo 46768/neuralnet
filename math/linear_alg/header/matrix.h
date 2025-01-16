@@ -19,7 +19,7 @@ Matrix* matrix_dup(Matrix*); // Duplicate a matrix
 
 
 // Matrix operation
-float matrix_get(Matrix*, int, int); // Get a value at x, y
+float matrix_get(Matrix*, size_t, size_t); // Get a value at x, y
 
 void matrix_transpose_ip(Matrix*, Matrix*); // Transpose a matrix in place
 Matrix* matrix_transpose(Matrix*); // Transpose a matrix

@@ -23,7 +23,7 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 // Create a matrix with random values
 Matrix* matrix_rand(size_t sx, size_t sy, float lb, float ub) {
 	Matrix* mat = matrix_zero(sx, sy);
-	for (int i = 0; i < sx*sy; i++) {
+	for (size_t i = 0; i < sx*sy; i++) {
 		mat->data[i] = f_random(lb, ub);
 	}
 
@@ -53,11 +53,11 @@ void matrix_deallocate(Matrix* mat) {
 /////////////////////
 
 // Get a value at x, y
-float matrix_get(Matrix* mat, int x, int y) {
-	if (0 > x && x >= mat->sx) {
+inline float matrix_get(Matrix* mat, size_t x, size_t y) {
+	if (x >= mat->sx) {
 		fatal("Matrix index x out of bound");
 	}
-	if (0 > y && y >= mat->sy) {
+	if (y >= mat->sy) {
 		fatal("Matrix index y out of bound");
 	}
 	return mat->data[(y*(mat->sx)) + x];
@@ -93,9 +93,9 @@ void matrix_vec_mul_ip(Matrix* mat, Vector* vec, Vector* res) {
 		fatal("Expected result vector size: %d, got %d", mat->sy, vec->dimension);
 	}
 
-	for (int i = 0; i < mat->sy; i++) {
+	for (size_t i = 0; i < mat->sy; i++) {
 		float dot_sum = 0.0f;
-		for (int j = 0; j < mat->sx; j++) {
+		for (size_t j = 0; j < mat->sx; j++) {
 			dot_sum += matrix_get(mat, j, i)*vec->data[j];
 		}
 
@@ -120,10 +120,10 @@ void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {
 		fatal("Incompatible sy mat: %zu to sy res: %zu", mat->sy, res->sy);
 	}
 
-	for (int y = 0; y < mat->sy; y++) {
+	for (size_t y = 0; y < mat->sy; y++) {
 		float vec_coefficient = vec->data[y];
-		for (int x = 0; x < mat->sx; x++) {
-			res->data[y*sx + x] *= vec_coefficient;
+		for (size_t x = 0; x < mat->sx; x++) {
+			res->data[y*sx + x] = vec_coefficient * matrix_get(mat, x, y);
 		}
 	}
 }
@@ -145,9 +145,9 @@ void column_row_vec_mul_ip(Vector* column, Vector* row, Matrix* res) {
 	}
 	size_t sx = row->dimension;
 
-	for (int x = 0; x < sx; x++) {
+	for (size_t x = 0; x < sx; x++) {
 		float row_cofficient = row->data[x];
-		for (int y = 0; y < column->dimension; y++) {
+		for (size_t y = 0; y < column->dimension; y++) {
 			res->data[y*sx + x] = row_cofficient * column->data[y];
 		}
 	}
