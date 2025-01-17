@@ -38,7 +38,7 @@ FFNMempool* ffn_init_pool(FFN* nn) {
 		pool->gradient_w[l] = matrix_zero(l_size, l1_size);
 		pool->weight_trsp[l] = matrix_zero(l1_size, l_size);
 		pool->a_deriv[l] = vec_zero(l_size);
-		pool->err_coef[l] = matrix_zero(l_size, l1_size);
+		pool->err_coef[l] = matrix_zero(l1_size, l_size);
 	}
 
 	return pool;

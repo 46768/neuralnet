@@ -67,7 +67,7 @@ float nn_cel(Vector* actual, Vector* target) {
 			 );
 	}
 	if (actual->dimension == 1) {
-		return log(1+exp(-actual->data[0])) - target->data[0];
+		return -target->data[0] * log(actual->data[0]);
 	}
 	float loss = 0;
 	float exp_sum = 0;
@@ -82,6 +82,7 @@ float nn_cel(Vector* actual, Vector* target) {
 	}
 	float cel_offset = log(exp_sum);
 	for (size_t i = 0; i < actual->dimension; i++) {
+		debug("loss_i: %f", target->data[i] * -(actual->data[i] - z_max - cel_offset));
 		loss -= target->data[i] * (actual->data[i] - z_max - cel_offset);
 	}
 
@@ -101,7 +102,11 @@ void nn_cel_d(Vector* actual, Vector* target, Vector* res) {
 			 );
 	}
 	if (actual->dimension == 1) {
-		res->data[0] = ((float)1/(1+exp(-actual->data[0]))) - target->data[0];
+		float a = actual->data[0];
+		if (0 > a || a > 1) {
+			a = (float)1/(1+exp(-a));
+		}
+		res->data[0] = a*(1-a) * target->data[0];
 		return;
 	}
 	float exp_sum = 0;
@@ -116,6 +121,8 @@ void nn_cel_d(Vector* actual, Vector* target, Vector* res) {
 	}
 
 	for (size_t i = 0; i < actual->dimension; i++) {
-		res->data[i] = (exp(actual->data[i] - z_max)/exp_sum) - target->data[i];
+		float pow_i = actual->data[i] - z_max;
+		float exp_i = exp(pow_i);
+		res->data[i] = -(exp_sum / exp_i) * target->data[i] * pow_i * exp_i;
 	}
 }

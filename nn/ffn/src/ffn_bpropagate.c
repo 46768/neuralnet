@@ -7,6 +7,14 @@
 #include "logger.h"
 
 void _ffn_next_error(FFN* nn, FFNMempool* pool, int nxt_idx) {
+	debug("calcing for l %d", nxt_idx);
+	debug("err_coef[%d]:", nxt_idx);
+	for (size_t y = 0; y < pool->err_coef[nxt_idx]->sy; y++) {
+		for (size_t x = 0; x < pool->err_coef[nxt_idx]->sx; x++) {
+			printr_d("%f ", matrix_get(pool->err_coef[nxt_idx], x, y));
+		}
+		newline_d();
+	}
 	// err_(l-1) = ((da[l-1]/dz[l-1]) hdm_p w[l-1]^T) * err_l
 	matrix_transpose_ip(nn->weights[nxt_idx], pool->weight_trsp[nxt_idx]); // w[l-1]^T
 	debug("weight_trsp[%d]:", nxt_idx);
@@ -51,7 +59,7 @@ float ffn_bpropagate(
 		) {
 	if (!nn->immutable) {
 		error("Network is mutable");
-		return -1.0f;
+		return 1000000.0f;
 	}
 	size_t L = nn->hidden_size;
 
