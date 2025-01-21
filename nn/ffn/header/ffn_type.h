@@ -10,9 +10,15 @@
 #include "matrix.h"
 #include "vector.h"
 
+typedef enum {
+	Dense,
+	PassThrough
+} LayerType;
+
 typedef struct {
 	size_t node_cnt;
 	ActivationFNEnum fn_type;
+	LayerType l_type;
 } LayerData;
 
 // Feed forwad network type definition
@@ -31,8 +37,6 @@ typedef struct {
 	
 	CostFn cost_fn;
 	CostFnD cost_fn_d;
-
-
 } FFN;
 
 #endif

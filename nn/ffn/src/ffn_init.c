@@ -61,8 +61,7 @@ void ffn_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
 // Layer Initialization //
 //////////////////////////
 
-// Push a dense (fully connected) layer
-void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type) {
+void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type) {
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
@@ -78,9 +77,20 @@ void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type) {
 
 	(nn->hidden_layers)[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
 	LayerData* layer = (nn->hidden_layers)[hidden_size];
-	layer->node_cnt = dense_size;
+	layer->node_cnt = size;
 	layer->fn_type = fn_type;
+	layer->l_type = l_type;
 	nn->hidden_size++;
+}
+
+// Push a dense (fully connected) layer
+void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type) {
+	_ffn_init_layer(nn, dense_size, fn_type, Dense);
+}
+
+void ffn_init_passt(FFN* nn, ActivationFNEnum fn_type) {
+	size_t prev_size = nn->hidden_layers[nn->hidden_size-1]->node_cnt;
+	_ffn_init_layer(nn, prev_size, fn_type, PassThrough);
 }
 
 // Finalize a network's layer
@@ -111,16 +121,22 @@ void ffn_init_params(FFN* nn) {
 		size_t sy = layer_nxt->node_cnt;
 
 		// Initialize the data structure
-		(nn->weights)[l] = matrix_zero(sx, sy);
+		if (layer_cur->l_type == Dense) {
+			(nn->weights)[l] = matrix_zero(sx, sy);
+		} else if (layer_cur->l_type == PassThrough) {
+			(nn->weights)[l] = matrix_iden(sx);
+		}
 		(nn->biases)[l] = vec_zero(sy);
 		(nn->layer_activation)[l] = resolve_activation_fn(layer_cur->fn_type);
 		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);
 
 		// Initialize the actual data
-		for (size_t y = 0; y < sy; y++) {
-			((nn->biases[l])->data)[y] = f_random(-0.01f, 0.01f);
-			for (size_t x = 0; x < sx; x++) {
-				((nn->weights[l])->data)[y*sx + x] = _ffn_he_init(sx);
+		if (layer_cur->l_type == Dense) {
+			for (size_t y = 0; y < sy; y++) {
+				((nn->biases[l])->data)[y] = f_random(-0.01f, 0.01f);
+				for (size_t x = 0; x < sx; x++) {
+					((nn->weights[l])->data)[y*sx + x] = _ffn_he_init(sx);
+				}
 			}
 		}
 	}

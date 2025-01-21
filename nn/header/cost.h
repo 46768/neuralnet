@@ -10,7 +10,8 @@ typedef void(*CostFnD)(Vector*, Vector*, Vector*); // Cost Function Derivative
 // Cost Function Enum
 typedef enum {
 	MSE,
-	CEL,
+	CCE,
+	BCE,
 } CostFnEnum;
 
 // Cost Function Resolver
@@ -21,8 +22,12 @@ CostFnD resolve_cost_fn_d(CostFnEnum);
 float nn_mse(Vector*, Vector*);
 void nn_mse_d(Vector*, Vector*, Vector*);
 
-// Cross Entropy Loss
-float nn_cel(Vector*, Vector*);
-void nn_cel_d(Vector*, Vector*, Vector*);
+// Categorial Cross Entropy Loss
+float nn_ccel(Vector*, Vector*);
+void nn_ccel_d(Vector*, Vector*, Vector*);
+
+// Binary Cross Entropy Loss
+float nn_bcel(Vector*, Vector*);
+void nn_bcel_d(Vector*, Vector*, Vector*);
 
 #endif

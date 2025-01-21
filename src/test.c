@@ -50,42 +50,15 @@ int main() {
 	ffn_init_dense(nn, 2, ReLU);
 	ffn_init_dense(nn, 2, Sigmoid);
 	ffn_init_dense(nn, 1, None);
-	ffn_set_cost_fn(nn, BCE);
+	ffn_set_cost_fn(nn, CCE);
 	FFNMempool* mempool = ffn_init_pool(nn);
 	ffn_init_params(nn);
-
-	info("Pre train");
-	info("Network weights:");
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		newline();
-		Matrix* mat = nn->weights[l];
-		info("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
-		for (size_t y = 0; y < mat->sy; y++) {
-			for (size_t x = 0; x < mat->sx; x++) {
-				printr("%f ", matrix_get(mat, x, y));
-			}
-			newline();
-		}
-	}
-	newline();
-
-	info("Network bias:");
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		newline();
-		Vector* b = nn->biases[l];
-		info("layer %d: %zu", l, b->dimension);
-		for (size_t x = 0; x < b->dimension; x++) {
-			printr("node %zu: %f\n", x, b->data[x]);
-		}
-		newline();
-	}
-	newline();
 
 	float learning_rate = 0.01;
 	float threshold = 0.0000000001;
 	float prev_l = INFINITY;
 	// Trains however many times
-	for (int t = 0; t < 30000; t++) {
+	for (int t = 0; t < 1000000; t++) {
 		float l = 0;
 		for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
@@ -130,21 +103,6 @@ int main() {
 		newline();
 	}
 	newline();
-	for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
-		Vector* x = vecs[i - REGS_RANGEL];
-		ffn_fpropagate(nn, mempool, x);
-		Vector* o = mempool->activations[nn->hidden_size-1];
-		info("Network In:");
-		for (size_t l = 0; l < x->dimension; l++) {
-			printr("out %zu: %f\n", l, x->data[l]);
-		}
-		info("Network Out:");
-		for (size_t l = 0; l < o->dimension; l++) {
-			printr("out %zu: %f\n", l, o->data[l]);
-		}
-	newline();
-		newline_d();
-	}
 
 	for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 		vec_deallocate(vecs[i - REGS_RANGEL]);

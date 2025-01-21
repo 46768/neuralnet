@@ -20,6 +20,14 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 	return mat;
 }
 
+Matrix* matrix_iden(size_t size) {
+	Matrix* mat = matrix_zero(size, size);
+	for (size_t i = 0; i < size; i++) {
+		mat->data[i*size + i] = 1;
+	}
+	return mat;
+}
+
 // Create a matrix with random values
 Matrix* matrix_rand(size_t sx, size_t sy, float lb, float ub) {
 	Matrix* mat = matrix_zero(sx, sy);
