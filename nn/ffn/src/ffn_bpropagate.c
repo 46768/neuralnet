@@ -23,6 +23,28 @@ void _ffn_next_error(FFN* nn, FFNMempool* pool, int nxt_idx) {
 			); // coef * err_l
 }
 
+void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
+	// Apply backward propagation gradient
+	// Going from L-1 to 0
+	size_t L = nn->hidden_size;
+	for (size_t l = L-2; l != SIZE_MAX; l--) {
+		if (nn->hidden_layers[l]->l_type == PassThrough) {
+			continue;
+		}
+		Matrix* gradient_w_l = pool->gradient_w[l];
+		Vector* gradient_b_l = pool->gradient_b[l];
+
+		// Apply weight gradient
+		for (size_t x = 0; x < gradient_w_l->sx; x++) {
+			(nn->biases)[l]->data[x] -= learning_rate*gradient_b_l->data[x];
+			for (size_t y = 0; y < gradient_w_l->sy; y++) {
+				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 
+					learning_rate*matrix_get(gradient_w_l, x, y);
+			}
+		}
+	}
+}
+
 float ffn_bpropagate(
 		FFN* nn,
 		FFNMempool* pool,
@@ -42,6 +64,7 @@ float ffn_bpropagate(
 	// Back propagation variables
 	Vector* a_driv_L = pool->a_deriv_L;
 	Vector* gradient_aL_C = pool->gradient_aL_C;
+
 	nn->cost_fn_d(pool->activations[L-1], target, gradient_aL_C);
 	nn->layer_activation_d[L-2](
 			pool->preactivations[L-1],
@@ -56,30 +79,13 @@ float ffn_bpropagate(
 		// Get previous layer error signal
 		Vector* ld_l1 = pool->gradient_b[l+1];
 		// Calculate weight gradient
-		// Storing gradient as to not skew next layer's error
 		column_row_vec_mul_ip(ld_l1, pool->activations[l], pool->gradient_w[l]);
-		// Storing the error signal for bias update
+		// Storing the error signal for bias gradient
 		_ffn_next_error(nn, pool, l);
 	}
 
 	// Apply backward propagation gradient
-	// Going from L-1 to 0
-	for (size_t l = L-2; l != SIZE_MAX; l--) {
-		if (nn->hidden_layers[l]->l_type == PassThrough) {
-			continue;
-		}
-		Matrix* gradient_w_l = pool->gradient_w[l];
-		Vector* gradient_b_l = pool->gradient_b[l];
-
-		// Apply weight gradient
-		for (size_t x = 0; x < gradient_w_l->sx; x++) {
-			(nn->biases)[l]->data[x] -= learning_rate*gradient_b_l->data[x];
-			for (size_t y = 0; y < gradient_w_l->sy; y++) {
-				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 
-					learning_rate*matrix_get(gradient_w_l, x, y);
-			}
-		}
-	}
+	_ffn_apply_gradient(nn, pool, learning_rate);
 
 	return loss;
 }

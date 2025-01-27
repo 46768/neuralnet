@@ -36,32 +36,46 @@ CostFnD resolve_cost_fn_d(CostFnEnum fn_type) {
 
 float nn_mse(Vector* actual, Vector* target) {
 	if (actual->dimension != target->dimension) {
-		fatal("Mismatched a to t size: a: %zu t: %zu",
+		fatal("Mismatched z to t size: z: %zu t: %zu",
 				actual->dimension,
 				target->dimension
 			 );
 	}
+
 	float cost = 0;
 	for (size_t i = 0; i < actual->dimension; i++) {
-		float diff = actual->data[i] - target->data[i];
+		float diff = target->data[i] - actual->data[i];
 		cost += diff*diff;
 		debug("accumulated cost: %f", cost);
 	}
 	return cost/(float)actual->dimension;
 }
 void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
+	if (actual->dimension != target->dimension) {
+		fatal("Mismatched z to t size: z: %zu t: %zu",
+				actual->dimension,
+				target->dimension
+			 );
+	}
+	if (actual->dimension != driv->dimension) {
+		fatal("Mismatched z to d size: z: %zu d: %zu",
+				actual->dimension,
+				driv->dimension
+			 );
+	}
+
 	// dMse/dwrt_x = 2(wrt_x - target_x)/wrt.dim
 	float driv_coef = 2/(float)target->dimension;
 
 	for (size_t i = 0; i < target->dimension; i++) {
 		//debug("deriv[%d]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
-		driv->data[i] = driv_coef*(actual->data[i] - target->data[i]);
+		driv->data[i] = driv_coef*(target->data[i] - actual->data[i]);
 	}
 }
 
-///////////////////////////////////
-// Categorial Cross Entropy Loss //
-///////////////////////////////////
+////////////////////////////////////
+// Categorical Cross Entropy Loss //
+////////////////////////////////////
 
 float nn_ccel(Vector* actual, Vector* target) {
 	if (actual->dimension != target->dimension) {
@@ -70,6 +84,7 @@ float nn_ccel(Vector* actual, Vector* target) {
 				target->dimension
 			 );
 	}
+
 	float loss = 0;
 	float exp_sum = 0;
 	float z_max = -INFINITY;

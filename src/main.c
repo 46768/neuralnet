@@ -43,14 +43,13 @@ int main() {
 	Vector** targets;
 	int REGS_RANGE = 10;
 	int REGS_RANGEL = 0;
-	//generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, 5.0f, &vecs, &targets);
-	generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
+	generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, 5.0f, &vecs, &targets);
+	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
 	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 2, ReLU);
-	ffn_init_dense(nn, 2, Sigmoid);
 	ffn_init_dense(nn, 1, None);
-	ffn_set_cost_fn(nn, BCE);
+	ffn_init_dense(nn, 1, None);
+	ffn_set_cost_fn(nn, MSE);
 	FFNMempool* mempool = ffn_init_pool(nn);
 	ffn_init_params(nn);
 
@@ -85,7 +84,7 @@ int main() {
 	float threshold = 0.0000000001;
 	float prev_l = INFINITY;
 	// Trains however many times
-	for (int t = 0; t < 30000; t++) {
+	for (int t = 0; t < 30; t++) {
 		float l = 0;
 		for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
@@ -99,7 +98,7 @@ int main() {
 			break;
 		}
 		prev_l = l;
-		if (t % 100 == 0) {
+		if (t % 1 == 0) {
 			info("Training loss: %f", l);
 		}
 	}
@@ -130,21 +129,6 @@ int main() {
 		newline();
 	}
 	newline();
-	for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
-		Vector* x = vecs[i - REGS_RANGEL];
-		ffn_fpropagate(nn, mempool, x);
-		Vector* o = mempool->activations[nn->hidden_size-1];
-		info("Network In:");
-		for (size_t l = 0; l < x->dimension; l++) {
-			printr("out %zu: %f\n", l, x->data[l]);
-		}
-		info("Network Out:");
-		for (size_t l = 0; l < o->dimension; l++) {
-			printr("out %zu: %f\n", l, o->data[l]);
-		}
-	newline();
-		newline_d();
-	}
 
 	for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 		vec_deallocate(vecs[i - REGS_RANGEL]);

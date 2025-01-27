@@ -88,7 +88,7 @@ void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type) {
 	_ffn_init_layer(nn, dense_size, fn_type, Dense);
 }
 
-void ffn_init_passt(FFN* nn, ActivationFNEnum fn_type) {
+void ffn_init_passthru(FFN* nn, ActivationFNEnum fn_type) {
 	size_t prev_size = nn->hidden_layers[nn->hidden_size-1]->node_cnt;
 	_ffn_init_layer(nn, prev_size, fn_type, PassThrough);
 }
@@ -111,21 +111,31 @@ void ffn_init_params(FFN* nn) {
 	nn->layer_activation = (ActivationFn*)allocate((hidden_cnt+1)*sizeof(ActivationFn));
 	nn->layer_activation_d = (ActivationFnD*)allocate((hidden_cnt+1)*sizeof(ActivationFnD));
 
-	// Initialize the data
+	// Logs layer for debugging
 	LayerData** layer_data = nn->hidden_layers;
+	for (size_t l = 0; l < nn->hidden_size; l++) {
+		LayerData* layer_cur = layer_data[l];
+		debug("Layer Data:");
+		debug("Node count: %zu", layer_cur->node_cnt);
+		if (layer_cur->l_type == Dense) {
+			debug("Layer type: Dense");
+		} else if (layer_cur->l_type == PassThrough) {
+			debug("Layer type: PassThrough");
+		}
+		debug("Activation function: %s", resolve_activation_fn_str(layer_cur->fn_type));
+	}
+
+	// Initialize the data
 	for (size_t l = 0; l < nn->hidden_size-1; l++) {
 		LayerData* layer_cur = layer_data[l];
 		LayerData* layer_nxt = layer_data[l+1];
+
 
 		size_t sx = layer_cur->node_cnt;
 		size_t sy = layer_nxt->node_cnt;
 
 		// Initialize the data structure
-		if (layer_cur->l_type == Dense) {
-			(nn->weights)[l] = matrix_zero(sx, sy);
-		} else if (layer_cur->l_type == PassThrough) {
-			(nn->weights)[l] = matrix_iden(sx);
-		}
+		(nn->weights)[l] = matrix_iden(sx);
 		(nn->biases)[l] = vec_zero(sy);
 		(nn->layer_activation)[l] = resolve_activation_fn(layer_cur->fn_type);
 		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);

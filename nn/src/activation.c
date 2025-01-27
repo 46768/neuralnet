@@ -13,6 +13,8 @@ ActivationFn resolve_activation_fn(ActivationFNEnum fn_type) {
 			return nn_sigmoid;
 		case None:
 			return nn_none_fn;
+		case Logging:
+			return nn_logging_fn;
 		default:
 			return NULL;
 	}
@@ -26,8 +28,25 @@ ActivationFnD resolve_activation_fn_d(ActivationFNEnum fn_type) {
 			return nn_sigmoid_d;
 		case None:
 			return nn_none_fn_d;
+		case Logging:
+			return nn_none_fn_d;
 		default:
 			return NULL;
+	}
+}
+
+char* resolve_activation_fn_str(ActivationFNEnum fn_type) {
+	switch (fn_type) {
+		case ReLU:
+			return "ReLU";
+		case Sigmoid:
+			return "Sigmoid";
+		case None:
+			return "None";
+		case Logging:
+			return "Logging";
+		default:
+			return "Unknown";
 	}
 }
 
@@ -116,5 +135,17 @@ void nn_softmax(Vector* z, Vector* a) {
 	}
 	for (size_t i = 0; i < z->dimension; i++) {
 		a->data[i] /= exp_sum;
+	}
+}
+
+/////////////
+// Logging //
+/////////////
+
+void nn_logging_fn(Vector* z, Vector* a) {
+	info("Layer Info:");
+	for (size_t i = 0; i < z->dimension; i++) {
+		printr("%f\n", z->data[i]);
+		a->data[i] = z->data[i];
 	}
 }

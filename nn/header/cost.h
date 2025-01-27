@@ -22,7 +22,7 @@ CostFnD resolve_cost_fn_d(CostFnEnum);
 float nn_mse(Vector*, Vector*);
 void nn_mse_d(Vector*, Vector*, Vector*);
 
-// Categorial Cross Entropy Loss
+// Categorical Cross Entropy Loss
 float nn_ccel(Vector*, Vector*);
 void nn_ccel_d(Vector*, Vector*, Vector*);
 

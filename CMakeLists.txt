@@ -45,7 +45,7 @@ add_executable(FCLNN "${ENTRY_POINT}")
 
 # Add test.c as executable
 set(ENTRY_POINT_T "${PROJECT_SOURCE_DIR}/src/test.c")
-add_executable(FCLNNt "${ENTRY_POINT}")
+add_executable(FCLNNt "${ENTRY_POINT_T}")
 
 # Set debug property
 set_target_properties(FCLNN PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})

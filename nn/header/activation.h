@@ -11,12 +11,17 @@ typedef void(*ActivationFnD)(Vector*, Vector*); // Activation Function Derivativ
 typedef enum {
 	ReLU,
 	Sigmoid,
+	Logging,
 	None
 } ActivationFNEnum;
 
 // Activation Function Resolver
 ActivationFn resolve_activation_fn(ActivationFNEnum);
 ActivationFnD resolve_activation_fn_d(ActivationFNEnum);
+char* resolve_activation_fn_str(ActivationFNEnum);
+
+// Filter Derivative
+void nn_filter_d(Vector*, Vector*);
 
 // None
 void nn_none_fn(Vector*, Vector*);
@@ -32,5 +37,8 @@ void nn_sigmoid_d(Vector*, Vector*);
 
 // Softmax
 void nn_softmax(Vector*, Vector*);
+
+// Logging
+void nn_logging_fn(Vector*, Vector*);
 
 #endif
