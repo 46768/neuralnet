@@ -7,7 +7,6 @@
 #include "generator.h"
 
 #include "ffn_init.h"
-#include "ffn_fpropagate.h"
 #include "ffn_bpropagate.h"
 #include "ffn_mempool.h"
 #include "ffn_util.h"
@@ -18,15 +17,16 @@ int main() {
 	// Inputs
 	Vector** vecs;
 	Vector** targets;
-	int REGS_RANGE = 10;
 	int REGS_RANGEL = -10;
-	generate_linear_regs(REGS_RANGEL, REGS_RANGE, -4.0f, -5.0f, &vecs, &targets);
-	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
+	int REGS_RANGE = 10;
+	//generate_linear_regs(REGS_RANGEL, REGS_RANGE, -4.0f, 5.0f, &vecs, &targets);
+	generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
 	FFN* nn = ffn_init();
+	ffn_init_dense(nn, 2, ReLU, He, RandomEN2);
+	ffn_init_dense(nn, 2, Sigmoid, He, RandomEN2);
 	ffn_init_dense(nn, 1, None, Zero, Zero);
-	ffn_init_dense(nn, 1, None, Zero, Zero);
-	ffn_set_cost_fn(nn, MSE);
+	ffn_set_cost_fn(nn, BCE);
 	FFNMempool* mempool = ffn_init_pool(nn);
 	ffn_init_params(nn);
 
@@ -34,24 +34,17 @@ int main() {
 	ffn_dump_data(nn);
 
 	float learning_rate = 0.01;
-	float threshold = 0.0000000001;
-	float prev_l = INFINITY;
 	// Trains however many times
-	for (int t = 0; t < 3; t++) {
+	for (int t = 0; t < 1000; t++) {
 		float l = 0;
-		for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
+		for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
 			Vector* y = targets[i - REGS_RANGEL];
 			l += ffn_bpropagate(nn, mempool, x, y, learning_rate);
 			newline_d();
 		}
 		l /= (REGS_RANGE - REGS_RANGEL);
-		if (fabsf(prev_l-l) <= threshold && l <= threshold) {
-			info("Loss doestn decrease much");
-			break;
-		}
-		prev_l = l;
-		if (t % 5 == 0) {
+		if (t % 1 == 0) {
 			info("Training loss: %f", l);
 		}
 	}

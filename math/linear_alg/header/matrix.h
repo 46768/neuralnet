@@ -15,6 +15,7 @@ typedef struct {
 // Creation
 Matrix* matrix_zero(size_t, size_t); // Create a matrix with all element to 0
 Matrix* matrix_iden(size_t); // Create an identity matrix
+Matrix* matrix_iden_xy(size_t, size_t); // Create an identity rectangle matrix
 Matrix* matrix_rand(size_t, size_t, float, float); // Create a matrix with random values
 Matrix* matrix_dup(Matrix*); // Duplicate a matrix
 

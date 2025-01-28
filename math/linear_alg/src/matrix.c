@@ -28,6 +28,16 @@ Matrix* matrix_iden(size_t size) {
 	return mat;
 }
 
+// Create a identity rectangle matrix
+Matrix* matrix_iden_xy(size_t sx, size_t sy) {
+	Matrix* mat = matrix_zero(sx, sy);
+	size_t min_s = sx < sy ? sx : sy;
+	for (size_t i = 0; i < min_s; i++) {
+		mat->data[i*sx + i] = 1;
+	}
+	return mat;
+}
+
 // Create a matrix with random values
 Matrix* matrix_rand(size_t sx, size_t sy, float lb, float ub) {
 	Matrix* mat = matrix_zero(sx, sy);

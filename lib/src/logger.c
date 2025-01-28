@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <execinfo.h>
 
 const char* level_header[] = {
 	"INFO", // INFO
@@ -43,13 +42,6 @@ void _log(
 	va_end(args);
 
 	fprintf(stderr, "\n");
-}
-
-void exitbt() {
-	//void* st[1024];
-	//size_t size = backtrace(st, 1024);
-	//backtrace_symbols_fd(st, size, 1);
-	abort();
 }
 
 inline void newline() {

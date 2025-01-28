@@ -120,7 +120,7 @@ void ffn_init_params(FFN* nn) {
 		size_t sy = layer_nxt->node_cnt;
 
 		// Initialize the data structure
-		(nn->weights)[l] = matrix_iden(sx);
+		(nn->weights)[l] = matrix_iden_xy(sx, sy);
 		(nn->biases)[l] = vec_zero(sy);
 		(nn->layer_activation)[l] = resolve_activation_fn(layer_cur->fn_type);
 		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);

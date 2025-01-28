@@ -68,7 +68,7 @@ void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
 	float driv_coef = 2/(float)target->dimension;
 
 	for (size_t i = 0; i < target->dimension; i++) {
-		//debug("deriv[%d]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
+		debug("deriv[%d]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
 		driv->data[i] = driv_coef*(actual->data[i] - target->data[i]);
 	}
 }

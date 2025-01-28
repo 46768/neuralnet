@@ -4,9 +4,9 @@
 #include "allocator.h"
 
 void generate_linear_regs(int lower, int upper, float m, float y, Vector*** vecs, Vector*** targets) {
-	*vecs = (Vector**)callocate(upper - lower, sizeof(Vector*));
-	*targets = (Vector**)callocate(upper - lower, sizeof(Vector*));
-	for (int i = lower; i < upper; i++) {
+	*vecs = (Vector**)callocate(upper - lower+1, sizeof(Vector*));
+	*targets = (Vector**)callocate(upper - lower+1, sizeof(Vector*));
+	for (int i = lower; i <= upper; i++) {
 		(*vecs)[i - lower] = vec_zero(1); (*vecs)[i - lower]->data[0] = i;
 		(*targets)[i - lower] = vec_zero(1); (*targets)[i - lower]->data[0] = (m*i) + y;
 	}

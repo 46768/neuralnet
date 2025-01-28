@@ -34,10 +34,8 @@ int main() {
 	ffn_dump_data(nn);
 
 	float learning_rate = 0.01;
-	float threshold = 0.0000000001;
-	float prev_l = INFINITY;
 	// Trains however many times
-	for (int t = 0; t < 1; t++) {
+	for (int t = 0; t < 1000; t++) {
 		float l = 0;
 		for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
@@ -46,11 +44,6 @@ int main() {
 			newline_d();
 		}
 		l /= (REGS_RANGE - REGS_RANGEL);
-		if (fabsf(prev_l-l) <= threshold && l <= threshold) {
-			info("Loss doestn decrease much");
-			break;
-		}
-		prev_l = l;
 		if (t % 1 == 0) {
 			info("Training loss: %f", l);
 		}
