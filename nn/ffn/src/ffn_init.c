@@ -2,31 +2,14 @@
 
 #include "activation.h"
 #include "cost.h"
+#include "initer.h"
 
 #include <stdlib.h>
-#include <math.h>
 
 #include "booltype.h"
 #include "logger.h"
 #include "allocator.h"
-#include "random.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846f
-#endif
-
-//////////////////////////////
-// Parameter Initialization //
-//////////////////////////////
-
-float _ffn_he_init(size_t node_cnt) {
-	float u1 = f_random(0.0f, 1.0f);
-	float u2 = f_random(0.0f, 1.0f);
-
-	float z0 = sqrt(-2.0f * log(u1)) * cos(2.0f * M_PI * u2);
-
-	return z0 * sqrt(2.0f / node_cnt);
-}
 
 //////////////
 // Creation //
@@ -61,7 +44,7 @@ void ffn_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
 // Layer Initialization //
 //////////////////////////
 
-void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type) {
+void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type, IniterEnum w_init_type, IniterEnum b_init_type) {
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
@@ -80,17 +63,19 @@ void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l
 	layer->node_cnt = size;
 	layer->fn_type = fn_type;
 	layer->l_type = l_type;
+	layer->w_init_type = w_init_type;
+	layer->b_init_type = b_init_type;
 	nn->hidden_size++;
 }
 
 // Push a dense (fully connected) layer
-void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type) {
-	_ffn_init_layer(nn, dense_size, fn_type, Dense);
+void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type, IniterEnum w_init_type, IniterEnum b_init_type) {
+	_ffn_init_layer(nn, dense_size, fn_type, Dense, w_init_type, b_init_type);
 }
 
 void ffn_init_passthru(FFN* nn, ActivationFNEnum fn_type) {
 	size_t prev_size = nn->hidden_layers[nn->hidden_size-1]->node_cnt;
-	_ffn_init_layer(nn, prev_size, fn_type, PassThrough);
+	_ffn_init_layer(nn, prev_size, fn_type, PassThrough, Zero, Zero);
 }
 
 // Finalize a network's layer
@@ -142,10 +127,12 @@ void ffn_init_params(FFN* nn) {
 
 		// Initialize the actual data
 		if (layer_cur->l_type == Dense) {
+			Initer w_initer = resolve_initer(layer_cur->w_init_type);
+			Initer b_initer = resolve_initer(layer_cur->b_init_type);
 			for (size_t y = 0; y < sy; y++) {
-				((nn->biases[l])->data)[y] = f_random(-0.01f, 0.01f);
+				((nn->biases[l])->data)[y] = b_initer(sx);
 				for (size_t x = 0; x < sx; x++) {
-					((nn->weights[l])->data)[y*sx + x] = _ffn_he_init(sx);
+					((nn->weights[l])->data)[y*sx + x] = w_initer(sx);
 				}
 			}
 		}

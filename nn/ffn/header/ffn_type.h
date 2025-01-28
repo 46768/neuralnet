@@ -3,6 +3,7 @@
 
 #include "activation.h"
 #include "cost.h"
+#include "initer.h"
 
 #include <stdlib.h>
 
@@ -18,6 +19,8 @@ typedef enum {
 typedef struct {
 	size_t node_cnt;
 	ActivationFNEnum fn_type;
+	IniterEnum w_init_type;
+	IniterEnum b_init_type;
 	LayerType l_type;
 } LayerData;
 

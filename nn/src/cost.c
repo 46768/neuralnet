@@ -44,7 +44,7 @@ float nn_mse(Vector* actual, Vector* target) {
 
 	float cost = 0;
 	for (size_t i = 0; i < actual->dimension; i++) {
-		float diff = target->data[i] - actual->data[i];
+		float diff = actual->data[i] - target->data[i];
 		cost += diff*diff;
 		debug("accumulated cost: %f", cost);
 	}
@@ -69,7 +69,7 @@ void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
 
 	for (size_t i = 0; i < target->dimension; i++) {
 		//debug("deriv[%d]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
-		driv->data[i] = driv_coef*(target->data[i] - actual->data[i]);
+		driv->data[i] = driv_coef*(actual->data[i] - target->data[i]);
 	}
 }
 

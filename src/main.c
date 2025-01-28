@@ -8,6 +8,7 @@
 #include "ffn_fpropagate.h"
 #include "ffn_bpropagate.h"
 #include "ffn_mempool.h"
+#include "ffn_util.h"
 
 void generate_linear_regs(int lower, int upper, float m, float y, Vector*** vecs, Vector*** targets) {
 	*vecs = (Vector**)callocate(upper - lower, sizeof(Vector*));
@@ -42,49 +43,25 @@ int main() {
 	Vector** vecs;
 	Vector** targets;
 	int REGS_RANGE = 10;
-	int REGS_RANGEL = 0;
+	int REGS_RANGEL = -10;
 	generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, 5.0f, &vecs, &targets);
 	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
 	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 1, None);
-	ffn_init_dense(nn, 1, None);
+	ffn_init_dense(nn, 1, None, He, RandomEN2);
+	ffn_init_dense(nn, 1, None, He, RandomEN2);
 	ffn_set_cost_fn(nn, MSE);
 	FFNMempool* mempool = ffn_init_pool(nn);
 	ffn_init_params(nn);
 
 	info("Pre train");
-	info("Network weights:");
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		newline();
-		Matrix* mat = nn->weights[l];
-		info("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
-		for (size_t y = 0; y < mat->sy; y++) {
-			for (size_t x = 0; x < mat->sx; x++) {
-				printr("%f ", matrix_get(mat, x, y));
-			}
-			newline();
-		}
-	}
-	newline();
-
-	info("Network bias:");
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		newline();
-		Vector* b = nn->biases[l];
-		info("layer %d: %zu", l, b->dimension);
-		for (size_t x = 0; x < b->dimension; x++) {
-			printr("node %zu: %f\n", x, b->data[x]);
-		}
-		newline();
-	}
-	newline();
+	ffn_dump_data(nn);
 
 	float learning_rate = 0.01;
 	float threshold = 0.0000000001;
 	float prev_l = INFINITY;
 	// Trains however many times
-	for (int t = 0; t < 30; t++) {
+	for (int t = 0; t < 1; t++) {
 		float l = 0;
 		for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
@@ -104,31 +81,7 @@ int main() {
 	}
 
 	info("Post train");
-	info("Network weights:");
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		newline();
-		Matrix* mat = nn->weights[l];
-		info("layer %d: in:%zu out:%zu", l, mat->sx, mat->sy);
-		for (size_t y = 0; y < mat->sy; y++) {
-			for (size_t x = 0; x < mat->sx; x++) {
-				printr("%f ", matrix_get(mat, x, y));
-			}
-			newline();
-		}
-	}
-	newline();
-
-	info("Network bias:");
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		newline();
-		Vector* b = nn->biases[l];
-		info("layer %d: %zu", l, b->dimension);
-		for (size_t x = 0; x < b->dimension; x++) {
-			printr("node %zu: %f\n", x, b->data[x]);
-		}
-		newline();
-	}
-	newline();
+	ffn_dump_data(nn);
 
 	for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
 		vec_deallocate(vecs[i - REGS_RANGEL]);
