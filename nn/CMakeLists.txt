@@ -19,4 +19,5 @@ target_include_directories(NeuralNetwork PUBLIC
 # Link other libraries to the library
 target_link_libraries(NeuralNetwork PUBLIC MathLinearAlg)
 target_link_libraries(NeuralNetwork PUBLIC compiler_flags)
+target_link_libraries(NeuralNetwork PUBLIC m)
 target_link_libraries(NeuralNetwork PRIVATE ComLib)

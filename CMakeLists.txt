@@ -53,14 +53,14 @@ set_target_properties(FCLNNt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 # Link libraries
 target_link_libraries(FCLNN PUBLIC compiler_flags) # Compiler Flags
-target_link_libraries(FCLNN PRIVATE ComLib) # Common Utility
-target_link_libraries(FCLNN PRIVATE NeuralNetwork) # Feed Forward Network
-target_link_libraries(FCLNN PRIVATE FeedForwardNetwork) # Feed Forward Network
-target_link_libraries(FCLNN PRIVATE m) # C Math Library
+target_link_libraries(FCLNN PUBLIC ComLib) # Common Utility
+target_link_libraries(FCLNN PUBLIC NeuralNetwork) # Feed Forward Network
+target_link_libraries(FCLNN PUBLIC FeedForwardNetwork) # Feed Forward Network
+target_link_libraries(FCLNN PUBLIC m) # C Math Library
 
 # Link libraries
 target_link_libraries(FCLNNt PUBLIC compiler_flags) # Compiler Flags
-target_link_libraries(FCLNNt PRIVATE ComLib) # Common Utility
-target_link_libraries(FCLNNt PRIVATE NeuralNetwork) # Feed Forward Network
-target_link_libraries(FCLNNt PRIVATE FeedForwardNetwork) # Feed Forward Network
-target_link_libraries(FCLNNt PRIVATE m) # C Math Library
+target_link_libraries(FCLNNt PUBLIC ComLib) # Common Utility
+target_link_libraries(FCLNNt PUBLIC NeuralNetwork) # Feed Forward Network
+target_link_libraries(FCLNNt PUBLIC FeedForwardNetwork) # Feed Forward Network
+target_link_libraries(FCLNNt PUBLIC m) # C Math Library
