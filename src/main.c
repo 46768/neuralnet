@@ -20,7 +20,7 @@ int main() {
 	Vector** targets;
 	int REGS_RANGE = 10;
 	int REGS_RANGEL = -10;
-	generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, 5.0f, &vecs, &targets);
+	generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, -5.0f, &vecs, &targets);
 	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
 	FFN* nn = ffn_init();
@@ -37,7 +37,7 @@ int main() {
 	// Trains however many times
 	for (int t = 0; t < 1000; t++) {
 		float l = 0;
-		for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
+		for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
 			Vector* y = targets[i - REGS_RANGEL];
 			l += ffn_bpropagate(nn, mempool, x, y, learning_rate);
@@ -52,7 +52,7 @@ int main() {
 	info("Post train");
 	ffn_dump_data(nn);
 
-	for (int i = REGS_RANGEL; i < REGS_RANGE; i++) {
+	for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
 		vec_deallocate(vecs[i - REGS_RANGEL]);
 		vec_deallocate(targets[i - REGS_RANGEL]);
 	}

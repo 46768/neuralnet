@@ -68,7 +68,7 @@ void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
 	float driv_coef = 2/(float)target->dimension;
 
 	for (size_t i = 0; i < target->dimension; i++) {
-		debug("deriv[%d]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
+		debug("deriv[%zu]: %f*(%f - %f)", i, driv_coef, actual->data[i], target->data[i]);
 		driv->data[i] = driv_coef*(actual->data[i] - target->data[i]);
 	}
 }
@@ -86,20 +86,15 @@ float nn_ccel(Vector* actual, Vector* target) {
 	}
 
 	float loss = 0;
-	float exp_sum = 0;
-	float z_max = -INFINITY;
 	for (size_t i = 0; i < actual->dimension; i++) {
-		if (actual->data[i] > z_max) {
-			z_max = actual->data[i];
+		if (0.0f > target->data[i] || target->data[i] > 1.0f) {
+			fatal("target[%zu] Not a probability, got %f", i, target->data[i]);
 		}
-	}
-	for (size_t i = 0; i < actual->dimension; i++) {
-		exp_sum += exp(actual->data[i] - z_max);
-	}
-	float cel_offset = log(exp_sum);
-	for (size_t i = 0; i < actual->dimension; i++) {
-		debug("loss_i: %f", target->data[i] * -(actual->data[i] - z_max - cel_offset));
-		loss -= target->data[i] * (actual->data[i] - z_max - cel_offset);
+		if (0.0f > actual->data[i] || actual->data[i] > 1.0f) {
+			fatal("actual[%zu] Not a probability, got %f", i, actual->data[i]);
+		}
+		float clipped_a = fmaxf(fminf(actual->data[i], 1.0-1e-7), 1e-7);
+		loss -= target->data[i] * log(clipped_a);
 	}
 
 	return loss;
@@ -117,21 +112,15 @@ void nn_ccel_d(Vector* actual, Vector* target, Vector* res) {
 				res->dimension
 			 );
 	}
-	float exp_sum = 0;
-	float z_max = -INFINITY;
-	for (size_t i = 0; i < actual->dimension; i++) {
-		if (actual->data[i] > z_max) {
-			z_max = actual->data[i];
-		}
-	}
-	for (size_t i = 0; i < actual->dimension; i++) {
-		exp_sum += exp(actual->data[i] - z_max);
-	}
 
 	for (size_t i = 0; i < actual->dimension; i++) {
-		float pow_i = actual->data[i] - z_max;
-		float exp_i = exp(pow_i);
-		res->data[i] = -(exp_sum / exp_i) * target->data[i] * pow_i * exp_i;
+		if (0.0f > target->data[i] || target->data[i] > 1.0f) {
+			fatal("target[%zu] Not a probability, got %f", i, target->data[i]);
+		}
+		if (0.0f > actual->data[i] || actual->data[i] > 1.0f) {
+			fatal("actual[%zu] Not a probability, got %f", i, actual->data[i]);
+		}
+		res->data[i] = actual->data[i] - target->data[i];
 	}
 }
 
@@ -149,14 +138,20 @@ float nn_bcel(Vector* actual, Vector* target) {
 	if (actual->dimension != 1) {
 		fatal("Using BCEL for non 1D vector, use CCEL instead");
 	}
-	float clipped_a = fmax(fmin(actual->data[0], 1.0-1e-15), 1e-15);
+	if (0.0f > actual->data[0] || actual->data[0] > 1.0f) {
+		fatal("actual not a probability, got %f", actual->data[0]);
+	}
+	float clipped_a = fmaxf(fminf(actual->data[0], 1.0-1e-15), 1e-15);
+	//float clipped_a = actual->data[0];
 	debug("clipped activation: %.10f", clipped_a);
 	debug("target: %.10f", target->data[0]);
-	//float clipped_a = actual->data[0];
 	if (target->data[0] == 0.0f) {
 		return -log(1 - clipped_a);
-	} else {
+	} else if (target->data[0] == 1.0f) {
 		return -log(clipped_a);
+	} else {
+		fatal("Non binary target, got %f", target->data[0]);
+		return -1.0f;
 	}
 }
 void nn_bcel_d(Vector* actual, Vector* target, Vector* res) {
@@ -175,10 +170,9 @@ void nn_bcel_d(Vector* actual, Vector* target, Vector* res) {
 	if (actual->dimension != 1) {
 		fatal("Using BCELd for non 1D vector, use CCELd instead");
 	}
-	float clipped_a = fmax(fmin(actual->data[0], 1.0-1e-15), 1e-15);
-	if (target->data[0] == 0) {
-		res->data[0] = -1/(1 - clipped_a);
-	} else {
-		res->data[0] = -1/clipped_a;
+	if (0.0f > target->data[0] || target->data[0] > 1.0f) {
+		fatal("target not a probability, got %f", target->data[0]);
 	}
+	float clipped_a = fmaxf(fminf(actual->data[0], 1.0-1e-15), 1e-15);
+	res->data[0] = (clipped_a - target->data[0]) / (clipped_a * (1 - clipped_a));
 }
