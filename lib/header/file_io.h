@@ -9,7 +9,8 @@ typedef struct {
 	FILE* file_pointer;
 } FileData;
 
-FileData get_file(char*);
+FileData get_file_read(char*);
+FileData get_file_write(char*);
 int close_file(FileData);
 
 #endif
