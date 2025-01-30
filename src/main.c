@@ -6,6 +6,8 @@
 
 #include "generator.h"
 
+#include "grapher.h"
+
 #include "ffn_init.h"
 #include "ffn_fpropagate.h"
 #include "ffn_bpropagate.h"
@@ -61,5 +63,6 @@ int main() {
 
 	ffn_deallocate(nn);
 	ffn_deallocate_pool(mempool);
+	python_graph("hello");
 	return 0;
 }

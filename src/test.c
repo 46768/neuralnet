@@ -1,6 +1,7 @@
 #include "logger.h"
 #include "random.h"
 #include "allocator.h"
+#include "file_io.h"
 
 #include "generator.h"
 
@@ -12,6 +13,7 @@
 
 int main() {
 	debug("init");
+	info(PROJECT_PATH "/src/test.c");
 	init_random();
 	// Inputs
 	Vector** vecs;

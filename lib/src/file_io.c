@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-FileData get_file(char* filename, char* mode) {
+FileData _get_file(char* filename, char* mode) {
 	FileData file_read;
 	// Open file
 	file_read.file_pointer = fopen(filename, mode);
@@ -17,11 +17,11 @@ FileData get_file(char* filename, char* mode) {
 }
 
 FileData get_file_read(char* filename) {
-	return get_file(filename, "rb");
+	return _get_file(filename, "rb");
 }
 
 FileData get_file_write(char* filename) {
-	return get_file(filename, "wb");
+	return _get_file(filename, "wb");
 }
 
 int close_file(FileData file_data) {
