@@ -13,7 +13,7 @@
 
 int main() {
 	debug("init");
-	info(PROJECT_PATH "/src/test.c");
+	FileData* training_csv = get_file_write("data/loss.csv");
 	init_random();
 	// Inputs
 	Vector** vecs;
@@ -46,6 +46,7 @@ int main() {
 			info("Accmulated loss: %f", l);
 		}
 		l /= (REGS_RANGE - REGS_RANGEL + 1);
+		fprintf(training_csv->file_pointer, "%.10f,", l);
 		if (t % 1 == 0) {
 			info("Training loss: %f", l);
 		}
@@ -76,8 +77,8 @@ int main() {
 	}
 	deallocate(vecs);
 	deallocate(targets);
-
 	ffn_deallocate(nn);
 	ffn_deallocate_pool(mempool);
+	close_file(training_csv);
 	return 0;
 }

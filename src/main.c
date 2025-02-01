@@ -1,15 +1,10 @@
-#include <math.h>
-
 #include "logger.h"
 #include "random.h"
 #include "allocator.h"
 
 #include "generator.h"
 
-#include "grapher.h"
-
 #include "ffn_init.h"
-#include "ffn_fpropagate.h"
 #include "ffn_bpropagate.h"
 #include "ffn_mempool.h"
 #include "ffn_util.h"
@@ -63,6 +58,5 @@ int main() {
 
 	ffn_deallocate(nn);
 	ffn_deallocate_pool(mempool);
-	python_graph("hello");
 	return 0;
 }
