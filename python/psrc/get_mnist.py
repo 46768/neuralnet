@@ -1,10 +1,11 @@
 import sys
 import os
 import numpy as np
-from datasets import load_datasets
+from datasets import load_dataset
 
-mnist = load_datasets('mnist')
+mnist = load_dataset('mnist')
 outputdir = sys.argv[1]
+print("data out:", outputdir)
 
 
 def save_data(name, img, label):

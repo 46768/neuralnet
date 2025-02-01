@@ -47,7 +47,8 @@ endif()
 # Project root path as macro
 target_compile_definitions(compiler_flags INTERFACE
 	PROJECT_PATH="${PROJECT_SOURCE_DIR}"
-	PYTHON_CMD="${PROJECT_SOURCE_DIR}/data/venv/bin/python3"
+	PYTHON_CMD="python3"
+	PYTHON_VENV="${PROJECT_SOURCE_DIR}/data/venv/bin/python3"
 )
 
 # Add the libraries
@@ -57,17 +58,15 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Feed forward network
 add_subdirectory("${PROJECT_SOURCE_DIR}/python") # Python Interface
 
-# Add main.c as executable
-set(ENTRY_POINT "${PROJECT_SOURCE_DIR}/src/main.c")
-add_executable(FCLNN "${ENTRY_POINT}")
-
-# Add test.c as executable
-set(ENTRY_POINT_T "${PROJECT_SOURCE_DIR}/src/test.c")
-add_executable(FCLNNt "${ENTRY_POINT_T}")
+# Add executables
+add_executable(FCLNN "${PROJECT_SOURCE_DIR}/src/main.c")
+add_executable(FCLNNt "${PROJECT_SOURCE_DIR}/src/test.c")
+add_executable(envt "${PROJECT_SOURCE_DIR}/src/env_test.c")
 
 # Set debug property
 set_target_properties(FCLNN PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(FCLNNt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set_target_properties(envt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 # Link libraries
 target_link_libraries(FCLNN PUBLIC compiler_flags) # Compiler Flags
@@ -84,3 +83,6 @@ target_link_libraries(FCLNNt PUBLIC NeuralNetwork) # Feed Forward Network
 target_link_libraries(FCLNNt PUBLIC FeedForwardNetwork) # Feed Forward Network
 target_link_libraries(FCLNNt PUBLIC PythonInterface) # Python Interface
 target_link_libraries(FCLNNt PUBLIC m) # C Math Library
+
+target_link_libraries(envt PUBLIC compiler_flags)
+target_link_libraries(envt PUBLIC PythonInterface)

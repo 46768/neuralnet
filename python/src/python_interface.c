@@ -23,25 +23,38 @@ void python_spawn(const char* script_path, const char* data_path) {
 	pid_t pid = fork();
 	int status;
 	if (pid == 0) {
-		execlp(PYTHON_CMD, PYTHON_CMD, script_path, data_path, NULL);
+		execlp(PYTHON_VENV, PYTHON_VENV, script_path, data_path, NULL);
 	}
 	waitpid(pid, &status, 0);
 }
 
 void python_create_venv(const char* requirements_path) {
-	DIR* venv = opendir(PROJECT_PATH "/data/venv");
-	mkdir(PROJECT_PATH "/data", 0777);
-	if (venv == NULL) {
+	struct stat st;
+	if (stat(PROJECT_PATH "/data", &st) != 0) {
+		mkdir(PROJECT_PATH "/data", 0777);
+	}
+
+	if (stat(PROJECT_PATH "/data/venv", &st) != 0) {
 		mkdir(PROJECT_PATH "/data/venv", 0777);
-		pid_t pid1 = fork(), pid2;
+		pid_t pid1 = fork();
 		int status;
-		execlp(PYTHON_CMD, PYTHON_CMD, "-m", "venv", PROJECT_PATH "/data/venv", NULL);
-		waitpid(pid1, &status, 0);
+		if (pid1 == 0) {
+			execlp(PYTHON_CMD, PYTHON_CMD, "-m", "venv", PROJECT_PATH "/data/venv", NULL);
+		} else if (pid1 > 0) {
+			waitpid(pid1, &status, 0);
+		} else {
+			fatal("Fork failed for python3 venv");
+		}
 		info("Created venv");
-		pid2 = fork();
-		execlp(PROJECT_PATH "/data/venv/bin/pip", PROJECT_PATH "/data/venv/bin/pip",
-				"install", "-r", requirements_path, NULL);
-		waitpid(pid2, &status, 0);
+		pid_t pid2 = fork();
+		if (pid2 == 0) {
+			execlp(PROJECT_PATH "/data/venv/bin/pip", PROJECT_PATH "/data/venv/bin/pip",
+					"install", "-r", requirements_path, NULL);
+		} else if (pid2 > 0) {
+			waitpid(pid2, &status, 0);
+		} else {
+			fatal("Fork failed for pip install");
+		}
 		info("Installed packages");
 	}
 	info("Created python venv");
