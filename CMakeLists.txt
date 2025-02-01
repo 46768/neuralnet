@@ -47,7 +47,7 @@ endif()
 # Project root path as macro
 target_compile_definitions(compiler_flags INTERFACE
 	PROJECT_PATH="${PROJECT_SOURCE_DIR}"
-	PYTHON_CMD="python3"
+	PYTHON_CMD="${PROJECT_SOURCE_DIR}/data/venv/bin/python3"
 )
 
 # Add the libraries

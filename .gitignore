@@ -5,3 +5,6 @@ prof/
 
 # Clang cache
 .cache/
+
+# Data files
+data/

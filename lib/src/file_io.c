@@ -2,18 +2,30 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
 
 #include "allocator.h"
+#include "logger.h"
 
 FileData* _get_file(char* filename, char* mode) {
+	char* fullname = (char*)allocate(strlen(PROJECT_PATH "/data/")+strlen(filename)+2);
+	strcat(fullname, PROJECT_PATH "/data/");
+	strcat(fullname, filename);
+	info("path: %s", fullname);
 	FileData* file_read = (FileData*)allocate(sizeof(FileData));
-	if (access(filename, F_OK) != 0) {
-		 FILE* temp = fopen(filename, "w");
+	mkdir(PROJECT_PATH "/data", 0777);
+	if (access(fullname, F_OK) != 0) {
+		 FILE* temp = fopen(fullname, "w");
+		 if (temp == NULL) {
+			fatal("Failed to open file: %s", fullname);
+		 }
 		 fclose(temp);
 	}
 	// Open file
-	file_read->file_pointer = fopen(filename, mode);
-	file_read->filename = filename;
+	file_read->file_pointer = fopen(fullname, mode);
+	file_read->filename = fullname;
+	info("filename: %s", file_read->filename);
 
 	// Get file size
 	fseek(file_read->file_pointer, 0l, SEEK_END);
@@ -36,5 +48,7 @@ int close_file(FileData* file_data) {
 		printf("Failed to close file: %s", file_data->filename);
 		return 1;
 	}
+	deallocate(file_data->filename);
+	deallocate(file_data);
 	return 0;
 }

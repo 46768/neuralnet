@@ -1,7 +1,13 @@
+#include <string.h>
+
 #include "logger.h"
 #include "random.h"
 #include "allocator.h"
 #include "file_io.h"
+
+#include "python_interface.h"
+#include "python_grapher.h"
+#include "python_get_mnist.h"
 
 #include "generator.h"
 
@@ -13,7 +19,10 @@
 
 int main() {
 	debug("init");
-	FileData* training_csv = get_file_write("data/loss.csv");
+	info(PROJECT_PATH);
+	FileData* training_csv = get_file_write("loss.csv");
+	python_create_venv(PROJECT_PATH "/requirements.txt");
+	python_get_mnist(PROJECT_PATH "/data");
 	init_random();
 	// Inputs
 	Vector** vecs;
@@ -24,7 +33,7 @@ int main() {
 	generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
 	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 2, ReLU, He, RandomEN2);
+	ffn_init_dense(nn, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_init_dense(nn, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_init_dense(nn, 1, None, Zero, Zero);
 	ffn_set_cost_fn(nn, BCE);
@@ -34,24 +43,21 @@ int main() {
 	info("Pre train");
 	ffn_dump_data(nn);
 
-	float learning_rate = 0.1;
+	float learning_rate = 0.01;
 	float prev_l = 1e10;
 	// Trains however many times
-	for (int t = 0; t < 100; t++) {
+	for (int t = 0; t < 100000; t++) {
 		float l = 0;
 		for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
 			Vector* y = targets[i - REGS_RANGEL];
 			l += ffn_bpropagate(nn, mempool, x, y, learning_rate);
-			info("Accmulated loss: %f", l);
+			//info("Accmulated loss: %f", l);
 		}
 		l /= (REGS_RANGE - REGS_RANGEL + 1);
 		fprintf(training_csv->file_pointer, "%.10f,", l);
 		if (t % 1 == 0) {
-			info("Training loss: %f", l);
-		}
-		if (l < 0.4) {
-			break;
+			//info("Training loss: %f", l);
 		}
 		prev_l = l;
 	}
@@ -79,6 +85,13 @@ int main() {
 	deallocate(targets);
 	ffn_deallocate(nn);
 	ffn_deallocate_pool(mempool);
+
+	char* fpath = (char*)allocate(strlen(training_csv->filename));
+	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
+	fprintf(training_csv->file_pointer, "\n");
 	close_file(training_csv);
+	info("training filename: %s", fpath);
+	python_graph(fpath);
+
 	return 0;
 }

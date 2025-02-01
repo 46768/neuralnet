@@ -1,6 +1,12 @@
+#include <string.h>
+
 #include "logger.h"
 #include "random.h"
 #include "allocator.h"
+#include "file_io.h"
+
+#include "python_interface.h"
+#include "python_grapher.h"
 
 #include "generator.h"
 
@@ -11,6 +17,8 @@
 
 int main() {
 	debug("init");
+	FileData* training_csv = get_file_write("loss.csv");
+	python_create_venv(PROJECT_PATH "/requirements.txt");
 	init_random();
 	// Inputs
 	Vector** vecs;
@@ -41,8 +49,9 @@ int main() {
 			newline_d();
 		}
 		l /= (REGS_RANGE - REGS_RANGEL);
+		fprintf(training_csv->file_pointer, "%.10f,", l);
 		if (t % 1 == 0) {
-			info("Training loss: %f", l);
+			//info("Training loss: %f", l);
 		}
 	}
 
@@ -58,5 +67,13 @@ int main() {
 
 	ffn_deallocate(nn);
 	ffn_deallocate_pool(mempool);
+
+	char* fpath = (char*)allocate(strlen(training_csv->filename));
+	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
+	fprintf(training_csv->file_pointer, "\n");
+	close_file(training_csv);
+	info("training filename: %s", fpath);
+	python_graph(fpath);
+
 	return 0;
 }
