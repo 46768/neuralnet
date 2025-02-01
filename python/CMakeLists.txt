@@ -6,7 +6,6 @@ file(GLOB srcs
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
 )
 
-# Define neural network libraries
 add_library(PythonInterface STATIC
 	${srcs}
 )

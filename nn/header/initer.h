@@ -10,6 +10,7 @@ typedef float(*Initer)(size_t);
 typedef enum {
 	Zero,
 	He,
+	Xavier,
 	RandomEN2,
 } IniterEnum;
 
@@ -18,6 +19,7 @@ Initer resolve_initer(IniterEnum);
 
 float zero_init(size_t); // Initialize to 0.0f
 float he_init(size_t); // Initialize with He Initialization
+float xavier_init(size_t); // Initialize with Xavier Initialization
 float random_en2_init(size_t); // Initialize randomly in range of -0.01 to 0.01
 
 #endif

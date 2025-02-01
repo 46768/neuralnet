@@ -15,6 +15,8 @@ Initer resolve_initer(IniterEnum init_type) {
 			return zero_init;
 		case He:
 			return he_init;
+		case Xavier:
+			return xavier_init;
 		case RandomEN2:
 			return random_en2_init;
 		default:
@@ -34,6 +36,11 @@ float he_init(size_t node_cnt) {
 	float z0 = sqrt(-2.0f * log(u1)) * cos(2.0f * M_PI * u2);
 
 	return z0 * sqrt(2.0f / node_cnt);
+}
+
+float xavier_init(size_t node_cnt) {
+	float z0 = sqrt(1.0/ node_cnt);
+	return f_random(-z0, z0);
 }
 
 float random_en2_init(size_t _) {

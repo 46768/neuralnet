@@ -25,7 +25,7 @@ int main() {
 
 	FFN* nn = ffn_init();
 	ffn_init_dense(nn, 2, ReLU, He, RandomEN2);
-	ffn_init_dense(nn, 2, Sigmoid, He, RandomEN2);
+	ffn_init_dense(nn, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_init_dense(nn, 1, None, Zero, Zero);
 	ffn_set_cost_fn(nn, BCE);
 	FFNMempool* mempool = ffn_init_pool(nn);
@@ -37,7 +37,7 @@ int main() {
 	float learning_rate = 0.1;
 	float prev_l = 1e10;
 	// Trains however many times
-	for (int t = 0; t < 10; t++) {
+	for (int t = 0; t < 100; t++) {
 		float l = 0;
 		for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
 			Vector* x = vecs[i - REGS_RANGEL];
