@@ -11,6 +11,8 @@ ActivationFn resolve_activation_fn(ActivationFNEnum fn_type) {
 			return nn_relu;
 		case Sigmoid:
 			return nn_sigmoid;
+		case Softmax:
+			return nn_softmax;
 		case None:
 			return nn_none_fn;
 		case Logging:
@@ -26,6 +28,8 @@ ActivationFnD resolve_activation_fn_d(ActivationFNEnum fn_type) {
 			return nn_relu_d;
 		case Sigmoid:
 			return nn_sigmoid_d;
+		case Softmax:
+			return nn_none_fn_d;
 		case None:
 			return nn_none_fn_d;
 		case Logging:
@@ -41,6 +45,8 @@ char* resolve_activation_fn_str(ActivationFNEnum fn_type) {
 			return "ReLU";
 		case Sigmoid:
 			return "Sigmoid";
+		case Softmax:
+			return "Softmax";
 		case None:
 			return "None";
 		case Logging:
@@ -118,22 +124,23 @@ void nn_sigmoid_d(Vector* z, Vector* d) {
 /////////////
 
 void nn_softmax(Vector* z, Vector* a) {
-	if (z->dimension == 1) {
-		return nn_sigmoid(z, a);
-	}
-	float exp_sum = 0;
+	// Find largest element of the vector
 	float z_max = 0;
 	for (size_t i = 0; i < z->dimension; i++) {
 		if (z->data[i] > z_max) {
 			z_max = z->data[i];
 		}
 	}
+
+	float exp_sum = 0;
 	for (size_t i = 0; i < z->dimension; i++) {
 		float z_exp = exp(z->data[i] - z_max);
-		exp_sum += exp(z->data[i] - z_max);
+		exp_sum += z_exp;
 		a->data[i] = z_exp;
 	}
+	info("exp_sum: %.10f", exp_sum);
 	for (size_t i = 0; i < z->dimension; i++) {
+		info("a[i]: %.10f", a->data[i]);
 		a->data[i] /= exp_sum;
 	}
 }

@@ -12,8 +12,6 @@ void generate_xor(int*, int*, Vector***, Vector***);
 // MNIST Database Generator
 void generate_mnist(int*, int*, Vector***, Vector***,
 		char*,
-		char*,
-		char*,
 		char*);
 
 #endif

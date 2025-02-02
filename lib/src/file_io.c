@@ -9,7 +9,7 @@
 #include "logger.h"
 
 FileData* _get_file(char* filename, char* mode) {
-	char* fullname = (char*)allocate(strlen(PROJECT_PATH "/data/")+strlen(filename)+2);
+	char* fullname = (char*)callocate(strlen(PROJECT_PATH "/data/")+strlen(filename)+2, sizeof(char));
 	strcat(fullname, PROJECT_PATH "/data/");
 	strcat(fullname, filename);
 	FileData* file_read = (FileData*)allocate(sizeof(FileData));

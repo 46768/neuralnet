@@ -119,70 +119,55 @@ unsigned char _mnist_get_label(FileData* label_filedata, int lbl_idx) {
 	FILE* fp = label_filedata->file_pointer;
 	unsigned char label;
 	fseek(fp, 8+ lbl_idx, SEEK_SET);
-	info("Seeked to position: %ld", ftell(fp));
 	if (fread(&label, sizeof(unsigned char), 1, fp) != 1) {
 		fatal("Failed to read label at index: %d", lbl_idx);
 	}
-	info("lbl read: %d", label);
 	return label;
 }
 
 void generate_mnist(int* lower, int* upper, Vector*** vecs, Vector*** targets,
-		char* train_img_path,
-		char* train_lbl_path,
-		char* test_img_path,
-		char* test_lbl_path
+		char* img_path,
+		char* lbl_path
 		) {
-	FileData* train_img = get_file_read(train_img_path);
-	FileData* train_lbl = get_file_read(train_lbl_path);
-	FileData* test_img = get_file_read(test_img_path);
-	FileData* test_lbl = get_file_read(test_lbl_path);
+	FileData* img_fdata = get_file_read(img_path);
+	FileData* lbl_fdata = get_file_read(lbl_path);
 
-	if (0x00000803 != _mnist_get_magic(train_img)) {
-		fatal("Non matching magic number for training image");
+	if (0x00000803 != _mnist_get_magic(img_fdata)) {
+		fatal("Non matching magic number for image data");
 	}
-	if (0x00000803 != _mnist_get_magic(test_img)) {
-		fatal("Non matching magic number for test image");
-	}
-	if (0x00000801 != _mnist_get_magic(train_lbl)) {
-		fatal("Non matching magic number for training label");
-	}
-	if (0x00000801 != _mnist_get_magic(test_lbl)) {
-		fatal("Non matching magic number for test label");
+	if (0x00000801 != _mnist_get_magic(lbl_fdata)) {
+		fatal("Non matching magic number for label data");
 	}
 
-	int training_img_cnt = _mnist_get_image_count(train_img);
-	int test_img_cnt = _mnist_get_image_count(test_img);
-	int training_img_size[2]; _mnist_get_image_size(train_img, training_img_size);
-	int test_img_size[2]; _mnist_get_image_size(test_img, test_img_size);
-	int training_lbl_cnt = _mnist_get_label_count(train_lbl);
-	int test_lbl_cnt = _mnist_get_label_count(test_lbl);
+	int img_cnt = _mnist_get_image_count(img_fdata);
+	int img_size[2]; _mnist_get_image_size(img_fdata, img_size);
+	int lbl_cnt = _mnist_get_label_count(lbl_fdata);
 
-	info("Training image count: %d, size of %dx%d", training_img_cnt, training_img_size[0], training_img_size[1]);
-	info("Test image count: %d, size of %dx%d", test_img_cnt, test_img_size[0], test_img_size[1]);
-	info("Training label count: %d", training_lbl_cnt);
-	info("Test label count: %d", test_lbl_cnt);
+	if (img_cnt != lbl_cnt) {
+		fatal("Mismatching image count to label count");
+	}
 
-	int img_size = training_img_size[0]*training_img_size[1];
-	int img_idx = 2;
-	unsigned char* img_buf = (unsigned char*)allocate(img_size);
-	_mnist_get_image(train_img, img_idx, training_img_size, &img_buf, img_size);
-	unsigned char img_label = _mnist_get_label(train_lbl, img_idx);
-	info("Example training image at idx: %d of a %d", img_idx, img_label);
-	for (int i = 0; i < training_img_size[0]; i++) {
-		for (int j = 0; j < training_img_size[1]; j++) {
-			if (img_buf[(i*training_img_size[0]) + j]) {
-				printr("X");
-			} else {
-				printr(" ");
-			}
+	int img_buf_size = img_size[0]*img_size[1];
+	unsigned char* img_buf = (unsigned char*)allocate(img_buf_size);
+	*lower = 0;
+	*upper = lbl_cnt;
+	*vecs = (Vector**)allocate(sizeof(Vector*)*lbl_cnt);
+	*targets = (Vector**)allocate(sizeof(Vector*)*lbl_cnt);
+
+	for (int t = 0; t < lbl_cnt; t++) {
+		unsigned char img_lbl = _mnist_get_label(lbl_fdata, t);
+		_mnist_get_image(img_fdata, t, img_size, &img_buf, img_buf_size);
+
+		(*vecs)[t] = vec_zero(img_buf_size);
+		(*targets)[t] = vec_zero(10);
+
+		for (int i = 0; i < img_buf_size; i++) {
+			(*vecs)[t]->data[i] = img_buf[i] / 255.0f;
 		}
-		newline();
+		(*targets)[t]->data[img_lbl] = 1.0f;
 	}
-	newline();
 
-	close_file(train_img);
-	close_file(train_lbl);
-	close_file(test_img);
-	close_file(test_lbl);
+	close_file(img_fdata);
+	close_file(lbl_fdata);
+	deallocate(img_buf);
 }

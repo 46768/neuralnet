@@ -29,3 +29,14 @@ void ffn_dump_data(FFN* nn) {
 	}
 	newline();
 }
+
+void ffn_dump_output(FFNMempool* pool) {
+	size_t layer_count = pool->layer_cnt;
+	Vector* output = pool->activations[layer_count-1];
+
+	info("Network output:");
+	for (size_t i = 0; i < output->dimension; i++) {
+		printr("%f\n", output->data[i]);
+	}
+	newline();
+}
