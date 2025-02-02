@@ -28,7 +28,7 @@ void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
 	// Going from L-1 to 0
 	size_t L = nn->hidden_size;
 	for (size_t l = L-2; l != SIZE_MAX; l--) {
-		if (nn->hidden_layers[l]->l_type == PassThrough) {
+		if (nn->hidden_layers[l+1]->l_type == PassThrough) {
 			continue;
 		}
 		Matrix* gradient_w_l = pool->gradient_w[l];

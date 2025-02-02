@@ -37,12 +37,14 @@ void ffn_fpropagate(FFN* nn, FFNMempool* pool, Vector* input) {
 		Vector* al1 = a[l+1];
 
 		// Calculate the matrix vector multiplication
+		debug("w[%zu]*a[%zu]+b[%zu]", l, l, l);
 		for (size_t y = 0; y < weight->sy; y++) {
 			float z_j = (bias->data)[y];
 			for (size_t x = 0; x < weight->sx; x++) {
 				z_j += (al->data)[x]*matrix_get(weight, x, y);
-				//debug("w: %f", matrix_get(weight, x, y));
+				//info("w: %f", matrix_get(weight, x, y));
 			}
+			debug("l[%zu/%zu]->z[%zu][%zu]: %.10f", l, nn->hidden_size, l+1, y, z_j);
 			(zl1->data)[y] = z_j;
 		}
 		nn->layer_activation[l](zl1, al1);

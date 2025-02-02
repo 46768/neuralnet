@@ -126,7 +126,7 @@ void ffn_init_params(FFN* nn) {
 		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);
 
 		// Initialize the actual data
-		if (layer_cur->l_type == Dense) {
+		if (layer_nxt->l_type == Dense) {
 			Initer w_initer = resolve_initer(layer_cur->w_init_type);
 			Initer b_initer = resolve_initer(layer_cur->b_init_type);
 			for (size_t y = 0; y < sy; y++) {

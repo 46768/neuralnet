@@ -130,6 +130,7 @@ void nn_softmax(Vector* z, Vector* a) {
 		if (z->data[i] > z_max) {
 			z_max = z->data[i];
 		}
+		debug("z[i]: %.10f", z->data[i]);
 	}
 
 	float exp_sum = 0;
@@ -138,9 +139,9 @@ void nn_softmax(Vector* z, Vector* a) {
 		exp_sum += z_exp;
 		a->data[i] = z_exp;
 	}
-	info("exp_sum: %.10f", exp_sum);
+	debug("exp_sum: %.10f", exp_sum);
 	for (size_t i = 0; i < z->dimension; i++) {
-		info("a[i]: %.10f", a->data[i]);
+		debug("a[i]: %.10f", a->data[i]);
 		a->data[i] /= exp_sum;
 	}
 }
@@ -152,7 +153,7 @@ void nn_softmax(Vector* z, Vector* a) {
 void nn_logging_fn(Vector* z, Vector* a) {
 	info("Layer Info:");
 	for (size_t i = 0; i < z->dimension; i++) {
-		printr("%f\n", z->data[i]);
+		printr("node[%zu]: %f\n", i, z->data[i]);
 		a->data[i] = z->data[i];
 	}
 }
