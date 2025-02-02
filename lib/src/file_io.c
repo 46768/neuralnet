@@ -12,7 +12,6 @@ FileData* _get_file(char* filename, char* mode) {
 	char* fullname = (char*)allocate(strlen(PROJECT_PATH "/data/")+strlen(filename)+2);
 	strcat(fullname, PROJECT_PATH "/data/");
 	strcat(fullname, filename);
-	info("path: %s", fullname);
 	FileData* file_read = (FileData*)allocate(sizeof(FileData));
 	mkdir(PROJECT_PATH "/data", 0777);
 	if (access(fullname, F_OK) != 0) {
@@ -25,7 +24,6 @@ FileData* _get_file(char* filename, char* mode) {
 	// Open file
 	file_read->file_pointer = fopen(fullname, mode);
 	file_read->filename = fullname;
-	info("filename: %s", file_read->filename);
 
 	// Get file size
 	fseek(file_read->file_pointer, 0l, SEEK_END);

@@ -58,31 +58,29 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Feed forward network
 add_subdirectory("${PROJECT_SOURCE_DIR}/python") # Python Interface
 
+# Add the commonly used libraries
+add_library(FCLNNLib INTERFACE)
+target_link_libraries(FCLNNLib INTERFACE compiler_flags) # Compiler Flags
+target_link_libraries(FCLNNLib INTERFACE ComLib) # Common Utility
+target_link_libraries(FCLNNLib INTERFACE NeuralNetwork) # Feed Forward Network
+target_link_libraries(FCLNNLib INTERFACE FeedForwardNetwork) # Feed Forward Network
+target_link_libraries(FCLNNLib INTERFACE PythonInterface) # Python Interface
+target_link_libraries(FCLNNLib INTERFACE m) # C Math Library
+
 # Add executables
 add_executable(FCLNN "${PROJECT_SOURCE_DIR}/src/main.c")
 add_executable(FCLNNt "${PROJECT_SOURCE_DIR}/src/test.c")
-add_executable(envt "${PROJECT_SOURCE_DIR}/src/env_test.c")
+add_executable(MNIST "${PROJECT_SOURCE_DIR}/src/mnist.c")
 
 # Set debug property
 set_target_properties(FCLNN PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(FCLNNt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-set_target_properties(envt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set_target_properties(MNIST PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 # Link libraries
-target_link_libraries(FCLNN PUBLIC compiler_flags) # Compiler Flags
-target_link_libraries(FCLNN PUBLIC ComLib) # Common Utility
-target_link_libraries(FCLNN PUBLIC NeuralNetwork) # Feed Forward Network
-target_link_libraries(FCLNN PUBLIC FeedForwardNetwork) # Feed Forward Network
-target_link_libraries(FCLNN PUBLIC PythonInterface) # Python Interface
-target_link_libraries(FCLNN PUBLIC m) # C Math Library
+target_link_libraries(FCLNN PUBLIC FCLNNLib)
 
 # Link libraries
-target_link_libraries(FCLNNt PUBLIC compiler_flags) # Compiler Flags
-target_link_libraries(FCLNNt PUBLIC ComLib) # Common Utility
-target_link_libraries(FCLNNt PUBLIC NeuralNetwork) # Feed Forward Network
-target_link_libraries(FCLNNt PUBLIC FeedForwardNetwork) # Feed Forward Network
-target_link_libraries(FCLNNt PUBLIC PythonInterface) # Python Interface
-target_link_libraries(FCLNNt PUBLIC m) # C Math Library
+target_link_libraries(FCLNNt PUBLIC FCLNNLib)
 
-target_link_libraries(envt PUBLIC compiler_flags)
-target_link_libraries(envt PUBLIC PythonInterface)
+target_link_libraries(MNIST PUBLIC FCLNNLib)

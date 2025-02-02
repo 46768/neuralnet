@@ -18,7 +18,7 @@
 int main() {
 	debug("init");
 	FileData* training_csv = get_file_write("loss.csv");
-	//python_create_venv(PROJECT_PATH "/requirements.txt");
+	python_create_venv(PROJECT_PATH "/requirements.txt");
 	init_random();
 	// Inputs
 	Vector** vecs;
@@ -73,7 +73,7 @@ int main() {
 	fprintf(training_csv->file_pointer, "\n");
 	close_file(training_csv);
 	info("training filename: %s", fpath);
-	//python_graph(fpath);
+	python_graph(fpath);
 
 	return 0;
 }

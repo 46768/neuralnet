@@ -8,24 +8,26 @@
 #include "logger.h"
 
 void python_spawn(const char* script_path, const char* data_path) {
+	struct stat st;
 	if (!data_path) {
 		fatal("NULL Data path");
 	}
 	if (!script_path) {
 		fatal("NULL Script name");
 	}
-	DIR* venv = opendir(PROJECT_PATH "/data/venv");
-	if (venv == NULL) {
+	if (stat(PROJECT_PATH "/data/venv", &st) != 0) {
 		fatal("Python venv not found, call `python_create_venv` first");
 	}
-	closedir(venv);
 
 	pid_t pid = fork();
 	int status;
 	if (pid == 0) {
 		execlp(PYTHON_VENV, PYTHON_VENV, script_path, data_path, NULL);
+	} else if (pid > 0) {
+		waitpid(pid, &status, 0);
+	} else {
+		fatal("Fork failed for python_venv %s", script_path);
 	}
-	waitpid(pid, &status, 0);
 }
 
 void python_create_venv(const char* requirements_path) {
