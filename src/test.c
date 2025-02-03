@@ -7,7 +7,6 @@
 
 #include "python_interface.h"
 #include "python_grapher.h"
-#include "python_get_mnist.h"
 
 #include "generator.h"
 
@@ -22,7 +21,6 @@ int main() {
 	info(PROJECT_PATH);
 	FileData* training_csv = get_file_write("loss.csv");
 	python_create_venv(PROJECT_PATH "/requirements.txt");
-	python_get_mnist(PROJECT_PATH "/data/mnist");
 	init_random();
 	// Inputs
 	Vector** vecs;

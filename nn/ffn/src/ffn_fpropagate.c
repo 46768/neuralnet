@@ -41,7 +41,7 @@ void ffn_fpropagate(FFN* nn, FFNMempool* pool, Vector* input) {
 		for (size_t y = 0; y < weight->sy; y++) {
 			float z_j = (bias->data)[y];
 			for (size_t x = 0; x < weight->sx; x++) {
-				z_j += (al->data)[x]*matrix_get(weight, x, y);
+				z_j += (al->data)[x]*weight->data[(x*(weight->sx)) + y];
 				//info("w: %f", matrix_get(weight, x, y));
 			}
 			debug("l[%zu/%zu]->z[%zu][%zu]: %.10f", l, nn->hidden_size, l+1, y, z_j);
