@@ -9,6 +9,7 @@ print("Data output directory:", outputdir)
 if os.path.exists(outputdir):
     print("Data exists, skipping downloading")
     exit(0)
+os.mkdir(outputdir)
 
 print("Downloading MNIST dataset")
 mnist = load_dataset('mnist')
