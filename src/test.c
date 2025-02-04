@@ -20,6 +20,8 @@ int main() {
 	debug("init");
 	info(PROJECT_PATH);
 	FileData* training_csv = get_file_write("loss.csv");
+	fprintf(training_csv->file_pointer, "1,");
+	fprintf(training_csv->file_pointer, "Training loss,");
 	python_create_venv(PROJECT_PATH "/requirements.txt");
 	init_random();
 	// Inputs
