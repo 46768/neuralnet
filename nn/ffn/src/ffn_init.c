@@ -17,7 +17,7 @@
 
 // Create a feed forward network
 FFN* ffn_init() {
-	FFN* ffn = (FFN*)callocate(1, sizeof(FFN));
+	FFN* ffn = (FFN*)allocate(sizeof(FFN));
 	ffn->hidden_size = 0;
 	ffn->hidden_capacity = 10;
 	ffn->hidden_layers = (LayerData**)callocate(ffn->hidden_capacity, sizeof(LayerData*));
@@ -44,7 +44,8 @@ void ffn_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
 // Layer Initialization //
 //////////////////////////
 
-void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type, IniterEnum w_init_type, IniterEnum b_init_type) {
+void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type,
+		IniterEnum w_init_type, IniterEnum b_init_type) {
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
@@ -53,9 +54,7 @@ void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l
 	if (hidden_size >= nn->hidden_capacity) {
 		nn->hidden_capacity += 10;
 		size_t hidden_cap = nn->hidden_capacity;
-		nn->hidden_layers = reallocate(nn->hidden_layers, hidden_cap*sizeof(size_t));		
-		nn->weights = reallocate(nn->weights, hidden_cap*sizeof(Matrix*));		
-		nn->biases = reallocate(nn->biases, hidden_cap*sizeof(Vector*));		
+		nn->hidden_layers = reallocate(nn->hidden_layers, hidden_cap*sizeof(LayerData*));
 	}
 
 	(nn->hidden_layers)[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
@@ -69,7 +68,8 @@ void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l
 }
 
 // Push a dense (fully connected) layer
-void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type, IniterEnum w_init_type, IniterEnum b_init_type) {
+void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type,
+		IniterEnum w_init_type, IniterEnum b_init_type) {
 	_ffn_init_layer(nn, dense_size, fn_type, Dense, w_init_type, b_init_type);
 }
 
@@ -93,8 +93,8 @@ void ffn_init_params(FFN* nn) {
 	size_t hidden_cnt = nn->hidden_size-1;
 	nn->weights = (Matrix**)allocate(hidden_cnt*sizeof(Matrix*));
 	nn->biases = (Vector**)allocate(hidden_cnt*sizeof(Vector*));
-	nn->layer_activation = (ActivationFn*)allocate((hidden_cnt+1)*sizeof(ActivationFn));
-	nn->layer_activation_d = (ActivationFnD*)allocate((hidden_cnt+1)*sizeof(ActivationFnD));
+	nn->layer_activation = (ActivationFn*)allocate(hidden_cnt*sizeof(ActivationFn));
+	nn->layer_activation_d = (ActivationFnD*)allocate(hidden_cnt*sizeof(ActivationFnD));
 
 	// Logs layer for debugging
 	LayerData** layer_data = nn->hidden_layers;

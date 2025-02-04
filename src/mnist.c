@@ -53,34 +53,38 @@ int main() {
 	ffn_init_params(nn);
 	FFNMempool* pool = ffn_init_pool(nn);
 
-	ffn_bpropagate(nn, pool, train_input[0], train_target[0], 0.01);
-	ffn_bpropagate(nn, pool, train_input[0], train_target[0], 0.01);
-	ffn_bpropagate(nn, pool, train_input[0], train_target[0], 0.01);
-	/*
 	float learning_rate = 0.01;
-	for (int t = 0; t < 10; t++) {
+	for (int t = 0; t < 30; t++) {
 		// Sample random range of training data
 		int range_lower = floorf(f_random((float)train_lbound, (float)train_ubound));
 		int range_upper = floorf(f_random((float)range_lower, (float)train_ubound));
 
 		// Train the network on data from the range
+		float train_loss = 0.0f;
 		for (int i = range_lower; i < range_upper; i++) {
-			ffn_bpropagate(nn, pool, train_input[i], train_target[i], learning_rate);
+			printr("Training %d/%d\r", i - range_lower + 1, range_upper - range_lower);
+			train_loss += ffn_bpropagate(nn, pool, train_input[0], train_target[0], learning_rate);
 		}
+		newline();
+		train_loss /= range_upper - range_lower;
 
 		// Sample random range of training data
 		range_lower = floorf(f_random((float)test_lbound, (float)test_ubound));
 		range_upper = floorf(f_random((float)range_lower, (float)test_ubound));
 
-		// Train the network on data from the range
-		float loss = 0.0f;
+		// Test the network on data from the range
+		float test_loss = 0.0f;
 		for (int i = range_lower; i < range_upper; i++) {
-			loss += ffn_bpropagate(nn, pool, test_input[i], test_target[i], learning_rate);
+			printr("Testing %d/%d\r", i - range_lower + 1, range_upper - range_lower);
+			ffn_fpropagate(nn, pool, test_input[i]);
+			test_loss += nn->cost_fn(pool->activations[nn->hidden_size-1], test_target[i]);
 		}
-		loss /= range_upper - range_lower + 1;
-		info("Training epoch loss: %.10f", loss);
+		newline();
+		test_loss /= range_upper - range_lower;
+		info("Training epoch loss: %.10f", train_loss);
+		info("Validation epoch loss: %.10f", test_loss);
+		info("-Epoch %d--------------------------------------", t);
 	}
-	*/
 
 	// Network forward propagation
 	ffn_fpropagate(nn, pool, train_input[0]);

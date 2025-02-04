@@ -27,7 +27,7 @@ void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
 	// Apply backward propagation gradient
 	// Going from L-1 to 0
 	size_t L = nn->hidden_size;
-	for (size_t l = L-2; l != SIZE_MAX; l--) {
+	for (int l = (int)L-2; l >= 0; l--) {
 		if (nn->hidden_layers[l+1]->l_type == PassThrough) {
 			continue;
 		}
@@ -36,9 +36,9 @@ void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
 
 		// Apply weight gradient
 		debug("Weight modification to layer[%d]", l);
-		for (size_t x = 0; x < gradient_w_l->sx; x++) {
-			(nn->biases)[l]->data[x] -= learning_rate*gradient_b_l->data[x];
-			for (size_t y = 0; y < gradient_w_l->sy; y++) {
+		for (size_t y = 0; y < gradient_w_l->sy; y++) {
+			(nn->biases)[l]->data[y] -= learning_rate*gradient_b_l->data[y];
+			for (size_t x = 0; x < gradient_w_l->sx; x++) {
 				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 
 					learning_rate*matrix_get(gradient_w_l, x, y);
 				printr_d("%f ", -learning_rate*matrix_get(gradient_w_l, x, y));
