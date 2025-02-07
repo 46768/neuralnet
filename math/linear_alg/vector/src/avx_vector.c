@@ -1,4 +1,4 @@
-#ifdef SIMD_AVX2
+#ifdef SIMD_AVX
 #include "vector.h"
 
 #include <string.h>

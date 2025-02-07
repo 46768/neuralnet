@@ -1,4 +1,4 @@
-#ifdef SIMD_AVX2
+#ifdef SIMD_AVX
 #include "matrix.h"
 
 #include <string.h>

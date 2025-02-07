@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 # Include compiler flag checker
-include(CheckCCompilerFlag)
+include(CheckCSourceRuns)
 
 # Export compile_commands.json for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -24,8 +24,25 @@ option(PROFILING "Profile the program" OFF)
 set(gcc_like_c "$<COMPILE_LANG_AND_ID:C,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_c "$<COMPILE_LANG_AND_ID:C,MSVC>")
 
+# Get AVX2 availability
+set(CMAKE_REQUIRED_FLAGS "-mavx2")
+check_c_source_runs("
+#include <immintrin.h>
+int main() {
+__m256i v = _mm256_setzero_si256();
+return 0;
+}" haveAVX2
+)
 # Get AVX availability
-check_c_compiler_flag("-mavx2" haveAVX2)
+set(CMAKE_REQUIRED_FLAGS "-mavx")
+check_c_source_runs("
+#include <immintrin.h>
+int main() {
+__m256 v = _mm256_set1_ps(1.0f);
+return 0;
+}" haveAVX
+)
+set(CMAKE_REQUIRED_FLAGS "")
 
 # Set compiler flags
 target_compile_options(compiler_flags INTERFACE
@@ -38,10 +55,15 @@ if (PROFILING)
 	target_link_options(compiler_flags INTERFACE
 		"$<${gcc_like_c}:$<BUILD_INTERFACE:-g;-pg>>")
 endif()
-if (haveAVX2)
+if (haveAVX2 AND haveAVX)
 	target_compile_options(compiler_flags INTERFACE
 		"$<${gcc_like_c}:$<BUILD_INTERFACE:-mavx2;-mfma>>")
+	target_compile_definitions(compiler_flags INTERFACE "SIMD_AVX")
 	target_compile_definitions(compiler_flags INTERFACE "SIMD_AVX2")
+elseif (haveAVX)
+	target_compile_options(compiler_flags INTERFACE
+		"$<${gcc_like_c}:$<BUILD_INTERFACE:-mavx>>")
+	target_compile_definitions(compiler_flags INTERFACE "SIMD_AVX")
 else()
 	target_compile_definitions(compiler_flags INTERFACE "SIMD_NONE")
 endif()
