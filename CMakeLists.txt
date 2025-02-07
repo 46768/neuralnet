@@ -6,6 +6,9 @@ project(FCLNN C)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
+# Include compiler flag checker
+include(CheckCCompilerFlag)
+
 # Export compile_commands.json for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -21,6 +24,9 @@ option(PROFILING "Profile the program" OFF)
 set(gcc_like_c "$<COMPILE_LANG_AND_ID:C,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_c "$<COMPILE_LANG_AND_ID:C,MSVC>")
 
+# Get AVX availability
+check_c_compiler_flag("-mavx2" haveAVX2)
+
 # Set compiler flags
 target_compile_options(compiler_flags INTERFACE
 	"$<${gcc_like_c}:$<BUILD_INTERFACE:-Wall;-Wextra;-Og;-g>>"
@@ -31,6 +37,13 @@ if (PROFILING)
 		"$<${gcc_like_c}:$<BUILD_INTERFACE:-pg>>")
 	target_link_options(compiler_flags INTERFACE
 		"$<${gcc_like_c}:$<BUILD_INTERFACE:-g;-pg>>")
+endif()
+if (haveAVX2)
+	target_compile_options(compiler_flags INTERFACE
+		"$<${gcc_like_c}:$<BUILD_INTERFACE:-mavx2;-mfma>>")
+	target_compile_definitions(compiler_flags INTERFACE "SIMD_AVX2")
+else()
+	target_compile_definitions(compiler_flags INTERFACE "SIMD_NONE")
 endif()
 
 # Platform macro
@@ -54,6 +67,7 @@ target_compile_definitions(compiler_flags INTERFACE
 # Add the libraries
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib") # Common utilities
 add_subdirectory("${PROJECT_SOURCE_DIR}/math/linear_alg") # Feed forward network
+add_subdirectory("${PROJECT_SOURCE_DIR}/simd/avx") # AVX SIMD
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Feed forward network
 add_subdirectory("${PROJECT_SOURCE_DIR}/python") # Python Interface
@@ -71,16 +85,16 @@ target_link_libraries(FCLNNLib INTERFACE m) # C Math Library
 add_executable(FCLNN "${PROJECT_SOURCE_DIR}/src/main.c")
 add_executable(FCLNNt "${PROJECT_SOURCE_DIR}/src/test.c")
 add_executable(MNIST "${PROJECT_SOURCE_DIR}/src/mnist.c")
+add_executable(UTEST "${PROJECT_SOURCE_DIR}/src/utest.c")
 
 # Set debug property
 set_target_properties(FCLNN PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(FCLNNt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(MNIST PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set_target_properties(UTEST PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 # Link libraries
 target_link_libraries(FCLNN PUBLIC FCLNNLib)
-
-# Link libraries
 target_link_libraries(FCLNNt PUBLIC FCLNNLib)
-
 target_link_libraries(MNIST PUBLIC FCLNNLib)
+target_link_libraries(UTEST PUBLIC FCLNNLib)

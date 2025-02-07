@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "matrix.h"
+
 #include "ffn_fpropagate.h"
 
 #include "logger.h"
@@ -39,7 +41,7 @@ void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
 		for (size_t y = 0; y < gradient_w_l->sy; y++) {
 			(nn->biases)[l]->data[y] -= learning_rate*gradient_b_l->data[y];
 			for (size_t x = 0; x < gradient_w_l->sx; x++) {
-				(nn->weights)[l]->data[y*gradient_w_l->sx + x] -= 
+				*matrix_get_ptr(nn->weights[l], x, y) -= 
 					learning_rate*matrix_get(gradient_w_l, x, y);
 				printr_d("%f ", -learning_rate*matrix_get(gradient_w_l, x, y));
 			}

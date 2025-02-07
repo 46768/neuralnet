@@ -1,8 +1,9 @@
 #include "ffn_fpropagate.h"
 
-#include "logger.h"
-#include "matrix.h"
 #include "vector.h"
+#include "matrix.h"
+
+#include "logger.h"
 
 void ffn_fpropagate(FFN* nn, FFNMempool* pool, Vector* input) {
 	if (!(nn->immutable)) {
@@ -41,7 +42,7 @@ void ffn_fpropagate(FFN* nn, FFNMempool* pool, Vector* input) {
 		for (size_t y = 0; y < weight->sy; y++) {
 			float z_j = (bias->data)[y];
 			for (size_t x = 0; x < weight->sx; x++) {
-				z_j += (al->data)[x]*weight->data[(y*(weight->sx)) + x];
+				z_j += (al->data)[x]*matrix_get(weight, x, y);
 				//info("w: %f", matrix_get(weight, x, y));
 			}
 			debug("l[%zu/%zu]->z[%zu][%zu]: %.10f", l, nn->hidden_size, l+1, y, z_j);

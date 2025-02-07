@@ -44,7 +44,6 @@ int main() {
 	ffn_dump_data(nn);
 
 	float learning_rate = 0.01;
-	float prev_l = 1e10;
 	// Trains however many times
 	for (int t = 0; t < 100000; t++) {
 		float l = 0;
@@ -59,7 +58,6 @@ int main() {
 		if (t % 1 == 0) {
 			//info("Training loss: %f", l);
 		}
-		prev_l = l;
 	}
 
 	info("Post train");

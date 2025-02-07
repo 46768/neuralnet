@@ -7,9 +7,11 @@
 
 #include <stdlib.h>
 
-#include "booltype.h"
-#include "matrix.h"
 #include "vector.h"
+#include "matrix.h"
+
+#include "booltype.h"
+
 
 typedef enum {
 	Dense,

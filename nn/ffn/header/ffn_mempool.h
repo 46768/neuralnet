@@ -3,8 +3,8 @@
 
 #include "ffn_type.h"
 
-#include "matrix.h"
 #include "vector.h"
+#include "matrix.h"
 
 typedef struct {
 	// Node Activation

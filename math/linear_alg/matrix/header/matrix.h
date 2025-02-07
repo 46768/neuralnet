@@ -1,7 +1,11 @@
 #ifndef MATH_MATRIX_H
 #define MATH_MATRIX_H
 
-#include <stdlib.h>
+#ifdef SIMD_AVX2
+#define MATRIX_LIB_TYPE "AVX"
+#else
+#define MATRIX_LIB_TYPE "Scalar"
+#endif
 
 #include "vector.h"
 
@@ -22,9 +26,13 @@ Matrix* matrix_dup(Matrix*); // Duplicate a matrix
 
 // Matrix operation
 float matrix_get(Matrix*, size_t, size_t); // Get a value at x, y
+float* matrix_get_ptr(Matrix*, size_t, size_t); // Get a pointer to x, y
 
 void matrix_transpose_ip(Matrix*, Matrix*); // Transpose a matrix in place
 Matrix* matrix_transpose(Matrix*); // Transpose a matrix
+
+// Memory management
+void matrix_deallocate(Matrix*); // Deallocate a matrix
 
 // Matrix vector operation
 void matrix_vec_mul_ip(Matrix*, Vector*, Vector*); // Multiply matrix with vector in place
@@ -33,8 +41,5 @@ void vec_matrix_hadamard_ip(Vector*, Matrix*, Matrix*); // Get hadamard product 
 Matrix* vec_matrix_hadamard(Vector*, Matrix*); // Get hadamard product of vector and matrix
 void column_row_vec_mul_ip(Vector*, Vector*, Matrix*); // Multiply column vector with row vector
 Matrix* column_row_vec_mul(Vector*, Vector*); // Multiply column vector with row vector
-
-// Memory management
-void matrix_deallocate(Matrix*); // Deallocate a matrix
 
 #endif

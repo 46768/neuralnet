@@ -1,9 +1,7 @@
 # Include all source files
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
 file(GLOB srcs
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/matrix/src/*.c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/vector/src/*.c"
 )
 
 # Define common libraries
@@ -12,8 +10,10 @@ add_library(MathLinearAlg STATIC
 )
 
 target_include_directories(MathLinearAlg PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/header"
+	"${CMAKE_CURRENT_SOURCE_DIR}/matrix/header"
+	"${CMAKE_CURRENT_SOURCE_DIR}/vector/header"
 )
 
 target_link_libraries(MathLinearAlg PUBLIC compiler_flags)
-target_link_libraries(MathLinearAlg PRIVATE ComLib)
+target_link_libraries(MathLinearAlg PUBLIC ComLib)
+target_link_libraries(MathLinearAlg PUBLIC AVXLib)
