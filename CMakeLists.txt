@@ -25,24 +25,23 @@ set(gcc_like_c "$<COMPILE_LANG_AND_ID:C,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_c "$<COMPILE_LANG_AND_ID:C,MSVC>")
 
 # Get AVX2 availability
-set(CMAKE_REQUIRED_FLAGS "-mavx2")
 check_c_source_runs("
-#include <immintrin.h>
+#include <cpuid.h>
 int main() {
-__m256i v = _mm256_setzero_si256();
-return 0;
+unsigned int eax,ebx,ecx,edx;
+__cpuid(7,eax,ebx,ecx,edx);
+return (ebx & (1 << 5)) != 0;
 }" haveAVX2
 )
 # Get AVX availability
-set(CMAKE_REQUIRED_FLAGS "-mavx")
 check_c_source_runs("
-#include <immintrin.h>
+#include <cpuid.h>
 int main() {
-__m256 v = _mm256_set1_ps(1.0f);
-return 0;
+unsigned int eax,ebx,ecx,edx;
+__cpuid(1,eax,ebx,ecx,edx);
+return (edx & (1 << 28)) != 0;
 }" haveAVX
 )
-set(CMAKE_REQUIRED_FLAGS "")
 
 # Set compiler flags
 target_compile_options(compiler_flags INTERFACE
