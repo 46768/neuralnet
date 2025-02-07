@@ -1,4 +1,4 @@
-#ifdef SIMD_AVX2
+#ifdef SIMD_AVX
 #include "avx.h"
 
 #include <stdlib.h>
@@ -61,7 +61,12 @@ void avx_madd(float* a, float* b, float* c, float* res) {
 	__m256 a256 = _mm256_load_ps(a);
 	__m256 b256 = _mm256_load_ps(b);
 	__m256 c256 = _mm256_load_ps(c);
+#ifdef SIMD_AVX2
 	__m256 res256 = _mm256_fmadd_ps(a256, b256, c256);
+#else
+	__m256 temp = _mm256_mul_ps(a256, b256);
+	__m256 res256 = _mm256_add_ps(temp, c256);
+#endif
 	_mm256_store_ps(res, res256);
 }
 float avx_dot(float* a, float* b) {

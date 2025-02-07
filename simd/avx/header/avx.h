@@ -1,4 +1,4 @@
-#ifdef SIMD_AVX2
+#ifdef SIMD_AVX
 #ifndef AVX_SIMD_H
 #define AVX_SIMD_H
 

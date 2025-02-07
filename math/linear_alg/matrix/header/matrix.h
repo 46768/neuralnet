@@ -1,7 +1,7 @@
 #ifndef MATH_MATRIX_H
 #define MATH_MATRIX_H
 
-#ifdef SIMD_AVX2
+#ifdef SIMD_AVX
 #define MATRIX_LIB_TYPE "AVX"
 #else
 #define MATRIX_LIB_TYPE "Scalar"

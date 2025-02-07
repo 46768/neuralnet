@@ -1,7 +1,7 @@
 #ifndef MATH_VECTOR_H
 #define MATH_VECTOR_H
 
-#ifdef SIMD_AVX2
+#ifdef SIMD_AVX
 #define VECTOR_LIB_TYPE "AVX"
 #else
 #define VECTOR_LIB_TYPE "Scalar"
