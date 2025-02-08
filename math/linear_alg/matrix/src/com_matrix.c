@@ -11,9 +11,6 @@
 // Creation //
 /////////////
 
-// Create a matrix with all element to 0
-Matrix* matrix_zero(size_t sx, size_t sy);
-
 Matrix* matrix_iden(size_t size) {
 	Matrix* mat = matrix_zero(size, size);
 	for (size_t i = 0; i < size; i++) {
@@ -72,7 +69,7 @@ inline float matrix_get(Matrix* mat, size_t x, size_t y) {
 	if (y >= mat->sy) {
 		fatal("Matrix index y out of bound");
 	}
-	return mat->data[(y*(mat->sx)) + x];
+	return mat->data[mat->major ? (x*(mat->sx)) + y : (y*(mat->sx)) + x];
 }
 
 // Get a value at x, y
@@ -83,7 +80,7 @@ inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
 	if (y >= mat->sy) {
 		fatal("Matrix index y out of bound");
 	}
-	return (mat->data)+((y*(mat->sx)) + x);
+	return (mat->data)+(mat->major ? (x*(mat->sx)) + y : (y*(mat->sx)) + x);
 }
 
 // Transpose a matrix in place
@@ -95,6 +92,7 @@ void matrix_transpose_ip(Matrix* mat, Matrix* res) {
 		fatal("Incompatible sx mat: %zu to sy res: %zu", mat->sx, res->sy);
 	}
 	memcpy(res->data, mat->data, (mat->sx)*(mat->sy)*sizeof(float));
+	res->major = !mat->major;
 }
 // Transpose a matrix
 Matrix* matrix_transpose(Matrix* mat) {

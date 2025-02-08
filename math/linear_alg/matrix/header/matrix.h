@@ -9,10 +9,17 @@
 
 #include "vector.h"
 
+// Matrix major type
+typedef enum {
+	RowMajor = 0,
+	ColumnMajor = 1
+} MatrixMajorEnum;
+
 // Matrix type definition
 typedef struct {
 	size_t sx; // Horizontal size
 	size_t sy; // Vertical size
+	MatrixMajorEnum major;
 	float* data; // 1D data array, access x, y by [y*sx + x]
 } Matrix;
 

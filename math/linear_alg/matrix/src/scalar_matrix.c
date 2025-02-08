@@ -18,6 +18,7 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 	Matrix* mat = (Matrix*)allocate(sizeof(Matrix));
 	mat->sx = sx;
 	mat->sy = sy;
+	mat->major = RowMajor;
 	mat->data = (float*)callocate(sx*sy, sizeof(float));
 
 	return mat;

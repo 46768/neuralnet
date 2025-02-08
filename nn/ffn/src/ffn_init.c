@@ -132,7 +132,7 @@ void ffn_init_params(FFN* nn) {
 			for (size_t y = 0; y < sy; y++) {
 				((nn->biases[l])->data)[y] = b_initer(sx);
 				for (size_t x = 0; x < sx; x++) {
-					((nn->weights[l])->data)[y*sx + x] = w_initer(sx);
+					*matrix_get_ptr(nn->weights[l], x, y) = w_initer(sx);
 				}
 			}
 		}
