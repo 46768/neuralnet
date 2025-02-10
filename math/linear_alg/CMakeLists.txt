@@ -16,4 +16,4 @@ target_include_directories(MathLinearAlg PUBLIC
 
 target_link_libraries(MathLinearAlg PUBLIC compiler_flags)
 target_link_libraries(MathLinearAlg PUBLIC ComLib)
-target_link_libraries(MathLinearAlg PUBLIC AVXLib)
+target_link_libraries(MathLinearAlg PUBLIC SIMDLib)

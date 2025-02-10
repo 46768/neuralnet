@@ -24,7 +24,7 @@ int main() {
 	fprintf(training_csv->file_pointer, "Training loss,");
 	fprintf(training_csv->file_pointer, "Validation loss,");
 	python_create_venv(PROJECT_PATH "/requirements.txt");
-	python_get_mnist(PROJECT_PATH "/data/mnist");
+	//python_get_mnist(PROJECT_PATH "/data/mnist");
 	init_random();
 
 	// Dataset
@@ -50,9 +50,9 @@ int main() {
 
 	// Network Building
 	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 784, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 16, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 16, Sigmoid, Xavier, RandomEN2);
+	ffn_init_dense(nn, 784, ReLU, He, RandomEN2);
+	ffn_init_dense(nn, 16, ReLU, He, RandomEN2);
+	ffn_init_dense(nn, 16, ReLU, He, RandomEN2);
 	ffn_init_dense(nn, 10, None, Zero, Zero);
 	ffn_init_passthru(nn, Softmax);
 	ffn_init_passthru(nn, None);
@@ -61,7 +61,17 @@ int main() {
 	FFNMempool* pool = ffn_init_pool(nn);
 
 	float learning_rate = 0.01;
-	for (int t = 0; t < 3000; t++) {
+	for (int t = 0; t < 38; t++) {
+		for (int i = 0; i < 10; i++) {
+			ffn_bpropagate(nn, pool, train_input[i], train_target[i], learning_rate);
+			ffn_dump_pool(pool);
+			if (pool->activations[pool->layer_cnt-1]->data[0] == NAN) {
+			break;
+			}
+		}
+	}
+	/*
+	for (int t = 0; t < 30; t++) {
 		// Sample random range of training data
 		int range_lower = floorf(f_random((float)train_lbound, (float)train_ubound));
 		int range_upper = floorf(f_random((float)range_lower, (float)train_ubound));
@@ -94,6 +104,8 @@ int main() {
 		info("Validation epoch loss: %.10f", test_loss);
 		info("-Epoch %d--------------------------------------", t);
 	}
+	*/
+	ffn_dump_data(nn);
 
 	// Network forward propagation
 	ffn_fpropagate(nn, pool, train_input[0]);
@@ -101,13 +113,35 @@ int main() {
 	ffn_fpropagate(nn, pool, train_input[1]);
 	ffn_dump_output(pool);
 
+	for (int i = 0; i < 10; i++) {
+		int lbl = 0;
+		for (int j = 0; j < 10; j++) {
+			if (train_target[i]->data[j] == 1.0f) {
+				lbl = j;
+				break;
+			}
+		}
+		info("Training image for a %d\n", lbl);
+		for (int x = 0; x < 28; x++) {
+			for (int y = 0; y < 28; y++) {
+				if (train_input[i]->data[x*28 + y] > 0.0f) {
+					printr("#");
+				} else {
+					printr(" ");
+				}
+			}
+			newline();
+		}
+		newline();
+	}
+
 	char* fpath = (char*)allocate(strlen(training_csv->filename)+1);
 	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
 	fpath[strlen(training_csv->filename)] = '\0';
 	fprintf(training_csv->file_pointer, "\n");
 	close_file(training_csv);
 	info("training filename: %s", fpath);
-	python_graph(fpath);
+	//python_graph(fpath);
 
 	// Post train cleanup
 	deallocate(fpath);

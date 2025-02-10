@@ -4,6 +4,7 @@
 
 #include "allocator.h"
 #include "random.h"
+#include "logger.h"
 
 //////////////
 // Creation //
@@ -23,6 +24,16 @@ Vector* vec_dup(Vector* src_vec) {
 	Vector* vec_clone = vec_zero(src_vec->dimension);
 	memcpy(vec_clone->data, src_vec->data, src_vec->dimension*sizeof(float));
 	return vec_clone;
+}
+
+///////////////
+// Debugging //
+///////////////
+
+void vec_dump(Vector* vec) {
+	for (int i = 0; i < (int)(vec->dimension); i++) {
+		printr("%.10f\n", vec->data[i]);
+	}
 }
 
 ///////////////////////

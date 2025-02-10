@@ -9,6 +9,8 @@ ActivationFn resolve_activation_fn(ActivationFNEnum fn_type) {
 	switch (fn_type) {
 		case ReLU:
 			return nn_relu;
+		case CReLU:
+			return nn_crelu;
 		case Sigmoid:
 			return nn_sigmoid;
 		case Softmax:
@@ -26,6 +28,8 @@ ActivationFnD resolve_activation_fn_d(ActivationFNEnum fn_type) {
 	switch (fn_type) {
 		case ReLU:
 			return nn_relu_d;
+		case CReLU:
+			return nn_crelu_d;
 		case Sigmoid:
 			return nn_sigmoid_d;
 		case Softmax:
@@ -92,7 +96,31 @@ void nn_relu_d(Vector* z, Vector* d) {
 		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
 	}
 	for (size_t i = 0; i < z->dimension; i++) {
-		if (z->data[i] > 0) d->data[i] = 1.0f;
+		if (z->data[i] > 0) {
+			d->data[i] = 1.0f;
+		} else {
+			d->data[i] = 0.0f;
+		}
+	}
+}
+void nn_crelu(Vector* z, Vector* a) {
+	if (z->dimension != a->dimension) {
+		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
+	}
+	for (size_t i = 0; i < z->dimension; i++) {
+		if (z->data[i] > 0) a->data[i] = fminf(z->data[i], 1.0f);
+	}
+}
+void nn_crelu_d(Vector* z, Vector* d) {
+	if (z->dimension != d->dimension) {
+		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
+	}
+	for (size_t i = 0; i < z->dimension; i++) {
+		if (0 > z->data[i] || z->data[i] > 1) {
+			d->data[i] = 1.0f;
+		} else {
+			d->data[i] = 0.0f;
+		}
 	}
 }
 

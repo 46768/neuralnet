@@ -6,6 +6,7 @@
 #include "allocator.h"
 #include "logger.h"
 #include "endianness.h"
+#include "random.h"
 
 #include "vector.h"
 
@@ -19,6 +20,17 @@ void generate_linear_regs(int lower, int upper, float m, float y, Vector*** vecs
 	for (int i = lower; i <= upper; i++) {
 		(*vecs)[i - lower] = vec_zero(1); (*vecs)[i - lower]->data[0] = i;
 		(*targets)[i - lower] = vec_zero(1); (*targets)[i - lower]->data[0] = (m*i) + y;
+	}
+}
+
+void generate_noised_linear_regs(int lower, int upper, float m, float y,
+		Vector*** vecs, Vector*** targets) {
+	*vecs = (Vector**)callocate(upper - lower+1, sizeof(Vector*));
+	*targets = (Vector**)callocate(upper - lower+1, sizeof(Vector*));
+	for (int i = lower; i <= upper; i++) {
+		(*vecs)[i - lower] = vec_zero(1); (*vecs)[i - lower]->data[0] = i;
+		(*targets)[i - lower] = vec_zero(1); (*targets)[i - lower]->data[0] = (m*i) + y +
+			f_random(-0.1f, 0.1f);
 	}
 }
 

@@ -20,17 +20,15 @@ Vector* vec_zero(size_t); // Create a vector with all element to 0
 Vector* vec_rand(size_t, float, float); // Create a vector with random values
 Vector* vec_dup(Vector*); // Duplicate a vector
 
+// Debugging
+void vec_dump(Vector*);
+
 // Memory management
 void vec_deallocate(Vector*); // Deallocate a vector
 
 // Operation
 void vec_add_ip(Vector*, Vector*, Vector*); // Element wise addition in place
-Vector* vec_add(Vector*, Vector*); // Element wise addition
-								   //
 void vec_mul_ip(Vector*, Vector*, Vector*); // Element wise multiplication in place
-Vector* vec_mul(Vector*, Vector*); // Element wise multiplication
-								   //
 void vec_dot_ip(Vector*, Vector*, Vector*); // Perform dot product between 2 vectors in place
-float vec_dot(Vector*, Vector*); // Perform dot product between 2 vectors
 
 #endif

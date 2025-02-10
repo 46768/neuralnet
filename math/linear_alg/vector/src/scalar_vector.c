@@ -42,23 +42,11 @@ static inline float f_add(float a, float b) { return a+b; }
 void vec_add_ip(Vector* vec1, Vector* vec2, Vector* res) {
 	return _vec_apply(vec1, vec2, res, f_add);
 }
-// Element wise addition
-Vector* vec_add(Vector* vec1, Vector* vec2) {
-	Vector* res = vec_zero(vec1->dimension);
-	vec_add_ip(vec1, vec2, res);
-	return res;
-}
 
 static inline float f_mul(float a, float b) { return a*b; }
 // Element wise multiplication in place
 void vec_mul_ip(Vector* vec1, Vector* vec2, Vector* res) {
 	return _vec_apply(vec1, vec2, res, f_mul);
-}
-// Element wise multiplication
-Vector* vec_mul(Vector* vec1, Vector* vec2) {
-	Vector* res = vec_zero(vec1->dimension);
-	vec_mul_ip(vec1, vec2, res);
-	return res;
 }
 
 // Perform dot product between 2 vectors

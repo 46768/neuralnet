@@ -10,6 +10,7 @@ typedef void(*ActivationFnD)(Vector*, Vector*); // Activation Function Derivativ
 // Activation Function Enum
 typedef enum {
 	ReLU,
+	CReLU,
 	Sigmoid,
 	Softmax,
 	Logging,
@@ -28,6 +29,8 @@ void nn_none_fn_d(Vector*, Vector*);
 // ReLU
 void nn_relu(Vector*, Vector*);
 void nn_relu_d(Vector*, Vector*);
+void nn_crelu(Vector*, Vector*);
+void nn_crelu_d(Vector*, Vector*);
 
 // Sigmoid
 void nn_sigmoid(Vector*, Vector*);

@@ -7,13 +7,13 @@ file(GLOB srcs
 )
 
 # Define common libraries
-add_library(AVXLib STATIC
+add_library(SIMDLib STATIC
 	${srcs}
 )
 
-target_include_directories(AVXLib PUBLIC
+target_include_directories(SIMDLib PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/header"
 )
 
-target_link_libraries(AVXLib PUBLIC compiler_flags)
-target_link_libraries(AVXLib PUBLIC ComLib)
+target_link_libraries(SIMDLib PUBLIC compiler_flags)
+target_link_libraries(SIMDLib PUBLIC ComLib)

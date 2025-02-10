@@ -47,6 +47,19 @@ Matrix* matrix_dup(Matrix* mat) {
 	return mat_d;
 }
 
+///////////////
+// Debugging //
+///////////////
+
+void matrix_dump(Matrix* mat) {
+	for (size_t y = 0; y < mat->sy; y++) {
+		for (size_t x = 0; x < mat->sx; x++) {
+			printr("%f ", matrix_get(mat, x, y));
+		}
+		newline();
+	}
+}
+
 ///////////////////////
 // Memory Management //
 //////////////////////
@@ -55,48 +68,4 @@ Matrix* matrix_dup(Matrix* mat) {
 void matrix_deallocate(Matrix* mat) {
 	deallocate(mat->data);
 	deallocate(mat);
-}
-
-//////////////////////
-// Matrix Operation //
-/////////////////////
-
-// Get a value at x, y
-inline float matrix_get(Matrix* mat, size_t x, size_t y) {
-	if (x >= mat->sx) {
-		fatal("Matrix index x out of bound");
-	}
-	if (y >= mat->sy) {
-		fatal("Matrix index y out of bound");
-	}
-	return mat->data[mat->major ? (x*(mat->sx)) + y : (y*(mat->sx)) + x];
-}
-
-// Get a value at x, y
-inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
-	if (x >= mat->sx) {
-		fatal("Matrix index x out of bound");
-	}
-	if (y >= mat->sy) {
-		fatal("Matrix index y out of bound");
-	}
-	return (mat->data)+(mat->major ? (x*(mat->sx)) + y : (y*(mat->sx)) + x);
-}
-
-// Transpose a matrix in place
-void matrix_transpose_ip(Matrix* mat, Matrix* res) {
-	if (res->sx != mat->sy) {
-		fatal("Incompatible sy mat: %zu to sx res: %zu", mat->sy, res->sx);
-	}
-	if (res->sy != mat->sx) {
-		fatal("Incompatible sx mat: %zu to sy res: %zu", mat->sx, res->sy);
-	}
-	memcpy(res->data, mat->data, (mat->sx)*(mat->sy)*sizeof(float));
-	res->major = !mat->major;
-}
-// Transpose a matrix
-Matrix* matrix_transpose(Matrix* mat) {
-	Matrix* mat_t = matrix_zero(mat->sy, mat->sx);
-	matrix_transpose_ip(mat, mat_t);
-	return mat_t;
 }

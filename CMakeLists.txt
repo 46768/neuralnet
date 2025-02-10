@@ -88,7 +88,7 @@ target_compile_definitions(compiler_flags INTERFACE
 # Add the libraries
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib") # Common utilities
 add_subdirectory("${PROJECT_SOURCE_DIR}/math/linear_alg") # Feed forward network
-add_subdirectory("${PROJECT_SOURCE_DIR}/simd/avx") # AVX SIMD
+add_subdirectory("${PROJECT_SOURCE_DIR}/simd") # AVX SIMD
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Feed forward network
 add_subdirectory("${PROJECT_SOURCE_DIR}/python") # Python Interface
@@ -104,18 +104,23 @@ target_link_libraries(FCLNNLib INTERFACE m) # C Math Library
 
 # Add executables
 add_executable(FCLNN "${PROJECT_SOURCE_DIR}/src/main.c")
+add_executable(FCLNNn "${PROJECT_SOURCE_DIR}/src/main_noise.c")
 add_executable(FCLNNt "${PROJECT_SOURCE_DIR}/src/test.c")
 add_executable(MNIST "${PROJECT_SOURCE_DIR}/src/mnist.c")
+add_executable(MNISTt "${PROJECT_SOURCE_DIR}/src/mnist_test.c")
 add_executable(UTEST "${PROJECT_SOURCE_DIR}/src/utest.c")
 
 # Set debug property
 set_target_properties(FCLNN PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(FCLNNt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(MNIST PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set_target_properties(MNISTt PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 set_target_properties(UTEST PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 # Link libraries
 target_link_libraries(FCLNN PUBLIC FCLNNLib)
+target_link_libraries(FCLNNn PUBLIC FCLNNLib)
 target_link_libraries(FCLNNt PUBLIC FCLNNLib)
 target_link_libraries(MNIST PUBLIC FCLNNLib)
+target_link_libraries(MNISTt PUBLIC FCLNNLib)
 target_link_libraries(UTEST PUBLIC FCLNNLib)
