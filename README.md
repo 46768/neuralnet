@@ -32,8 +32,8 @@ more for experimentations
 ---
 
 ## Building
-### Requird tools
-- Building requires at least CMake 3.15
+### Required tools
+- CMake 3.15+
 - C compiler (GCC/Clang)
 - Python 3
 ```sh
