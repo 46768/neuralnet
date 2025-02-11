@@ -17,11 +17,10 @@
 // Create a matrix with all element to 0
 Matrix* matrix_zero(size_t sx, size_t sy) {
 	Matrix* mat = (Matrix*)allocate(sizeof(Matrix));
-	size_t padded_sx = (sx+7)&-7;
-	size_t padded_sy = (sy+7)&-7;
+	size_t padded_sx = (sx+7)&-8;
+	size_t padded_sy = (sy+7)&-8;
 	mat->sx = sx;
 	mat->sy = sy;
-	mat->major = ColumnMajor;
 	mat->data = (float*)avx_allocate(padded_sx*padded_sy*sizeof(float));
 	memset(mat->data, 0, padded_sx*padded_sy*sizeof(float));
 

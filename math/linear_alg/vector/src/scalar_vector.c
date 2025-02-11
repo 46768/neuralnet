@@ -1,8 +1,6 @@
 #ifdef SIMD_NONE
 #include "vector.h"
 
-#include <string.h>
-
 #include "logger.h"
 #include "allocator.h"
 

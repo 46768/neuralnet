@@ -6,7 +6,6 @@
 #include "vector.h"
 
 #include "logger.h"
-#include "random.h"
 #include "allocator.h"
 
 //////////////
@@ -16,10 +15,11 @@
 // Create a matrix with all element to 0
 Matrix* matrix_zero(size_t sx, size_t sy) {
 	Matrix* mat = (Matrix*)allocate(sizeof(Matrix));
+	size_t padded_sx = (sx+1)&-2;
+	size_t padded_sy = (sy+1)&-2;
 	mat->sx = sx;
 	mat->sy = sy;
-	mat->major = RowMajor;
-	mat->data = (float*)callocate(sx*sy, sizeof(float));
+	mat->data = (float*)callocate(padded_sx*padded_sy, sizeof(float));
 
 	return mat;
 }
@@ -36,7 +36,7 @@ inline float matrix_get(Matrix* mat, size_t x, size_t y) {
 	if (y >= mat->sy) {
 		fatal("Matrix index y out of bound");
 	}
-	return mat->data[mat->major ? (x*(mat->sx)) + y : (y*(mat->sx)) + x];
+	return mat->data[(x*(mat->sx)) + y];
 }
 
 // Get a value at x, y
@@ -47,7 +47,7 @@ inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
 	if (y >= mat->sy) {
 		fatal("Matrix index y out of bound");
 	}
-	return (mat->data)+(mat->major ? (x*(mat->sx)) + y : (y*(mat->sx)) + x);
+	return (mat->data)+((x*(mat->sx)) + y);
 }
 
 // Transpose a matrix in place
@@ -58,8 +58,10 @@ void matrix_transpose_ip(Matrix* mat, Matrix* res) {
 	if (res->sy != mat->sx) {
 		fatal("Incompatible sx mat: %zu to sy res: %zu", mat->sx, res->sy);
 	}
+	for (int x = 0; x < (int)(mat->sx); x+=2) {
+
+	}
 	memcpy(res->data, mat->data, (mat->sx)*(mat->sy)*sizeof(float));
-	res->major = !mat->major;
 }
 
 /////////////////////////////

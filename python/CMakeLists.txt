@@ -15,5 +15,5 @@ target_include_directories(PythonInterface PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/header"
 )
 
-target_link_libraries(PythonInterface PUBLIC compiler_flags)
+target_link_libraries(PythonInterface PUBLIC CompilerFlags)
 target_link_libraries(PythonInterface PRIVATE ComLib)

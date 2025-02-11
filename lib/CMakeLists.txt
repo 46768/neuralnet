@@ -15,4 +15,4 @@ target_include_directories(ComLib PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/header"
 )
 
-target_link_libraries(ComLib PUBLIC compiler_flags)
+target_link_libraries(ComLib PUBLIC CompilerFlags)

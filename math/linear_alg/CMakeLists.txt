@@ -14,6 +14,6 @@ target_include_directories(MathLinearAlg PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/vector/header"
 )
 
-target_link_libraries(MathLinearAlg PUBLIC compiler_flags)
+target_link_libraries(MathLinearAlg PUBLIC CompilerFlags)
 target_link_libraries(MathLinearAlg PUBLIC ComLib)
 target_link_libraries(MathLinearAlg PUBLIC SIMDLib)

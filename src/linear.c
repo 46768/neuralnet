@@ -18,6 +18,8 @@
 int main() {
 	debug("init");
 	FileData* training_csv = get_file_write("loss.csv");
+	fprintf(training_csv->file_pointer, "1,");
+	fprintf(training_csv->file_pointer, "Training loss,");
 	python_create_venv(PROJECT_PATH "/requirements.txt");
 	init_random();
 	// Inputs
@@ -25,7 +27,7 @@ int main() {
 	Vector** targets;
 	int REGS_RANGE = 10;
 	int REGS_RANGEL = -10;
-	generate_noised_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, -5.0f, &vecs, &targets);
+	generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, -5.0f, &vecs, &targets);
 	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
 	FFN* nn = ffn_init();

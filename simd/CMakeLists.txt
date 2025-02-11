@@ -15,5 +15,5 @@ target_include_directories(SIMDLib PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/header"
 )
 
-target_link_libraries(SIMDLib PUBLIC compiler_flags)
+target_link_libraries(SIMDLib PUBLIC CompilerFlags)
 target_link_libraries(SIMDLib PUBLIC ComLib)
