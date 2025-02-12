@@ -2,6 +2,7 @@
 target/
 debug/
 prof/
+prod/
 
 # Clang cache
 .cache/

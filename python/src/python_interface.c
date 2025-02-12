@@ -23,6 +23,7 @@ const char shellnix_format[] = "# shell.nix\n"
 "}";
 
 void python_spawn(const char* script_path, const char* data_path) {
+#ifndef NO_PYTHON
 	struct stat st;
 	if (!data_path) {
 		fatal("NULL Data path");
@@ -43,9 +44,11 @@ void python_spawn(const char* script_path, const char* data_path) {
 	} else {
 		fatal("Fork failed for python_venv %s", script_path);
 	}
+#endif
 }
 
 void python_create_venv(const char* requirements_path) {
+#ifndef NO_PYTHON
 	int is_nixos = 0;
 	struct stat st;
 	if (stat("/nix/store", &st) == 0 && stat("/etc/nixos", &st) == 0) {
@@ -116,4 +119,5 @@ void python_create_venv(const char* requirements_path) {
 
 		info("Created python venv");
 	}
+#endif
 }

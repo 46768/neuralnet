@@ -27,10 +27,12 @@ int main() {
 	Vector* v4 = vec_zero(3);
 	Vector* v5 = vec_zero(3);
 	Matrix* m1 = matrix_rand(3, 3, 0.0f, 1.0f);
+	Matrix* m2 = matrix_zero(3, 3);
 
 	vec_add_ip(v1, v2, v3);
 	vec_mul_ip(v1, v2, v4);
 	matrix_vec_mul_ip(m1, v1, v5);
+	matrix_transpose_ip(m1, m2);
 
 	info("Base Vector:");
 	vec_dump(v1);
@@ -38,7 +40,7 @@ int main() {
 	vec_dump(v2);
 	newline();
 	info("Base Matrix:");
-	matrix_dump(m1);
+	matrix_dump_raw(m1);
 	newline();
 
 	info("Vector addition:");
@@ -47,6 +49,8 @@ int main() {
 	vec_dump(v4);
 	info("Matrix Vector multiplication:");
 	vec_dump(v5);
+	info("Matrix transposition:");
+	matrix_dump_raw(m2);
 
 	vec_deallocate(v1);
 	vec_deallocate(v2);
@@ -54,4 +58,5 @@ int main() {
 	vec_deallocate(v4);
 	vec_deallocate(v5);
 	matrix_deallocate(m1);
+	matrix_deallocate(m2);
 }

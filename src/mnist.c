@@ -61,10 +61,10 @@ int main() {
 	FFNMempool* pool = ffn_init_pool(nn);
 
 	float learning_rate = 0.01;
-	for (int t = 0; t < 3000; t++) {
+	for (int t = 0; t < 300; t++) {
 		// Sample random range of training data
 		int range_lower = floorf(f_random((float)train_lbound, (float)train_ubound));
-		int range_upper = floorf(f_random((float)range_lower, (float)train_ubound));
+		int range_upper = floorf(f_random((float)range_lower+1, (float)train_ubound));
 
 		// Train the network on data from the range
 		float train_loss = 0.0f;
@@ -78,7 +78,7 @@ int main() {
 
 		// Sample random range of training data
 		range_lower = floorf(f_random((float)test_lbound, (float)test_ubound));
-		range_upper = floorf(f_random((float)range_lower, (float)test_ubound));
+		range_upper = floorf(f_random((float)range_lower+1, (float)test_ubound));
 
 		// Test the network on data from the range
 		float test_loss = 0.0f;

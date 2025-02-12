@@ -19,6 +19,8 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 	size_t padded_sy = (sy+1)&-2;
 	mat->sx = sx;
 	mat->sy = sy;
+	mat->rsx = padded_sx;
+	mat->rsy = padded_sy;
 	mat->data = (float*)callocate(padded_sx*padded_sy, sizeof(float));
 
 	return mat;
@@ -27,28 +29,6 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 //////////////////////
 // Matrix Operation //
 /////////////////////
-
-// Get a value at x, y
-inline float matrix_get(Matrix* mat, size_t x, size_t y) {
-	if (x >= mat->sx) {
-		fatal("Matrix index x out of bound");
-	}
-	if (y >= mat->sy) {
-		fatal("Matrix index y out of bound");
-	}
-	return mat->data[(x*(mat->sx)) + y];
-}
-
-// Get a value at x, y
-inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
-	if (x >= mat->sx) {
-		fatal("Matrix index x out of bound");
-	}
-	if (y >= mat->sy) {
-		fatal("Matrix index y out of bound");
-	}
-	return (mat->data)+((x*(mat->sx)) + y);
-}
 
 // Transpose a matrix in place
 void matrix_transpose_ip(Matrix* mat, Matrix* res) {
@@ -59,9 +39,13 @@ void matrix_transpose_ip(Matrix* mat, Matrix* res) {
 		fatal("Incompatible sx mat: %zu to sy res: %zu", mat->sx, res->sy);
 	}
 	for (int x = 0; x < (int)(mat->sx); x+=2) {
-
+		for (int y = 0; y < (int)(mat->sy); y+=2) {
+			*matrix_get_ptr(res, y, x) = matrix_get(mat, x, y);
+			*matrix_get_ptr(res, y+1, x) = matrix_get(mat, x, y+1);
+			*matrix_get_ptr(res, y, x+1) = matrix_get(mat, x+1, y);
+			*matrix_get_ptr(res, y+1, x+1) = matrix_get(mat, x+1, y+1);
+		}
 	}
-	memcpy(res->data, mat->data, (mat->sx)*(mat->sy)*sizeof(float));
 }
 
 /////////////////////////////
@@ -89,7 +73,6 @@ void matrix_vec_mul_ip(Matrix* mat, Vector* vec, Vector* res) {
 
 // Get hadamard product of vector and matrix in place
 void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {
-	size_t sx = mat->sx;
 	if (res->sx != mat->sx) {
 		fatal("Incompatible sx mat: %zu to sx res: %zu", mat->sx, res->sx);
 	}
@@ -100,7 +83,7 @@ void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {
 	for (size_t y = 0; y < mat->sy; y++) {
 		float vec_coefficient = vec->data[y];
 		for (size_t x = 0; x < mat->sx; x++) {
-			res->data[y*sx + x] = vec_coefficient * matrix_get(mat, x, y);
+			*matrix_get_ptr(res, x, y) = vec_coefficient * matrix_get(mat, x, y);
 		}
 	}
 }
@@ -118,7 +101,7 @@ void column_row_vec_mul_ip(Vector* column, Vector* row, Matrix* res) {
 	for (size_t x = 0; x < sx; x++) {
 		float row_cofficient = row->data[x];
 		for (size_t y = 0; y < column->dimension; y++) {
-			res->data[y*sx + x] = row_cofficient * column->data[y];
+			*matrix_get_ptr(res, x, y) = row_cofficient * column->data[y];
 		}
 	}
 }

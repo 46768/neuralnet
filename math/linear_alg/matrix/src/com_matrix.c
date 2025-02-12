@@ -32,8 +32,10 @@ Matrix* matrix_iden_xy(size_t sx, size_t sy) {
 // Create a matrix with random values
 Matrix* matrix_rand(size_t sx, size_t sy, float lb, float ub) {
 	Matrix* mat = matrix_zero(sx, sy);
-	for (size_t i = 0; i < sx*sy; i++) {
-		mat->data[i] = f_random(lb, ub);
+	for (size_t x = 0; x < sx; x++) {
+		for (size_t y = 0; y < sy; y++) {
+			*matrix_get_ptr(mat, x, y) = f_random(lb, ub);
+		}
 	}
 
 	return mat;
@@ -54,6 +56,15 @@ Matrix* matrix_dup(Matrix* mat) {
 void matrix_dump(Matrix* mat) {
 	for (size_t y = 0; y < mat->sy; y++) {
 		for (size_t x = 0; x < mat->sx; x++) {
+			printr("%f ", matrix_get(mat, x, y));
+		}
+		newline();
+	}
+}
+
+void matrix_dump_raw(Matrix* mat) {
+	for (size_t y = 0; y < mat->rsy; y++) {
+		for (size_t x = 0; x < mat->rsx; x++) {
 			printr("%f ", matrix_get(mat, x, y));
 		}
 		newline();

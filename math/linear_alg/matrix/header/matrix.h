@@ -8,11 +8,14 @@
 #endif
 
 #include "vector.h"
+#include "logger.h"
 
 // Matrix type definition
 typedef struct {
 	size_t sx; // Horizontal size
 	size_t sy; // Vertical size
+	size_t rsx; // Real horizontal size
+	size_t rsy; // Real vertical size
 	float* data; // 1D data array, access x, y by [y*sx + x]
 } Matrix;
 
@@ -25,10 +28,21 @@ Matrix* matrix_dup(Matrix*); // Duplicate a matrix
 
 // Debugging
 void matrix_dump(Matrix*);
+void matrix_dump_raw(Matrix*);
 
 // Matrix operation
-float matrix_get(Matrix*, size_t, size_t); // Get a value at x, y
-float* matrix_get_ptr(Matrix*, size_t, size_t); // Get a pointer to x, y
+// Get a value at x, y
+static inline float matrix_get(Matrix* mat, size_t x, size_t y) {
+	if (x >= mat->rsx || y >= mat->rsy) {fatal("Matrix index out of bound %zux%zu %zuy%zu",
+			x,mat->rsx,y,mat->rsy);}
+	return mat->data[(x*(mat->rsy)) + y];
+}
+// Get a value at x, y
+static inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
+	if (x >= mat->rsx || y >= mat->rsy) {fatal("Matrix index out of bound %zux%zu %zuy%zu",
+			x,mat->rsx,y,mat->rsy);}
+	return (mat->data)+((x*(mat->rsy)) + y);
+}
 
 void matrix_transpose_ip(Matrix*, Matrix*); // Transpose a matrix in place
 
