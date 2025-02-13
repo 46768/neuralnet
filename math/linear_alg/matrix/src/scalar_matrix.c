@@ -70,6 +70,23 @@ void matrix_vec_mul_ip(Matrix* mat, Vector* vec, Vector* res) {
 		res->data[i] = dot_sum;
 	}
 }
+void matrix_vec_mul_offset_ip(Matrix* mat, Vector* vec, Vector* offset, Vector* res) {
+	if (mat->sx != vec->dimension) {
+		fatal("Expected input vector size: %d, got %d", mat->sx, vec->dimension);
+	}
+	if (res->dimension != mat->sy) {
+		fatal("Expected result vector size: %d, got %d", mat->sy, vec->dimension);
+	}
+
+	for (size_t i = 0; i < mat->sy; i++) {
+		float dot_sum = offset->data[i];
+		for (size_t j = 0; j < mat->sx; j++) {
+			dot_sum += matrix_get(mat, j, i)*vec->data[j];
+		}
+
+		res->data[i] = dot_sum;
+	}
+}
 
 // Get hadamard product of vector and matrix in place
 void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {

@@ -72,13 +72,38 @@ void matrix_vec_mul_ip(Matrix* mat, Vector* vec, Vector* res) {
 		fatal("Expected result vector size: %d, got %d", mat->sy, vec->dimension);
 	}
 
-	for (size_t i = 0; i < mat->sy; i++) {
-		float dot_sum = 0.0f;
+	for (size_t i = 0; i < mat->sy; i+=8) {
+		AVX256 sub_res = avxmm256_load_single_ptr(0);
+		AVX256 vec_data256, mat_data256;
 		for (size_t j = 0; j < mat->sx; j++) {
-			dot_sum += matrix_get(mat, j, i)*vec->data[j];
+			vec_data256 = avxmm256_load_single_ptr(vec->data[j]);
+			mat_data256 = avxmm256_load_ptr(matrix_get_ptr(mat, j, i));
+
+			sub_res = avxmm256_madd(mat_data256, vec_data256, sub_res);
 		}
 
-		res->data[i] = dot_sum;
+		avxmm256_unload_ptr(sub_res, (res->data)+i);
+	}
+}
+void matrix_vec_mul_offset_ip(Matrix* mat, Vector* vec, Vector* offset, Vector* res) {
+	if (mat->sx != vec->dimension) {
+		fatal("Expected input vector size: %d, got %d", mat->sx, vec->dimension);
+	}
+	if (res->dimension != mat->sy) {
+		fatal("Expected result vector size: %d, got %d", mat->sy, vec->dimension);
+	}
+
+	for (size_t i = 0; i < mat->sy; i+=8) {
+		AVX256 sub_res = avxmm256_load_ptr((offset->data)+i);
+		AVX256 vec_data256, mat_data256;
+		for (size_t j = 0; j < mat->sx; j++) {
+			vec_data256 = avxmm256_load_single_ptr(vec->data[j]);
+			mat_data256 = avxmm256_load_ptr(matrix_get_ptr(mat, j, i));
+
+			sub_res = avxmm256_madd(mat_data256, vec_data256, sub_res);
+		}
+
+		avxmm256_unload_ptr(sub_res, (res->data)+i);
 	}
 }
 
@@ -91,10 +116,13 @@ void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {
 		fatal("Incompatible sy mat: %zu to sy res: %zu", mat->sy, res->sy);
 	}
 
-	for (size_t y = 0; y < mat->sy; y++) {
-		float vec_coefficient = vec->data[y];
+	for (size_t y = 0; y < mat->sy; y+=8) {
+		AVX256 vec_coefficient = avxmm256_load_ptr((vec->data)+y);
 		for (size_t x = 0; x < mat->sx; x++) {
-			*matrix_get_ptr(res, x, y) = vec_coefficient * matrix_get(mat, x, y);
+			avxmm256_unload_ptr(avxmm256_mul(
+						avxmm256_load_ptr(matrix_get_ptr(mat, x, y)),
+						vec_coefficient
+						), matrix_get_ptr(res, x, y));
 		}
 	}
 }
@@ -107,12 +135,14 @@ void column_row_vec_mul_ip(Vector* column, Vector* row, Matrix* res) {
 	if (res->sy != column->dimension) {
 		fatal("Incompatible col dim: %zu to sy res: %zu", column->dimension, res->sy);
 	}
-	size_t sx = row->dimension;
 
-	for (size_t x = 0; x < sx; x++) {
-		float row_cofficient = row->data[x];
-		for (size_t y = 0; y < column->dimension; y++) {
-			*matrix_get_ptr(res, x, y) = row_cofficient * column->data[y];
+	for (size_t x = 0; x < row->dimension; x++) {
+		AVX256 row_cofficient = avxmm256_load_single_ptr(row->data[x]);
+		for (size_t y = 0; y < column->dimension; y+=8) {
+			avxmm256_unload_ptr(
+					avxmm256_mul(row_cofficient, avxmm256_load_ptr((column->data)+y)),
+					matrix_get_ptr(res, x, y)
+					);
 		}
 	}
 }

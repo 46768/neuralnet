@@ -50,9 +50,9 @@ int main() {
 
 	// Network Building
 	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 784, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 16, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 16, Sigmoid, Xavier, RandomEN2);
+	ffn_init_dense(nn, 784, ReLU, He, RandomEN2);
+	ffn_init_dense(nn, 16, ReLU, He, RandomEN2);
+	ffn_init_dense(nn, 16, ReLU, He, RandomEN2);
 	ffn_init_dense(nn, 10, None, Zero, Zero);
 	ffn_init_passthru(nn, Softmax);
 	ffn_init_passthru(nn, None);

@@ -23,13 +23,13 @@ include(cmake/PlatformMacros.cmake)
 # Project root path as macro
 target_compile_definitions(CompilerFlags INTERFACE
 	PROJECT_PATH="${PROJECT_SOURCE_DIR}"
-	PYTHON_CMD="python3"
+	PYTHON_CMD="/usr/bin/env python3"
 	PYTHON_VENV="${PROJECT_SOURCE_DIR}/data/venv/bin/python3"
 )
 
 # Add the libraries
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib") # Common utilities
-add_subdirectory("${PROJECT_SOURCE_DIR}/math/linear_alg") # Feed forward network
+add_subdirectory("${PROJECT_SOURCE_DIR}/math/linear_alg") # Linear algebra
 add_subdirectory("${PROJECT_SOURCE_DIR}/simd") # AVX SIMD
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Feed forward network

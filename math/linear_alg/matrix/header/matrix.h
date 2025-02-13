@@ -51,6 +51,8 @@ void matrix_deallocate(Matrix*); // Deallocate a matrix
 
 // Matrix vector operation
 void matrix_vec_mul_ip(Matrix*, Vector*, Vector*); // Multiply matrix with vector in place
+void matrix_vec_mul_offset_ip(Matrix*, Vector*, Vector*, Vector*); // Multiply matrix with vector
+																   // with offset in place
 void vec_matrix_hadamard_ip(Vector*, Matrix*, Matrix*); // Get hadamard product of vector and matrix
 void column_row_vec_mul_ip(Vector*, Vector*, Matrix*); // Multiply column vector with row vector
 

@@ -23,7 +23,7 @@ int main() {
 	fprintf(training_csv->file_pointer, "2,");
 	fprintf(training_csv->file_pointer, "Training loss,");
 	fprintf(training_csv->file_pointer, "Validation loss,");
-	python_create_venv(PROJECT_PATH "/requirements.txt");
+	//python_create_venv(PROJECT_PATH "/requirements.txt");
 	//python_get_mnist(PROJECT_PATH "/data/mnist");
 	init_random();
 
@@ -61,14 +61,9 @@ int main() {
 	FFNMempool* pool = ffn_init_pool(nn);
 
 	float learning_rate = 0.01;
-	for (int t = 0; t < 38; t++) {
-		for (int i = 0; i < 10; i++) {
-			ffn_bpropagate(nn, pool, train_input[i], train_target[i], learning_rate);
-			ffn_dump_pool(pool);
-			if (pool->activations[pool->layer_cnt-1]->data[0] == NAN) {
-			break;
-			}
-		}
+	for (int i = 0; i < 60000; i++) {
+		ffn_bpropagate(nn, pool, train_input[i], train_target[i], learning_rate);
+		printr("Testing %d/%d\r", i + 1, 60000);
 	}
 	/*
 	for (int t = 0; t < 30; t++) {
@@ -105,9 +100,10 @@ int main() {
 		info("-Epoch %d--------------------------------------", t);
 	}
 	*/
-	ffn_dump_data(nn);
+	//ffn_dump_data(nn);
 
 	// Network forward propagation
+	/*
 	ffn_fpropagate(nn, pool, train_input[0]);
 	ffn_dump_output(pool);
 	ffn_fpropagate(nn, pool, train_input[1]);
@@ -142,9 +138,10 @@ int main() {
 	close_file(training_csv);
 	info("training filename: %s", fpath);
 	//python_graph(fpath);
+	*/
 
 	// Post train cleanup
-	deallocate(fpath);
+	//deallocate(fpath);
 	for (int i = 0; i < train_ubound; i++) {
 		vec_deallocate(train_input[i]);
 		vec_deallocate(train_target[i]);
