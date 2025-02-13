@@ -33,7 +33,7 @@ int main() {
 	FFN* nn = ffn_init();
 	ffn_init_dense(nn, 1, None, He, RandomEN2);
 	ffn_init_dense(nn, 1, None, He, RandomEN2);
-	ffn_set_cost_fn(nn, MSE);
+	ffn_init_set_cost_fn(nn, MSE);
 	FFNMempool* mempool = ffn_init_pool(nn);
 	ffn_init_params(nn);
 

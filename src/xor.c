@@ -36,7 +36,7 @@ int main() {
 	ffn_init_dense(nn, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_init_dense(nn, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_init_dense(nn, 1, None, Zero, Zero);
-	ffn_set_cost_fn(nn, BCE);
+	ffn_init_set_cost_fn(nn, BCE);
 	FFNMempool* mempool = ffn_init_pool(nn);
 	ffn_init_params(nn);
 

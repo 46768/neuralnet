@@ -6,6 +6,7 @@
 
 #include "vector.h"
 
-float ffn_bpropagate(FFN*, FFNMempool*, Vector*, Vector*, float); // Back propagation
+float ffn_get_param_change(FFN*, FFNMempool*, Vector*, Vector*); // Back propagation
+void ffn_apply_gradient(FFN*, FFNMempool*, float);
 
 #endif

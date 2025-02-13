@@ -56,7 +56,7 @@ int main() {
 	ffn_init_dense(nn, 10, None, Zero, Zero);
 	ffn_init_passthru(nn, Softmax);
 	ffn_init_passthru(nn, None);
-	ffn_set_cost_fn(nn, CCE);
+	ffn_init_set_cost_fn(nn, CCE);
 	ffn_init_params(nn);
 	FFNMempool* pool = ffn_init_pool(nn);
 

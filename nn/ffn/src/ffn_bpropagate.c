@@ -1,7 +1,5 @@
 #include "ffn_bpropagate.h"
 
-#include <stdint.h>
-
 #include "matrix.h"
 
 #include "ffn_fpropagate.h"
@@ -25,7 +23,7 @@ void _ffn_next_error(FFN* nn, FFNMempool* pool, int nxt_idx) {
 			); // coef * err_l
 }
 
-void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
+void ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
 	// Apply backward propagation gradient
 	// Going from L-1 to 0
 	size_t L = nn->hidden_size;
@@ -56,12 +54,11 @@ void _ffn_apply_gradient(FFN* nn, FFNMempool* pool, float learning_rate) {
 	}
 }
 
-float ffn_bpropagate(
+float ffn_get_param_change(
 		FFN* nn,
 		FFNMempool* pool,
 		Vector* input,
-		Vector* target,
-		float learning_rate
+		Vector* target
 		) {
 	if (!nn->immutable) {
 		error("Network is mutable");
@@ -86,7 +83,7 @@ float ffn_bpropagate(
 
 	// Backward propagation
 	// Going from L-1 to 1
-	for (size_t l = L-2; l != SIZE_MAX; l--) {
+	for (int l = L-2; l >= 0; l--) {
 		// Get previous layer error signal
 		Vector* ld_l1 = pool->gradient_b[l+1];
 		// Calculate weight gradient
@@ -94,9 +91,6 @@ float ffn_bpropagate(
 		// Storing the error signal for bias gradient
 		_ffn_next_error(nn, pool, l);
 	}
-
-	// Apply backward propagation gradient
-	_ffn_apply_gradient(nn, pool, learning_rate);
 
 	return loss;
 }

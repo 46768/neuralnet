@@ -31,6 +31,7 @@ target_compile_definitions(CompilerFlags INTERFACE
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib") # Common utilities
 add_subdirectory("${PROJECT_SOURCE_DIR}/math/linear_alg") # Linear algebra
 add_subdirectory("${PROJECT_SOURCE_DIR}/simd") # AVX SIMD
+add_subdirectory("${PROJECT_SOURCE_DIR}/threading") # Multithreading
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Feed forward network
 add_subdirectory("${PROJECT_SOURCE_DIR}/python") # Python Interface
