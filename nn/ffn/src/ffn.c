@@ -3,8 +3,6 @@
 #include "logger.h"
 #include "allocator.h"
 
-#include "threading.h"
-
 #include "ffn_init.h"
 #include "ffn_mempool.h"
 #include "ffn_fpropagate.h"
@@ -72,7 +70,7 @@ Vector* ffn_run(FFNModel* model, Vector* input) {
 	return model->pool->activations[model->pool->layer_cnt-1];
 }
 void ffn_train(FFNModel* model, Vector** data, size_t d_size, float lr, int max_t) {
-	for (int t = 0; t < max_t || t < (int)d_size; t++) {
+	for (int t = 0; (t < max_t && max_t != -1) || t < (int)d_size; t++) {
 		
 	}
 }
