@@ -12,12 +12,18 @@
 // Creation //
 /////////////
 
+// Initalize a vector with a float* and assign it to a Vector*
+void vec_init(size_t dimension, float* dat, Vector* vec) {
+	vec->dimension = dimension;
+	vec->data = dat;
+	memset(vec->data, 0, dimension*sizeof(float));
+}
+
 // Create a vector with all element to 0
 Vector* vec_zero(size_t dimension) {
 	Vector* vec = (Vector*)allocate(sizeof(Vector));
-	vec->dimension = dimension;
-	vec->data = (float*)avx_allocate(dimension*sizeof(float));
-	memset(vec->data, 0, dimension*sizeof(float));
+	float* dat = (float*)avx_allocate(dimension*sizeof(float));
+	vec_init(dimension, dat, vec);
 
 	return vec;
 }

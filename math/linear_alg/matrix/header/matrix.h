@@ -20,11 +20,11 @@ typedef struct {
 } Matrix;
 
 // Creation
+void matrix_init(size_t, size_t, float*, Matrix*); // Initalize a matrix with float* and assign it to Matrix*
 Matrix* matrix_zero(size_t, size_t); // Create a matrix with all element to 0
-Matrix* matrix_iden(size_t); // Create an identity matrix
-Matrix* matrix_iden_xy(size_t, size_t); // Create an identity rectangle matrix
-Matrix* matrix_rand(size_t, size_t, float, float); // Create a matrix with random values
-Matrix* matrix_dup(Matrix*); // Duplicate a matrix
+
+void matrix_iden(Matrix*); // Create an identity matrix
+void matrix_rand(float, float, Matrix*); // Create a matrix with random values
 
 // Debugging
 void matrix_dump(Matrix*);
@@ -47,6 +47,28 @@ static inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
 void matrix_transpose_ip(Matrix*, Matrix*); // Transpose a matrix in place
 
 // Memory management
+static inline size_t matrix_calc_ssize(size_t size) {
+#ifdef SIMD_AVX
+	return (size+7)&~7;
+#else
+	return (size+1)&~1;
+#endif
+}
+/**
+ * \brief Returns amount of floats actually allocated
+ *
+ * Scalar: no modification
+ * AVX: padded to nearest multiple of 8
+ *
+ * @return The amount of floats actually allocated depending on instruction set used
+ */
+static inline size_t matrix_calc_size(size_t sx, size_t sy) {
+#ifdef SIMD_AVX
+	return ((sx+7)&~7)*((sy+7)&~7);
+#else
+	return ((sx+1)&~1)*((sy+1)&~1);
+#endif
+}
 void matrix_deallocate(Matrix*); // Deallocate a matrix
 
 // Matrix vector operation

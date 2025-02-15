@@ -15,17 +15,25 @@
 // Creation //
 /////////////
 
-// Create a matrix with all element to 0
-Matrix* matrix_zero(size_t sx, size_t sy) {
-	Matrix* mat = (Matrix*)allocate(sizeof(Matrix));
-	size_t padded_sx = (sx+7)&-8;
-	size_t padded_sy = (sy+7)&-8;
+// Initalize a matrix with float* and assign it to Matrix*
+void matrix_init(size_t sx, size_t sy, float* dat, Matrix* mat) {
+	size_t padded_sx = matrix_calc_ssize(sx);
+	size_t padded_sy = matrix_calc_ssize(sy);
 	mat->sx = sx;
 	mat->sy = sy;
 	mat->rsx = padded_sx;
 	mat->rsy = padded_sy;
-	mat->data = (float*)avx_allocate(padded_sx*padded_sy*sizeof(float));
+	mat->data = dat;
 	memset(mat->data, 0, padded_sx*padded_sy*sizeof(float));
+}
+
+// Create a matrix with all element to 0
+Matrix* matrix_zero(size_t sx, size_t sy) {
+	Matrix* mat = (Matrix*)allocate(sizeof(Matrix));
+	size_t padded_sx = matrix_calc_ssize(sx);
+	size_t padded_sy = matrix_calc_ssize(sy);
+	float* dat = (float*)avx_allocate(padded_sx*padded_sy*sizeof(float));
+	matrix_init(sx, sy, dat, mat);
 
 	return mat;
 }

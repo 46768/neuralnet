@@ -9,3 +9,7 @@ prod/
 
 # Data files
 data/
+
+# Doxygen documentation
+html/
+latex/

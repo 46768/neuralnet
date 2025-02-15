@@ -16,14 +16,31 @@ typedef struct {
 } Vector;
 
 // Creation
+void vec_init(size_t, float*, Vector*); // Initalize a vector with a float* and assign it to a Vector*
 Vector* vec_zero(size_t); // Create a vector with all element to 0
-Vector* vec_rand(size_t, float, float); // Create a vector with random values
-Vector* vec_dup(Vector*); // Duplicate a vector
+
+void vec_rand(float, float, Vector*); // Create a vector with random values
 
 // Debugging
 void vec_dump(Vector*);
 
 // Memory management
+
+/**
+ * \brief Returns amount of floats actually allocated
+ *
+ * Scalar: no modification
+ * AVX: padded to nearest multiple of 8
+ *
+ * @return The amount of floats actually allocated depending on instruction set used
+ */
+static inline size_t vec_calc_size(size_t size) {
+#ifdef SIMD_AVX
+	return (size+7)&~7;
+#else
+	return size;
+#endif
+}
 void vec_deallocate(Vector*); // Deallocate a vector
 
 // Operation

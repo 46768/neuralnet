@@ -11,42 +11,21 @@
 // Creation //
 /////////////
 
-Matrix* matrix_iden(size_t size) {
-	Matrix* mat = matrix_zero(size, size);
-	for (size_t i = 0; i < size; i++) {
-		mat->data[i*size + i] = 1;
-	}
-	return mat;
-}
-
-// Create a identity rectangle matrix
-Matrix* matrix_iden_xy(size_t sx, size_t sy) {
-	Matrix* mat = matrix_zero(sx, sy);
-	size_t min_s = sx < sy ? sx : sy;
+void matrix_iden(Matrix* mat) {
+	memset(mat->data, 0, mat->rsx * mat->rsy);
+	size_t min_s = mat->sx < mat->sy ? mat->sx : mat->sy;
 	for (size_t i = 0; i < min_s; i++) {
-		mat->data[i*sx + i] = 1;
+		*matrix_get_ptr(mat, i, i) = 1;
 	}
-	return mat;
 }
 
 // Create a matrix with random values
-Matrix* matrix_rand(size_t sx, size_t sy, float lb, float ub) {
-	Matrix* mat = matrix_zero(sx, sy);
-	for (size_t x = 0; x < sx; x++) {
-		for (size_t y = 0; y < sy; y++) {
+void matrix_rand(float lb, float ub, Matrix* mat) {
+	for (size_t x = 0; x < mat->sx; x++) {
+		for (size_t y = 0; y < mat->sy; y++) {
 			*matrix_get_ptr(mat, x, y) = f_random(lb, ub);
 		}
 	}
-
-	return mat;
-}
-
-// Duplicate a matrix
-Matrix* matrix_dup(Matrix* mat) {
-	size_t sx = mat->sx, sy = mat->sy;
-	Matrix* mat_d = matrix_zero(sx, sy);
-	memcpy(mat_d->data, mat->data, sx*sy*sizeof(float));
-	return mat_d;
 }
 
 ///////////////

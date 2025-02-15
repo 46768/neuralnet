@@ -7,27 +7,50 @@
 #include "matrix.h"
 
 typedef struct {
-	// Node Activation
+	Vector* preactivations;
+	Vector* activations;
+
+	void* data;
+} FFNPropagationPool;
+
+typedef struct {
+	Matrix* gradient_w;
+	Vector* gradient_b;
+
+	void* data;
+} FFNGradientPool;
+
+typedef struct {
+	Matrix* weight_trsp;
+	Matrix* err_coef;
+	Vector* a_deriv;
+
+	void* data;
+} FFNIntermediatePool;
+
+typedef struct {
 	size_t layer_cnt;
-	Vector** preactivations;
-	Vector** activations;
+
+	// Node Activation
+	FFNPropagationPool* propagation;
 
 	// Backpropagation
-	Matrix** gradient_w;
-	Vector** gradient_b;
-	Vector* gradient_aL_C;
-	Vector* a_deriv_L;
+	FFNGradientPool* gradients;
 
 	// Backpropagation Temp ptr
-	Matrix** weight_trsp;
-	Vector** a_deriv;
-	Matrix** err_coef;
+	FFNIntermediatePool* intermediates;
 } FFNMempool;
 
 // Creation
+FFNPropagationPool* ffn_init_propagation_pool(FFN*);
+FFNGradientPool* ffn_init_gradient_pool(FFN*);
+FFNIntermediatePool* ffn_init_intermediate_pool(FFN*);
 FFNMempool* ffn_init_pool(FFN*);
 
 // Memory Management
+void ffn_deallocate_propagation_pool(FFNPropagationPool*);
+void ffn_deallocate_gradient_pool(FFNGradientPool*);
+void ffn_deallocate_intermediate_pool(FFNIntermediatePool*);
 void ffn_deallocate_pool(FFNMempool*);
 
 #endif

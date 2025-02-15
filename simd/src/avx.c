@@ -2,6 +2,7 @@
 #include "avx.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <immintrin.h>
 
 #include "logger.h"
@@ -9,9 +10,10 @@
 void* avx_allocate(size_t size) {
 	void* ptr;
 	size_t padded_size = (size + 31) & ~31;
-	if (posix_memalign(&ptr, 32, size+padded_size) != 0) {
+	if (posix_memalign(&ptr, 32, padded_size) != 0) {
 		fatal("Failed AVX allocation");
 	}
+	memset(ptr, 0, padded_size);
 	return ptr;
 }
 

@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Define the project
-project(NeuralNetwork LANGUAGES C VERSION 0.0.0.1)
+# Version numbering: {Major refactors/reworks}.{Major updates}.{Minor updates}.{Patches}
+project(NeuralNetwork LANGUAGES C VERSION 0.0.1.1)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 

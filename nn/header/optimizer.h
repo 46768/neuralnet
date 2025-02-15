@@ -8,7 +8,7 @@ typedef void(*OptimizerFn)(Matrix*, Matrix*); // Optimizer Function
 
 // Cost Function Enum
 typedef enum {
-	GD,
+	SGD,
 	Momentum
 } OptimizerFnEnum;
 
