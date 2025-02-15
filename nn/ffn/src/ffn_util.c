@@ -50,55 +50,55 @@ void ffn_dump_pool(FFNMempool* pool) {
 	info("Pool Layer Count: %zu", L);
 	info("Pool Preactivations:");
 	for (int l = 0; l < (int)L; l++) {
-		_dump_vector(pool->preactivations[l]);
+		_dump_vector(&(pool->propagation->preactivations[l]));
 		newline();
 	}
 
 	info("Pool Activations:");
 	for (int l = 0; l < (int)L; l++) {
-		_dump_vector(pool->activations[l]);
+		_dump_vector(&(pool->propagation->activations[l]));
 		newline();
 	}
 
 	info("Pool Bias Gradient:");
 	for (int l = 0; l < (int)L; l++) {
-		_dump_vector(pool->gradient_b[l]);
+		_dump_vector(&(pool->gradients->gradient_b[l]));
 		newline();
 	}
 
 	info("Pool Weight Gradient:");
 	for (int l = 0; l < (int)L-1; l++) {
-		_dump_matrix(pool->gradient_w[l]);
+		_dump_matrix(&(pool->gradients->gradient_w[l]));
 		newline();
 	}
 
 	info("Pool Cost Gradient:");
-	_dump_vector(pool->gradient_aL_C);
+	_dump_vector(&(pool->intermediates->a_deriv[L]));
 	newline();
 	info("Pool L Derivative:");
-	_dump_vector(pool->a_deriv_L);
+	_dump_vector(&(pool->intermediates->a_deriv[L-1]));
 	newline();
 
 	info("Pool Weight Transpose");
 	for (int l = 0; l < (int)L-1; l++) {
-		_dump_matrix(pool->weight_trsp[l]);
+		_dump_matrix(&(pool->intermediates->weight_trsp[l]));
 		newline();
 	}
 	info("Pool Layer Derivative");
 	for (int l = 0; l < (int)L-1; l++) {
-		_dump_vector(pool->a_deriv[l]);
+		_dump_vector(&(pool->intermediates->a_deriv[l]));
 		newline();
 	}
 	info("Pool Error Coefficient");
 	for (int l = 0; l < (int)L-1; l++) {
-		_dump_matrix(pool->err_coef[l]);
+		_dump_matrix(&(pool->intermediates->err_coef[l]));
 		newline();
 	}
 }
 
 void ffn_dump_output(FFNMempool* pool) {
 	size_t layer_count = pool->layer_cnt;
-	Vector* output = pool->activations[layer_count-1];
+	Vector* output = &(pool->propagation->activations[layer_count-1]);
 
 	info("Network output:");
 	for (size_t i = 0; i < output->dimension; i++) {

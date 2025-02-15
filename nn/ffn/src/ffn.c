@@ -7,7 +7,6 @@
 #include "ffn_mempool.h"
 #include "ffn_fpropagate.h"
 #include "ffn_bpropagate.h"
-#include "ffn_util.h"
 
 // Creation
 
@@ -66,11 +65,17 @@ void ffn_finalize(FFNModel* model) {
 // Running and Training
 
 Vector* ffn_run(FFNModel* model, Vector* input) {
-	ffn_fpropagate(model->nn, model->pool, input);
-	return model->pool->activations[model->pool->layer_cnt-1];
+	ffn_fpropagate(model->nn, model->pool->propagation, input);
+	return &(model->pool->propagation->activations[model->pool->layer_cnt-1]);
 }
-void ffn_train(FFNModel* model, Vector** data, size_t d_size, float lr, int max_t) {
+float ffn_train(FFNModel* model, Vector** data, Vector** target, size_t d_size, float lr, int max_t) {
+	float avg_loss = 0;
 	for (int t = 0; (t < max_t && max_t != -1) || t < (int)d_size; t++) {
-		
+		Vector* res = ffn_run(model, data[t]);
+		avg_loss += model->nn->cost_fn(res, target[t]);
+		ffn_get_param_change(model->nn, model->pool, target[t]);
+
+		ffn_apply_gradient(model->nn, model->pool->gradients, lr);
 	}
+	return avg_loss / (max_t == -1 ? (float)d_size : (float)max_t);
 }

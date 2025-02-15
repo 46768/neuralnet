@@ -39,6 +39,6 @@ void ffn_finalize(FFNModel*);
 // Running and Training
 
 Vector* ffn_run(FFNModel*, Vector*);
-void ffn_train(FFNModel*, Vector**, size_t, float, int);
+float ffn_train(FFNModel*, Vector**, Vector**, size_t, float, int);
 
 #endif

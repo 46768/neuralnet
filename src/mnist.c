@@ -12,10 +12,7 @@
 
 #include "generator.h"
 
-#include "ffn_init.h"
-#include "ffn_fpropagate.h"
-#include "ffn_bpropagate.h"
-#include "ffn_mempool.h"
+#include "ffn.h"
 #include "ffn_util.h"
 
 int main() {
@@ -49,16 +46,15 @@ int main() {
 			);
 
 	// Network Building
-	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 784, ReLU, He, RandomEN2);
-	ffn_init_dense(nn, 16, ReLU, He, RandomEN2);
-	ffn_init_dense(nn, 16, ReLU, He, RandomEN2);
-	ffn_init_dense(nn, 10, None, Zero, Zero);
-	ffn_init_passthru(nn, Softmax);
-	ffn_init_passthru(nn, None);
-	ffn_init_set_cost_fn(nn, CCE);
-	ffn_init_params(nn);
-	FFNMempool* pool = ffn_init_pool(nn);
+	FFNModel* model = ffn_new_model();
+	ffn_add_dense(model, 784, ReLU, He, RandomEN2);
+	ffn_add_dense(model, 16, ReLU, He, RandomEN2);
+	ffn_add_dense(model, 16, ReLU, He, RandomEN2);
+	ffn_add_dense(model, 10, None, Zero, Zero);
+	ffn_add_passthrough(model, Softmax);
+	ffn_add_passthrough(model, None);
+	ffn_set_cost_fn(model, CCE);
+	ffn_finalize(model);
 
 	float learning_rate = 0.01;
 	for (int t = 0; t < 300; t++) {
@@ -67,13 +63,8 @@ int main() {
 		int range_upper = floorf(f_random((float)range_lower+1, (float)train_ubound));
 
 		// Train the network on data from the range
-		float train_loss = 0.0f;
-		for (int i = range_lower; i < range_upper; i++) {
-			printr("Training %d/%d\r", i - range_lower + 1, range_upper - range_lower);
-			train_loss += ffn_bpropagate(nn, pool, train_input[i], train_target[i], learning_rate);
-		}
+		float train_loss = ffn_train(model, &(train_input[range_lower]), &(train_target[range_lower]), range_upper - range_lower, learning_rate, -1);
 		newline();
-		train_loss /= range_upper - range_lower;
 		fprintf(training_csv->file_pointer, "%.10f,", train_loss);
 
 		// Sample random range of training data
@@ -83,9 +74,8 @@ int main() {
 		// Test the network on data from the range
 		float test_loss = 0.0f;
 		for (int i = range_lower; i < range_upper; i++) {
-			printr("Testing %d/%d\r", i - range_lower + 1, range_upper - range_lower);
-			ffn_fpropagate(nn, pool, test_input[i]);
-			test_loss += nn->cost_fn(pool->activations[nn->hidden_size-1], test_target[i]);
+			Vector* res = ffn_run(model, test_input[i]);
+			test_loss += model->nn->cost_fn(res, test_target[i]);
 		}
 		newline();
 		test_loss /= range_upper - range_lower;
@@ -96,10 +86,8 @@ int main() {
 	}
 
 	// Network forward propagation
-	ffn_fpropagate(nn, pool, train_input[0]);
-	ffn_dump_output(pool);
-	ffn_fpropagate(nn, pool, train_input[1]);
-	ffn_dump_output(pool);
+	vec_dump(ffn_run(model, train_input[0]));
+	vec_dump(ffn_run(model, train_input[1]));
 
 	char* fpath = (char*)allocate(strlen(training_csv->filename)+1);
 	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
@@ -124,9 +112,7 @@ int main() {
 	}
 	deallocate(test_input);
 	deallocate(test_target);
-
-	ffn_deallocate(nn);
-	ffn_deallocate_pool(pool);
+	ffn_deallocate_model(model);
 
 	return 0;
 }

@@ -21,13 +21,13 @@ int main() {
 	info("CPUID Leaf 7 ECX: 0b%08x", ecx);
 	info("CPUID Leaf 7 EDX: 0b%08x", edx);
 
-	Vector* v1 = vec_rand(3, 0.0f, 1.0f);
-	Vector* v2 = vec_rand(3, 0.0f, 1.0f);
+	Vector* v1 = vec_zero(3); vec_rand(0.0f, 1.0f, v1);
+	Vector* v2 = vec_zero(3); vec_rand(0.0f, 1.0f, v2);
 	Vector* v3 = vec_zero(3);
 	Vector* v4 = vec_zero(3);
 	Vector* v5 = vec_zero(3);
 	Vector* v6 = vec_zero(3);
-	Matrix* m1 = matrix_rand(3, 3, 0.0f, 1.0f);
+	Matrix* m1 = matrix_zero(3, 3); matrix_rand(0.0f, 1.0f, m1);
 	Matrix* m2 = matrix_zero(3, 3);
 	Matrix* m3 = matrix_zero(3, 3);
 	Matrix* m4 = matrix_zero(3, 3);

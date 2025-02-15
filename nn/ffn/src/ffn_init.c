@@ -31,7 +31,7 @@ FFN* ffn_init() {
 //////////////////////
 
 // Set network's cost function
-void ffn_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
+void ffn_init_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
@@ -120,7 +120,8 @@ void ffn_init_params(FFN* nn) {
 		size_t sy = layer_nxt->node_cnt;
 
 		// Initialize the data structure
-		(nn->weights)[l] = matrix_iden_xy(sx, sy);
+		(nn->weights)[l] = matrix_zero(sx, sy);
+		matrix_iden((nn->weights)[l]);
 		(nn->biases)[l] = vec_zero(sy);
 		(nn->layer_activation)[l] = resolve_activation_fn(layer_cur->fn_type);
 		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);

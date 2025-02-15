@@ -51,7 +51,6 @@ add_executable(FCLNN "${PROJECT_SOURCE_DIR}/src/linear.c")
 add_executable(FCLNNn "${PROJECT_SOURCE_DIR}/src/linear_noise.c")
 add_executable(FCLNNt "${PROJECT_SOURCE_DIR}/src/xor.c")
 add_executable(MNIST "${PROJECT_SOURCE_DIR}/src/mnist.c")
-add_executable(MNISTt "${PROJECT_SOURCE_DIR}/src/mnist_test.c")
 add_executable(UTEST "${PROJECT_SOURCE_DIR}/src/utest.c")
 
 # Link libraries
@@ -59,5 +58,4 @@ target_link_libraries(FCLNN PUBLIC FCLNNLib)
 target_link_libraries(FCLNNn PUBLIC FCLNNLib)
 target_link_libraries(FCLNNt PUBLIC FCLNNLib)
 target_link_libraries(MNIST PUBLIC FCLNNLib)
-target_link_libraries(MNISTt PUBLIC FCLNNLib)
 target_link_libraries(UTEST PUBLIC FCLNNLib)

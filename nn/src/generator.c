@@ -40,9 +40,9 @@ void generate_noised_linear_regs(int lower, int upper, float m, float y,
 
 void generate_xor(int* lower, int* upper, Vector*** vecs, Vector*** targets) {
 	*lower = 0;
-	*upper = 3;
-	*vecs = (Vector**)callocate(*upper - *lower+1, sizeof(Vector*));
-	*targets = (Vector**)callocate(*upper - *lower+1, sizeof(Vector*));
+	*upper = 4;
+	*vecs = (Vector**)callocate(4, sizeof(Vector*));
+	*targets = (Vector**)callocate(4, sizeof(Vector*));
 
 	(*vecs)[0] = vec_zero(2);(*vecs)[0]->data[0]=-1.0f;(*vecs)[0]->data[1]=-1.0f;
 	(*vecs)[1] = vec_zero(2);(*vecs)[1]->data[0]=-1.0f;(*vecs)[1]->data[1]=1.0f;

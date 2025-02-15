@@ -21,11 +21,20 @@ void avx_add(float* a, float* b, float* res) {
 	if (a == NULL) {
 		fatal("a is null");
 	}
+	if ((long long)a % 32 != 0) {
+		fatal("a is unaligned");
+	}
 	if (b == NULL) {
 		fatal("b is null");
 	}
+	if ((long long)b % 32 != 0) {
+		fatal("b is unaligned");
+	}
 	if (res == NULL) {
 		fatal("res is null");
+	}
+	if ((long long)res % 32 != 0) {
+		fatal("res is unaligned");
 	}
 	__m256 a256 = _mm256_load_ps(a);
 	__m256 b256 = _mm256_load_ps(b);
@@ -36,11 +45,20 @@ void avx_mul(float* a, float* b, float* res) {
 	if (a == NULL) {
 		fatal("a is null");
 	}
+	if ((long long)a % 32 != 0) {
+		fatal("a is unaligned");
+	}
 	if (b == NULL) {
 		fatal("b is null");
 	}
+	if ((long long)b % 32 != 0) {
+		fatal("b is unaligned");
+	}
 	if (res == NULL) {
 		fatal("res is null");
+	}
+	if ((long long)res % 32 != 0) {
+		fatal("res is unaligned");
 	}
 	__m256 a256 = _mm256_load_ps(a);
 	__m256 b256 = _mm256_load_ps(b);
@@ -51,14 +69,26 @@ void avx_madd(float* a, float* b, float* c, float* res) {
 	if (a == NULL) {
 		fatal("a is null");
 	}
+	if ((long long)a % 32 != 0) {
+		fatal("a is unaligned");
+	}
 	if (b == NULL) {
 		fatal("b is null");
+	}
+	if ((long long)b % 32 != 0) {
+		fatal("b is unaligned");
 	}
 	if (c == NULL) {
 		fatal("c is null");
 	}
+	if ((long long)c % 32 != 0) {
+		fatal("c is unaligned");
+	}
 	if (res == NULL) {
 		fatal("res is null");
+	}
+	if ((long long)res % 32 != 0) {
+		fatal("res is unaligned");
 	}
 	__m256 a256 = _mm256_load_ps(a);
 	__m256 b256 = _mm256_load_ps(b);

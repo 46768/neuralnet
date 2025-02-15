@@ -6,6 +6,6 @@
 
 #include "vector.h"
 
-void ffn_fpropagate(FFN*, FFNMempool*, Vector*); // Forward propagation
+void ffn_fpropagate(FFN*, FFNPropagationPool*, Vector*); // Forward propagation
 
 #endif

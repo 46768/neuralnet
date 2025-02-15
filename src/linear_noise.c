@@ -10,9 +10,7 @@
 
 #include "generator.h"
 
-#include "ffn_init.h"
-#include "ffn_bpropagate.h"
-#include "ffn_mempool.h"
+#include "ffn.h"
 #include "ffn_util.h"
 
 int main() {
@@ -30,45 +28,22 @@ int main() {
 	generate_noised_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, -5.0f, &vecs, &targets);
 	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 
-	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 1, None, He, RandomEN2);
-	ffn_init_dense(nn, 1, None, He, RandomEN2);
-	ffn_init_set_cost_fn(nn, MSE);
-	FFNMempool* mempool = ffn_init_pool(nn);
-	ffn_init_params(nn);
+	FFNModel* model = ffn_new_model();
+	ffn_add_dense(model, 1, None, He, RandomEN2);
+	ffn_add_dense(model, 1, None, He, RandomEN2);
+	ffn_set_cost_fn(model, MSE);
+	ffn_finalize(model);
 
 	info("Pre train");
-	ffn_dump_data(nn);
+	ffn_dump_data(model->nn);
 
-	float learning_rate = 0.01;
-	// Trains however many times
 	for (int t = 0; t < 1000; t++) {
-		float l = 0;
-		for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
-			Vector* x = vecs[i - REGS_RANGEL];
-			Vector* y = targets[i - REGS_RANGEL];
-			l += ffn_bpropagate(nn, mempool, x, y, learning_rate);
-			newline_d();
-		}
-		l /= (REGS_RANGE - REGS_RANGEL);
-		fprintf(training_csv->file_pointer, "%.10f,", l);
-		if (t % 1 == 0) {
-			//info("Training loss: %f", l);
-		}
+		float loss = ffn_train(model, vecs, targets, REGS_RANGE - REGS_RANGEL, 0.01, -1);
+		fprintf(training_csv->file_pointer, "%.10f,", loss);
 	}
 
 	info("Post train");
-	ffn_dump_data(nn);
-
-	for (int i = REGS_RANGEL; i <= REGS_RANGE; i++) {
-		vec_deallocate(vecs[i - REGS_RANGEL]);
-		vec_deallocate(targets[i - REGS_RANGEL]);
-	}
-	deallocate(vecs);
-	deallocate(targets);
-
-	ffn_deallocate(nn);
-	ffn_deallocate_pool(mempool);
+	ffn_dump_data(model->nn);
 
 	char* fpath = (char*)allocate(strlen(training_csv->filename));
 	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
@@ -76,6 +51,15 @@ int main() {
 	close_file(training_csv);
 	info("training filename: %s", fpath);
 	python_graph(fpath);
+
+	deallocate(fpath);
+	for (int i = 0; i < (REGS_RANGE - REGS_RANGEL); i++) {
+		vec_deallocate(vecs[i]);
+		vec_deallocate(targets[i]);
+	}
+	deallocate(vecs);
+	deallocate(targets);
+	ffn_deallocate_model(model);
 
 	return 0;
 }

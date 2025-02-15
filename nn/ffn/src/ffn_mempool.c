@@ -31,26 +31,26 @@
  */
 FFNPropagationPool* _ffn_init_ppool(size_t layer_cnt, size_t padded_size_sum, FFN* nn) {
 	FFNPropagationPool* ppool = (FFNPropagationPool*)allocate(sizeof(FFNPropagationPool));
-	size_t vec_mdata_size = layer_cnt * sizeof(Vector) << 1;
+	size_t vec_mdata_size = (layer_cnt * sizeof(Vector)) << 1;
 	size_t padding = _pool_pad(vec_mdata_size);
 
 	ppool->data = _pool_alloc(
 			vec_mdata_size // Space for 2 set of layer vector data
 			+ padding // Padding for alignment
-			+ (padded_size_sum << 1) // Space for vector data
+			+ ((padded_size_sum * sizeof(float)) << 1) // Space for vector data
 			);
 
 	Vector* act_vec_ptr = (Vector*)(ppool->data);
 	Vector* preact_vec_ptr = act_vec_ptr + layer_cnt;
 
-	float* act_dat_ptr = (float*)((char*)preact_vec_ptr+padding);
+	float* act_dat_ptr = (float*)((char*)(preact_vec_ptr + layer_cnt)+padding);
 	float* preact_dat_ptr = act_dat_ptr + padded_size_sum;
 
 	size_t accum_size = 0;
 	for (int l = 0; l < (int)layer_cnt; l++) {
 		size_t l_size = nn->hidden_layers[l]->node_cnt;
 		vec_init(l_size, act_dat_ptr + accum_size, &act_vec_ptr[l]);
-		vec_init(l_size, preact_dat_ptr + accum_size, &preact_vec_ptr[l]);
+		vec_init(l_size, preact_dat_ptr + accum_size, &preact_vec_ptr[l]); // ffn_mempool.c:53
 
 		accum_size += vec_calc_size(l_size);
 	}
@@ -83,13 +83,13 @@ FFNGradientPool* _ffn_init_gpool(size_t layer_cnt, size_t mat_size_sum, size_t v
 	gpool->data = _pool_alloc(
 			mdata_size // Space for matrix + Vector pointer
 			+ padding // Padding for alignment
-			+ (mat_size_sum + vec_size_sum) // Space for matrix + vector data
+			+ ((mat_size_sum + vec_size_sum) * sizeof(float)) // Space for matrix + vector data
 			);
 
 	Matrix* mat_ptr = (Matrix*)(gpool->data);
 	Vector* vec_ptr = (Vector*)(mat_ptr + layer_cnt - 1);
 
-	float* mat_dat_ptr = (float*)((char*)vec_ptr + padding);
+	float* mat_dat_ptr = (float*)((char*)(vec_ptr + layer_cnt) + padding);
 	float* vec_dat_ptr = mat_dat_ptr + mat_size_sum;
 
 	size_t mat_accum_size = 0;
@@ -129,21 +129,21 @@ FFNGradientPool* _ffn_init_gpool(size_t layer_cnt, size_t mat_size_sum, size_t v
  */
 FFNIntermediatePool* _ffn_init_ipool(size_t layer_cnt, size_t mat_size_sum, size_t vec_size_sum, FFN* nn) {
 	FFNIntermediatePool* ipool = (FFNIntermediatePool*)allocate(sizeof(FFNIntermediatePool));
-	size_t mdata_size = ((layer_cnt-1) * sizeof(Matrix) << 1) + (layer_cnt * sizeof(Vector));
+	size_t mdata_size = (((layer_cnt-1) * sizeof(Matrix)) << 1) + ((layer_cnt+1) * sizeof(Vector));
 	size_t padding = _pool_pad(mdata_size);
 
 	ipool->data = _pool_alloc(
 			mdata_size // Space Transpose matrices/activation derivative vector/error coefficient matrices pointers
 			+ padding // Padding for alignment
-			+ (mat_size_sum << 1) // Space for transpose/error coefficents data
-			+ vec_size_sum // Space for activation derivative data
+			+ ((mat_size_sum * sizeof(float)) << 1) // Space for transpose/error coefficents data
+			+ (vec_size_sum * sizeof(float)) // Space for activation derivative data
 			);
 
 	Matrix* mat_trsp_ptr = (Matrix*)(ipool->data);
 	Matrix* err_coef_ptr = mat_trsp_ptr + layer_cnt - 1;
 	Vector* a_deriv_ptr = (Vector*)(err_coef_ptr + layer_cnt -1);
 
-	float* mat_trsp_dat_ptr = (float*)((char*)a_deriv_ptr + padding);
+	float* mat_trsp_dat_ptr = (float*)((char*)(a_deriv_ptr + layer_cnt+1) + padding);
 	float* err_coef_dat_ptr = mat_trsp_dat_ptr + mat_size_sum;
 	float* a_deriv_dat_ptr = err_coef_dat_ptr + mat_size_sum;
 
@@ -160,7 +160,9 @@ FFNIntermediatePool* _ffn_init_ipool(size_t layer_cnt, size_t mat_size_sum, size
 		vec_init(l_size, a_deriv_dat_ptr + vec_accum_size, &a_deriv_ptr[l]);
 		vec_accum_size += vec_calc_size(l_size);
 	}
-	vec_init(nn->hidden_layers[layer_cnt-1]->node_cnt, a_deriv_dat_ptr + vec_accum_size, &a_deriv_ptr[layer_cnt-1]);
+	size_t Ln1_size = nn->hidden_layers[layer_cnt-1]->node_cnt;
+	vec_init(Ln1_size, a_deriv_dat_ptr + vec_accum_size, &a_deriv_ptr[layer_cnt-1]);
+	vec_init(Ln1_size, a_deriv_dat_ptr + vec_accum_size + vec_calc_size(Ln1_size), &a_deriv_ptr[layer_cnt]);
 
 	ipool->weight_trsp = mat_trsp_ptr;
 	ipool->err_coef = err_coef_ptr;
@@ -208,7 +210,7 @@ FFNIntermediatePool* ffn_init_intermediate_pool(FFN* nn) {
 		mat_padded_size += matrix_calc_size(l_data[l+1]->node_cnt, l_data[l]->node_cnt);
 	}
 
-	return _ffn_init_ipool(L, mat_padded_size, vec_padded_size, nn);
+	return _ffn_init_ipool(L, mat_padded_size, vec_padded_size + l_data[L-1]->node_cnt, nn);
 }
 
 FFNMempool* ffn_init_pool(FFN* nn) {
@@ -228,7 +230,7 @@ FFNMempool* ffn_init_pool(FFN* nn) {
 
 	pool->propagation = _ffn_init_ppool(L, vec_padded_size, nn);
 	pool->gradients = _ffn_init_gpool(L, mat_padded_size, vec_padded_size, nn);
-	pool->intermediates = _ffn_init_ipool(L, mat_padded_size, vec_padded_size, nn);
+	pool->intermediates = _ffn_init_ipool(L, mat_padded_size, vec_padded_size + vec_calc_size(l_data[L-1]->node_cnt), nn);
 
 	return pool;
 }
