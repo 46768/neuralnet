@@ -34,6 +34,7 @@ Vector* vec_zero(size_t dimension) {
 
 // Apply a function that operate on both vector
 void _vec_apply(Vector* vec1, Vector* vec2, Vector* res, void(*fn)(float*, float*, float*)) {
+#ifndef NO_BOUND_CHECK
 	if (vec1->dimension != vec2->dimension) {
 		fatal("Vector 1 and 2 dimension mismatched: %d to %d", vec1->dimension, vec2->dimension);
 	}
@@ -41,6 +42,8 @@ void _vec_apply(Vector* vec1, Vector* vec2, Vector* res, void(*fn)(float*, float
 		fatal("Vector 1 and result vector dimension mismatched: %d to %d",
 				vec1->dimension, res->dimension);
 	}
+#endif
+
 	for (size_t i = 0; i < vec1->dimension; i+=8) {
 		fn((vec1->data)+i, (vec2->data)+i, (res->data)+i);
 	}

@@ -128,7 +128,7 @@ void nn_crelu_d(Vector* z, Vector* d) {
 // Sigmoid //
 /////////////
 
-static inline float _sigmoid(float x) { return (float)1/(1+exp(-x)); }
+static inline float _sigmoid(float x) { return (float)1/(1+expf(-x)); }
 void nn_sigmoid(Vector* z, Vector* a) {
 	if (z->dimension != a->dimension) {
 		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);

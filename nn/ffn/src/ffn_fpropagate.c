@@ -6,9 +6,11 @@
 #include "logger.h"
 
 void ffn_fpropagate(FFN* nn, FFNPropagationPool* pool, Vector* input) {
+#ifndef NO_STATE_CHECK
 	if (!(nn->immutable)) {
 		fatal("Unable to forward propagate: Network is mutable");
 	}
+#endif
 
 	Matrix** weights = nn->weights;
 	Vector** biases = nn->biases;
@@ -17,6 +19,7 @@ void ffn_fpropagate(FFN* nn, FFNPropagationPool* pool, Vector* input) {
 
 
 	// Check if the input is compatible with network input
+#ifndef NO_BOUND_CHECK
 	if (input->dimension != nn->hidden_layers[0]->node_cnt) {
 		fatal("Input vector size mismatched with input node count, %d to %d",
 				input->dimension,
@@ -24,6 +27,7 @@ void ffn_fpropagate(FFN* nn, FFNPropagationPool* pool, Vector* input) {
 		);
 		exit(1);
 	}
+#endif
 
 	for (int i = 0; i < (int)(input->dimension); i++) {
 		z[0].data[i] = input->data[i];

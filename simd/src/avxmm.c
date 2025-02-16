@@ -9,7 +9,7 @@ AVX256 avxmm256_load_ptr(float* ptr) {
 	return _mm256_load_ps(ptr);
 }
 AVX256 avxmm256_load_single_ptr(float val) {
-	return _mm256_set_ps(val, val, val, val, val, val, val, val);
+	return _mm256_set1_ps(val);
 }
 void avxmm256_unload_ptr(AVX256 data256, float* ptr) {
 	_mm256_store_ps(ptr, data256);

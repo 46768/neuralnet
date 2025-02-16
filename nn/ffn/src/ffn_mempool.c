@@ -10,7 +10,7 @@
 #ifdef SIMD_AVX
 #include "avx.h"
 #define _pool_alloc(s) avx_allocate(s)
-#define _pool_pad(s) ((s+31)&~31)-s
+#define _pool_pad(s) ((s+63)&~63)-s
 #else
 #define _pool_alloc(s) callocate(s)
 #define _pool_pad(s) 0

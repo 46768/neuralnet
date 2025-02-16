@@ -8,7 +8,11 @@ set(CompilerFlagss "-Wall;-Wextra;-g;-lpthread")
 target_compile_options(CompilerFlags INTERFACE
 	"$<BUILD_INTERFACE:${CompilerFlagss}>")
 
-if (PROD)
+if (NEED_SPEED)
+	message("Using speedy flags")
+	target_compile_options(CompilerFlags INTERFACE
+		"$<BUILD_INTERFACE:-O3>")
+elseif (PROD)
 	message("Using production flags")
 	target_compile_options(CompilerFlags INTERFACE
 		"$<BUILD_INTERFACE:-O2>")
@@ -26,9 +30,18 @@ if (PROFILING)
 		"$<BUILD_INTERFACE:-g;-pg>")
 endif()
 
-if (NO_PYTHON)
+if (NO_PYTHON OR NEED_SPEED)
 	message("Disabling python interface")
 	target_compile_definitions(CompilerFlags INTERFACE "NO_PYTHON")
+endif()
+
+if (NO_BOUND_CHECK OR NEED_SPEED)
+	message("Disabling bound checking")
+	target_compile_definitions(CompilerFlags INTERFACE "NO_BOUND_CHECK")
+endif()
+if (NO_STATE_CHECK OR NEED_SPEED)
+	message("Disabling state checking")
+	target_compile_definitions(CompilerFlags INTERFACE "NO_STATE_CHECK")
 endif()
 
 if (USE_SCALAR)

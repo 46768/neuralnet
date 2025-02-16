@@ -40,12 +40,14 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 
 // Transpose a matrix in place
 void matrix_transpose_ip(Matrix* mat, Matrix* res) {
+#ifndef NO_BOUND_CHECK
 	if (res->sx != mat->sy) {
 		fatal("Incompatible sy mat: %zu to sx res: %zu", mat->sy, res->sx);
 	}
 	if (res->sy != mat->sx) {
 		fatal("Incompatible sx mat: %zu to sy res: %zu", mat->sx, res->sy);
 	}
+#endif
 	for (int x = 0; x < (int)(mat->sx); x+=2) {
 		for (int y = 0; y < (int)(mat->sy); y+=2) {
 			*matrix_get_ptr(res, y, x) = matrix_get(mat, x, y);
@@ -62,12 +64,14 @@ void matrix_transpose_ip(Matrix* mat, Matrix* res) {
 
 // Multiply matrix with vector
 void matrix_vec_mul_ip(Matrix* mat, Vector* vec, Vector* res) {
+#ifndef NO_BOUND_CHECK
 	if (mat->sx != vec->dimension) {
 		fatal("Expected input vector size: %d, got %d", mat->sx, vec->dimension);
 	}
 	if (res->dimension != mat->sy) {
 		fatal("Expected result vector size: %d, got %d", mat->sy, vec->dimension);
 	}
+#endif
 
 	for (size_t i = 0; i < mat->sy; i++) {
 		float dot_sum = 0.0f;
@@ -79,12 +83,14 @@ void matrix_vec_mul_ip(Matrix* mat, Vector* vec, Vector* res) {
 	}
 }
 void matrix_vec_mul_offset_ip(Matrix* mat, Vector* vec, Vector* offset, Vector* res) {
+#ifndef NO_BOUND_CHECK
 	if (mat->sx != vec->dimension) {
 		fatal("Expected input vector size: %d, got %d", mat->sx, vec->dimension);
 	}
 	if (res->dimension != mat->sy) {
 		fatal("Expected result vector size: %d, got %d", mat->sy, vec->dimension);
 	}
+#endif
 
 	for (size_t i = 0; i < mat->sy; i++) {
 		float dot_sum = offset->data[i];
@@ -98,12 +104,14 @@ void matrix_vec_mul_offset_ip(Matrix* mat, Vector* vec, Vector* offset, Vector* 
 
 // Get hadamard product of vector and matrix in place
 void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {
+#ifndef NO_BOUND_CHECK
 	if (res->sx != mat->sx) {
 		fatal("Incompatible sx mat: %zu to sx res: %zu", mat->sx, res->sx);
 	}
 	if (res->sy != mat->sy) {
 		fatal("Incompatible sy mat: %zu to sy res: %zu", mat->sy, res->sy);
 	}
+#endif
 
 	for (size_t y = 0; y < mat->sy; y++) {
 		float vec_coefficient = vec->data[y];
@@ -115,12 +123,14 @@ void vec_matrix_hadamard_ip(Vector* vec, Matrix* mat, Matrix* res) {
 
 // Multiply column vector with row vector in place
 void column_row_vec_mul_ip(Vector* column, Vector* row, Matrix* res) {
+#ifndef NO_BOUND_CHECK
 	if (res->sx != row->dimension) {
 		fatal("Incompatible row dim: %zu to sx res: %zu", row->dimension, res->sx);
 	}
 	if (res->sy != column->dimension) {
 		fatal("Incompatible col dim: %zu to sy res: %zu", column->dimension, res->sy);
 	}
+#endif
 	size_t sx = row->dimension;
 
 	for (size_t x = 0; x < sx; x++) {

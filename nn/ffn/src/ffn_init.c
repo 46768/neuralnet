@@ -32,10 +32,12 @@ FFN* ffn_init() {
 
 // Set network's cost function
 void ffn_init_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
+#ifndef NO_STATE_CHECK
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
 	}
+#endif
 	nn->cost_fn = resolve_cost_fn(cost_type);
 	nn->cost_fn_d = resolve_cost_fn_d(cost_type);
 }
@@ -46,10 +48,12 @@ void ffn_init_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
 
 void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type,
 		IniterEnum w_init_type, IniterEnum b_init_type) {
+#ifndef NO_STATE_CHECK
 	if (nn->immutable) {
 		error("Unable to modify ffn: Immutable");
 		return;
 	}
+#endif
 	size_t hidden_size = nn->hidden_size;
 	if (hidden_size >= nn->hidden_capacity) {
 		nn->hidden_capacity += 10;
@@ -80,6 +84,7 @@ void ffn_init_passthru(FFN* nn, ActivationFNEnum fn_type) {
 
 // Finalize a network's layer
 void ffn_init_params(FFN* nn) {
+#ifndef NO_STATE_CHECK
 	if (nn->cost_fn == NULL || nn->cost_fn_d == NULL) {
 		error("Network's cost function unset");
 		return;
@@ -88,6 +93,7 @@ void ffn_init_params(FFN* nn) {
 		error("Unable to initialize ffn: Already initialized");
 		return;
 	}
+#endif
 
 	// Allocate space for weights, biases, and activation functions and their derivative
 	size_t hidden_cnt = nn->hidden_size-1;
