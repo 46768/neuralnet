@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "avx.h"
+#include "avxmm.h"
 
 #include "logger.h"
 #include "allocator.h"
@@ -51,11 +52,31 @@ void _vec_apply(Vector* vec1, Vector* vec2, Vector* res, void(*fn)(float*, float
 
 // Element wise addition in place
 void vec_add_ip(Vector* vec1, Vector* vec2, Vector* res) {
-	return _vec_apply(vec1, vec2, res, avx_add);
+	_vec_apply(vec1, vec2, res, avx_add);
 }
 
 // Element wise multiplication in place
 void vec_mul_ip(Vector* vec1, Vector* vec2, Vector* res) {
-	return _vec_apply(vec1, vec2, res, avx_mul);
+	_vec_apply(vec1, vec2, res, avx_mul);
+}
+
+// Element wise multiplication with scalar coefficient in place
+void vec_coef_add_ip(Vector* vec1, Vector* vec2, float coef, Vector* res) {
+#ifndef NO_BOUND_CHECK
+	if (vec1->dimension != vec2->dimension) {
+		fatal("Mismatched vec1:vec2 dimension %zu:%zu", vec1->dimension, vec2->dimension);
+	}
+	if (vec1->dimension != res->dimension) {
+		fatal("Mismatched vec1:res dimension %zu:%zu", vec1->dimension, res->dimension);
+	}
+#endif
+
+	AVX256 vcoef = avxmm256_load_single_ptr(coef), v1dat, v2dat;
+
+	for (int i = 0; i < (int)(vec1->dimension); i+=8) {
+		v1dat = avxmm256_load_ptr(&(vec1->data[i]));
+		v2dat = avxmm256_load_ptr(&(vec2->data[i]));
+		avxmm256_unload_ptr(avxmm256_madd(v1dat, vcoef, v2dat), &(res->data[i]));
+	}
 }
 #endif

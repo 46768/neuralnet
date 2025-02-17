@@ -58,6 +58,22 @@ void matrix_transpose_ip(Matrix* mat, Matrix* res) {
 	}
 }
 
+void matrix_coef_add_ip(Matrix* mat1, Matrix* mat2, float coef, Matrix* res) {
+#ifndef NO_BOUND_CHECK
+	if (mat1->sx != mat2->sx || mat1->sy != mat2->sy) {
+		fatal("Mismatched matrix:mat2 size, %zux%zu, %zuy%zu", mat1->sx, mat2->sx, mat2->sy, mat2->sy);
+	}
+	if (mat1->sx != res->sx || mat1->sy != res->sy) {
+		fatal("Mismatched matrix:res size, %zux%zu, %zuy%zu", mat1->sx, res->sx, mat1->sy, res->sy);
+	}
+#endif
+
+	size_t ddim = mat1->rsx * mat2->rsy;
+	for (int i = 0; i < (int)ddim; i++) {
+		res->data[i] = (mat1->data[i] * coef) + mat2->data[i];
+	}
+}
+
 /////////////////////////////
 // Matrix Vector Operation //
 ////////////////////////////

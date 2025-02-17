@@ -45,7 +45,8 @@ void vec_deallocate(Vector*); // Deallocate a vector
 
 // Operation
 void vec_add_ip(Vector*, Vector*, Vector*); // Element wise addition in place
+void vec_sub_ip(Vector*, Vector*, Vector*); // Element wise subtraction in place
 void vec_mul_ip(Vector*, Vector*, Vector*); // Element wise multiplication in place
-void vec_dot_ip(Vector*, Vector*, Vector*); // Perform dot product between 2 vectors in place
+void vec_coef_add_ip(Vector*, Vector*, float, Vector*); // Element wise multiplication with scalar coefficient in place
 
 #endif

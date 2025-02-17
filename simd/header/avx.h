@@ -13,7 +13,6 @@ void* avx_allocate(size_t);
 void avx_add(float*, float*, float*);
 void avx_mul(float*, float*, float*);
 void avx_madd(float*, float*, float*, float*);
-float avx_dot(float*, float*);
 
 #endif
 #endif

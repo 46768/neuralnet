@@ -57,8 +57,8 @@ int main() {
 	for (int i = 0; i < test_ubound; i++) {
 		ffn_run(model, test_input[i]);
 		printr("Testing %d/%d\r", i + 1, test_ubound);
-		newline();
 	}
+	newline();
 
 	// Network forward propagation
 	vec_dump(ffn_run(model, train_input[0]));

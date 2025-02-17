@@ -32,9 +32,15 @@ void ffn_apply_gradient(FFN* nn, FFNGradientPool* pool, float learning_rate) {
 			continue;
 		}
 		Matrix* gradient_w_l = &(pool->gradient_w[l]);
+		Matrix* weight_l = nn->weights[l];
 		Vector* gradient_b_l = &(pool->gradient_b[l+1]);
+		Vector* bias_l = nn->biases[l];
 
 		// Apply weight gradient
+		matrix_coef_add_ip(gradient_w_l, weight_l, -learning_rate, weight_l);
+		vec_coef_add_ip(gradient_b_l, bias_l, -learning_rate, bias_l);
+
+		/*
 		for (size_t y = 0; y < gradient_w_l->sy; y++) {
 			(nn->biases)[l]->data[y] -= learning_rate*gradient_b_l->data[y];
 			for (size_t x = 0; x < gradient_w_l->sx; x++) {
@@ -42,6 +48,7 @@ void ffn_apply_gradient(FFN* nn, FFNGradientPool* pool, float learning_rate) {
 					learning_rate*matrix_get(gradient_w_l, x, y);
 			}
 		}
+		*/
 	}
 }
 

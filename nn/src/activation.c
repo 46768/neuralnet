@@ -65,15 +65,19 @@ char* resolve_activation_fn_str(ActivationFNEnum fn_type) {
 //////////
 
 void nn_none_fn(Vector* z, Vector* a) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != a->dimension) {
 		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
 	}
+#endif
 	memcpy(a->data, z->data, z->dimension*sizeof(float));
 }
 void nn_none_fn_d(Vector* z, Vector* d) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != d->dimension) {
 		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		d->data[i] = 1.0f;
 	}
@@ -84,17 +88,21 @@ void nn_none_fn_d(Vector* z, Vector* d) {
 //////////
 
 void nn_relu(Vector* z, Vector* a) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != a->dimension) {
 		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		if (z->data[i] > 0) a->data[i] = z->data[i];
 	}
 }
 void nn_relu_d(Vector* z, Vector* d) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != d->dimension) {
 		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		if (z->data[i] > 0) {
 			d->data[i] = 1.0f;
@@ -104,17 +112,21 @@ void nn_relu_d(Vector* z, Vector* d) {
 	}
 }
 void nn_crelu(Vector* z, Vector* a) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != a->dimension) {
 		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		if (z->data[i] > 0) a->data[i] = fminf(z->data[i], 1.0f);
 	}
 }
 void nn_crelu_d(Vector* z, Vector* d) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != d->dimension) {
 		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		if (0 > z->data[i] || z->data[i] > 1) {
 			d->data[i] = 1.0f;
@@ -130,17 +142,21 @@ void nn_crelu_d(Vector* z, Vector* d) {
 
 static inline float _sigmoid(float x) { return (float)1/(1+expf(-x)); }
 void nn_sigmoid(Vector* z, Vector* a) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != a->dimension) {
 		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		a->data[i] = _sigmoid(z->data[i]);
 	}
 }
 void nn_sigmoid_d(Vector* z, Vector* d) {
+#ifndef NO_BOUND_CHECK
 	if (z->dimension != d->dimension) {
 		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
 	}
+#endif
 	for (size_t i = 0; i < z->dimension; i++) {
 		float sig = _sigmoid(z->data[i]);
 		d->data[i] = sig*(1-sig);

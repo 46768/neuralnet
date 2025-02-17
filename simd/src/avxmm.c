@@ -29,16 +29,13 @@ AVX256 avxmm256_add(AVX256 a256, AVX256 b256) {
 AVX256 avxmm256_mul(AVX256 a256, AVX256 b256) {
 	return _mm256_mul_ps(a256, b256);
 };
+AVX256 avxmm256_madd(AVX256 a256, AVX256 b256, AVX256 c256) {
 #ifdef SIMD_AVX2
-AVX256 avxmm256_madd(AVX256 a256, AVX256 b256, AVX256 c256) {
 	return _mm256_fmadd_ps(a256, b256, c256);
-};
 #else
-AVX256 avxmm256_madd(AVX256 a256, AVX256 b256, AVX256 c256) {
 	return _mm256_add_ps(_mm256_mul_ps(a256, b256), c256);
-	return _mm256_fmadd_ps(a256, b256, c256);
-};
 #endif
+};
 
 // Pack/Unpacking Operation
 

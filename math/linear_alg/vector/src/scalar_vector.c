@@ -56,19 +56,18 @@ void vec_mul_ip(Vector* vec1, Vector* vec2, Vector* res) {
 	return _vec_apply(vec1, vec2, res, f_mul);
 }
 
-// Perform dot product between 2 vectors
-float vec_dot(Vector* vec1, Vector* vec2) {
+// Element wise multiplication with scalar coefficient in place
+void vec_coef_add_ip(Vector* vec1, Vector* vec2, float coef, Vector* res) {
 #ifndef NO_BOUND_CHECK
 	if (vec1->dimension != vec2->dimension) {
-		fatal("Vector 1 and 2 dimension mismatched: %d to %d", vec1->dimension, vec2->dimension);
+		fatal("Mismatched vec1:vec2 dimension %zu:%zu", vec1->dimension, vec2->dimension);
+	}
+	if (vec1->dimension != res->dimension) {
+		fatal("Mismatched vec1:res dimension %zu:%zu", vec1->dimension, res->dimension);
 	}
 #endif
-	float dot_prod = 0;
-
-	for (size_t i = 0; i < vec1->dimension; i++) {
-		dot_prod += (vec1->data)[i] * (vec2->data)[i];
+	for (int i = 0; i < (int)(vec1->dimension); i++) {
+		res->data[i] = (vec1->data[i] * coef) + vec2->data[i];
 	}
-
-	return dot_prod;
 }
 #endif
