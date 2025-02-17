@@ -1,23 +1,31 @@
-#ifndef FFN_INIT_H
-#define FFN_INIT_H
+#ifndef FFN_TYPE_H
+#define FFN_TYPE_H
 
 #include <stdlib.h>
 
-#include "ffn_type.h"
+#include "activation.h"
+#include "cost.h"
+#include "initer.h"
 
+typedef enum {
+	Dense,
+	PassThrough
+} LayerType;
 
-// Creation
-FFN* ffn_init(); // Create a feed forward network
+typedef struct {
+	size_t node_cnt;
+	ActivationFNEnum fn_type;
+	IniterEnum w_init_type;
+	IniterEnum b_init_type;
+	LayerType l_type;
+} LayerData;
 
-// Network Settings
-void ffn_init_set_cost_fn(FFN*, CostFnEnum); // Set network's cost function
-
-// Layer initialization
-void ffn_init_dense(FFN*, size_t, ActivationFNEnum, IniterEnum, IniterEnum); // Push a dense (fully connected) layer
-void ffn_init_passthru(FFN*, ActivationFNEnum); // Push a pass through layer
-void ffn_init_params(FFN*); // Finalize a network's layer
-
-// Memory management
-void ffn_deallocate(FFN*); // Deallocate a network
+// Feed forwad network type definition
+typedef struct {
+	size_t hidden_size;	// Number of layers
+	size_t hidden_capacity; // Maximum layer count
+	LayerData** hidden_layers; // Layer size array
+	CostFnEnum cost_fn_enum;
+} FFNParams;
 
 #endif

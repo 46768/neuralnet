@@ -1,11 +1,13 @@
 #include "ffn_mempool.h"
 
-#include "ffn_type.h"
+#include "allocator.h"
 
 #include "vector.h"
 #include "matrix.h"
 
-#include "allocator.h"
+#include "activation.h"
+
+#include "ffn_init.h"
 
 #ifdef SIMD_AVX
 #include "avx.h"
@@ -16,20 +18,51 @@
 #define _pool_pad(s) 0
 #endif
 
-/**
- * \brief Allocate a propagation pool with known layer size
- *
- * Allocates a forward propagation memory pool with known layer count, activation size and preactivation size sums
- *
- * \param layer_cnt Layer count in the network
- * \param padded_size_sum Sum of all layer's size in the network padded with vec_get_size
- * \param nn Feedforward network data
- *
- * \return A memory pool for forward propagation activations
- *
- * \since 0.0.1.1
- */
-FFNPropagationPool* _ffn_init_ppool(size_t layer_cnt, size_t padded_size_sum, FFN* nn) {
+FFNParameterPool* _ffn_init_papool(size_t layer_cnt, size_t mat_size_sum, size_t vec_size_sum, FFNParams* nn) {
+	FFNParameterPool* papool = (FFNParameterPool*)allocate(sizeof(FFNParameterPool));
+	// ((layer_cnt-1)*sizeof(Matrix)) + ((layer_cnt-1)*sizeof(Vector))
+	// + ((layer_cnt-1)*(sizeof(ActivationFn)+sizeof(ActivationFnD)))
+	size_t mdata_size = ((layer_cnt-1) * (sizeof(Matrix) + sizeof(Vector)
+			+ sizeof(ActivationFn) + sizeof(ActivationFnD)));
+	size_t padding = _pool_pad(mdata_size);
+
+	papool->data = _pool_alloc(
+			mdata_size // Space for matrix + Vector pointer
+			+ padding // Padding for alignment
+			+ ((mat_size_sum + vec_size_sum) * sizeof(float)) // Space for matrix + vector data
+			);
+
+	Matrix* mat_ptr = (Matrix*)(papool->data);
+	Vector* vec_ptr = (Vector*)(mat_ptr + layer_cnt - 1);
+	ActivationFn* act_fn_pptr = (ActivationFn*)(vec_ptr + layer_cnt - 1);
+	ActivationFnD* act_fn_d_pptr = (ActivationFnD*)(act_fn_pptr + layer_cnt - 1);
+
+	float* mat_dat_ptr = (float*)((char*)(act_fn_d_pptr + layer_cnt - 1) + padding);
+	float* vec_dat_ptr = mat_dat_ptr + mat_size_sum;
+
+	size_t mat_accum_size = 0;
+	size_t vec_accum_size = 0;
+	for (int l = 0; l < ((int)layer_cnt-1); l++) {
+		size_t l_size = nn->hidden_layers[l]->node_cnt;
+		size_t l1_size = nn->hidden_layers[l+1]->node_cnt;
+
+		matrix_init(l_size, l1_size, mat_dat_ptr + mat_accum_size, &mat_ptr[l]);
+		mat_accum_size += matrix_calc_size(l_size, l1_size);
+
+		vec_init(l1_size, vec_dat_ptr + vec_accum_size, &vec_ptr[l]);
+		vec_accum_size += vec_calc_size(l_size);
+	}
+
+	papool->biases = vec_ptr;
+	papool->weights = mat_ptr;
+	papool->activation_fn = act_fn_pptr;
+	papool->activation_fn_d = act_fn_d_pptr;
+	papool->layer_cnt = layer_cnt;
+
+	return papool;
+}
+
+FFNPropagationPool* _ffn_init_prpool(size_t layer_cnt, size_t padded_size_sum, FFNParams* nn) {
 	FFNPropagationPool* ppool = (FFNPropagationPool*)allocate(sizeof(FFNPropagationPool));
 	size_t vec_mdata_size = (layer_cnt * sizeof(Vector)) << 1;
 	size_t padding = _pool_pad(vec_mdata_size);
@@ -57,27 +90,15 @@ FFNPropagationPool* _ffn_init_ppool(size_t layer_cnt, size_t padded_size_sum, FF
 
 	ppool->activations = act_vec_ptr;
 	ppool->preactivations = preact_vec_ptr;
+	ppool->layer_cnt = layer_cnt;
 
 	return ppool;
 }
 
-/**
- * \brief Allocate a gradient pool with known layer size
- *
- * Allocates a gradient memory pool with known layer count, weight matrix size and bias size sum
- *
- * \param layer_cnt Layer count in the network
- * \param mat_size_sum Sum of all layer's weight matrix size (padded with matrix_get_size)
- * \param vec_size_sum Sum of all layer's bias vector size (padded with vec_get_size)
- * \param nn Feedforward network data
- *
- * \return A memory pool for gradient values
- *
- * \since 0.0.1.1
- */
-FFNGradientPool* _ffn_init_gpool(size_t layer_cnt, size_t mat_size_sum, size_t vec_size_sum, FFN* nn) {
+FFNGradientPool* _ffn_init_gpool(size_t layer_cnt, size_t mat_size_sum, size_t vec_size_sum, FFNParams* nn) {
 	FFNGradientPool* gpool = (FFNGradientPool*)allocate(sizeof(FFNGradientPool));
-	size_t mdata_size = ((layer_cnt-1) * sizeof(Matrix)) + (layer_cnt * sizeof(Vector));
+	// ((layer_cnt-1) * sizeof(Matrix)) + ((layer_cnt+1) * sizeof(Vector));
+	size_t mdata_size = (layer_cnt * (sizeof(Matrix) + sizeof(Vector))) - sizeof(Matrix);
 	size_t padding = _pool_pad(mdata_size);
 
 	gpool->data = _pool_alloc(
@@ -109,25 +130,12 @@ FFNGradientPool* _ffn_init_gpool(size_t layer_cnt, size_t mat_size_sum, size_t v
 
 	gpool->gradient_b = vec_ptr;
 	gpool->gradient_w = mat_ptr;
+	gpool->layer_cnt = layer_cnt;
 
 	return gpool;
 }
 
-/**
- * \brief Allocate an intermediate pool with known layer size
- *
- * Allocates a intermediate memory pool with known layer count and sizes
- *
- * \param layer_cnt Layer count in the network
- * \param mat_size_sum Sum of all layer's weight matrix size (padded with matrix_get_size)
- * \param vec_size_sum Sum of all layer's bias vector size (padded with vec_get_size)
- * \param nn Feedforward network data
- *
- * \return A memory pool for holding intermediates
- *
- * \since 0.0.1.1
- */
-FFNIntermediatePool* _ffn_init_ipool(size_t layer_cnt, size_t mat_size_sum, size_t vec_size_sum, FFN* nn) {
+FFNIntermediatePool* _ffn_init_ipool(size_t layer_cnt, size_t mat_size_sum, size_t vec_size_sum, FFNParams* nn) {
 	FFNIntermediatePool* ipool = (FFNIntermediatePool*)allocate(sizeof(FFNIntermediatePool));
 	size_t mdata_size = (((layer_cnt-1) * sizeof(Matrix)) << 1) + ((layer_cnt+1) * sizeof(Vector));
 	size_t padding = _pool_pad(mdata_size);
@@ -167,11 +175,26 @@ FFNIntermediatePool* _ffn_init_ipool(size_t layer_cnt, size_t mat_size_sum, size
 	ipool->weight_trsp = mat_trsp_ptr;
 	ipool->err_coef = err_coef_ptr;
 	ipool->a_deriv = a_deriv_ptr;
+	ipool->layer_cnt = layer_cnt;
 
 	return ipool;
 }
 
-FFNPropagationPool* ffn_init_propagation_pool(FFN* nn) {
+FFNParameterPool* ffn_init_parameter_pool(FFNParams* nn) {
+	size_t L = nn->hidden_size;
+	LayerData** l_data = nn->hidden_layers;
+
+	size_t mat_padded_size = 0;
+	size_t vec_padded_size = 0;
+
+	for (int l = 0; l < ((int)L-1); l++) {
+		vec_padded_size += vec_calc_size(l_data[l+1]->node_cnt);
+		mat_padded_size += matrix_calc_size(l_data[l]->node_cnt, l_data[l+1]->node_cnt);
+	}
+
+	return _ffn_init_papool(L, mat_padded_size, vec_padded_size, nn);
+}
+FFNPropagationPool* ffn_init_propagation_pool(FFNParams* nn) {
 	size_t L = nn->hidden_size;
 	LayerData** l_data = nn->hidden_layers;
 
@@ -180,9 +203,9 @@ FFNPropagationPool* ffn_init_propagation_pool(FFN* nn) {
 		total_padded_size += vec_calc_size(l_data[l]->node_cnt);
 	}
 
-	return _ffn_init_ppool(L, total_padded_size, nn);
+	return _ffn_init_prpool(L, total_padded_size, nn);
 }
-FFNGradientPool* ffn_init_gradient_pool(FFN* nn) {
+FFNGradientPool* ffn_init_gradient_pool(FFNParams* nn) {
 	size_t L = nn->hidden_size;
 	LayerData** l_data = nn->hidden_layers;
 
@@ -197,7 +220,7 @@ FFNGradientPool* ffn_init_gradient_pool(FFN* nn) {
 
 	return _ffn_init_gpool(L, mat_padded_size, vec_padded_size, nn);
 }
-FFNIntermediatePool* ffn_init_intermediate_pool(FFN* nn) {
+FFNIntermediatePool* ffn_init_intermediate_pool(FFNParams* nn) {
 	size_t L = nn->hidden_size;
 	LayerData** l_data = nn->hidden_layers;
 
@@ -213,7 +236,7 @@ FFNIntermediatePool* ffn_init_intermediate_pool(FFN* nn) {
 	return _ffn_init_ipool(L, mat_padded_size, vec_padded_size + l_data[L-1]->node_cnt, nn);
 }
 
-FFNMempool* ffn_init_pool(FFN* nn) {
+FFNMempool* ffn_init_pool(FFNParams* nn) {
 	FFNMempool* pool = (FFNMempool*)allocate(sizeof(FFNMempool));
 	size_t L = nn->hidden_size;
 	LayerData** l_data = nn->hidden_layers;
@@ -228,16 +251,20 @@ FFNMempool* ffn_init_pool(FFN* nn) {
 		mat_padded_size += matrix_calc_size(l_data[l+1]->node_cnt, l_data[l]->node_cnt);
 	}
 
-	pool->propagation = _ffn_init_ppool(L, vec_padded_size, nn);
+	pool->propagation = _ffn_init_prpool(L, vec_padded_size, nn);
 	pool->gradients = _ffn_init_gpool(L, mat_padded_size, vec_padded_size, nn);
 	pool->intermediates = _ffn_init_ipool(L, mat_padded_size, vec_padded_size + vec_calc_size(l_data[L-1]->node_cnt), nn);
 
 	return pool;
 }
 
-void ffn_deallocate_propagation_pool(FFNPropagationPool* ppool) {
-	deallocate(ppool->data);
-	deallocate(ppool);
+void ffn_deallocate_parameter_pool(FFNParameterPool* papool) {
+	deallocate(papool->data);
+	deallocate(papool);
+}
+void ffn_deallocate_propagation_pool(FFNPropagationPool* prpool) {
+	deallocate(prpool->data);
+	deallocate(prpool);
 }
 void ffn_deallocate_gradient_pool(FFNGradientPool* gpool) {
 	deallocate(gpool->data);

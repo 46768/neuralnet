@@ -13,7 +13,6 @@
 #include "generator.h"
 
 #include "ffn.h"
-#include "ffn_util.h"
 
 int main() {
 	python_create_venv(PROJECT_PATH "/requirements.txt");

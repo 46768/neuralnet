@@ -11,7 +11,6 @@
 #include "generator.h"
 
 #include "ffn.h"
-#include "ffn_util.h"
 
 int main() {
 	debug("init");
@@ -36,21 +35,15 @@ int main() {
 	ffn_set_cost_fn(model, BCE);
 	ffn_finalize(model);
 
-	info("Pre train");
-	ffn_dump_data(model->nn);
-
 	for (int t = 0; t < 100000; t++) {
 		float loss = ffn_train(model, vecs, targets, 4, 0.01, -1);
 		fprintf(training_csv->file_pointer, "%.10f,", loss);
 	}
 
-	info("Post train");
-	ffn_dump_data(model->nn);
-
 	info("Testing model");
 	for (int i = 0; i < 4; i++) {
-		ffn_run(model, vecs[i]);
-		ffn_dump_output(model->pool);
+		vec_dump(ffn_run(model, vecs[i]));
+		newline();
 	}
 
 	char* fpath = (char*)allocate(strlen(training_csv->filename));

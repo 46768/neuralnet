@@ -7,8 +7,9 @@
 #define MATRIX_LIB_TYPE "Scalar"
 #endif
 
+#include "logger.h" // Used in inline function
+
 #include "vector.h"
-#include "logger.h"
 
 // Matrix type definition
 typedef struct {
@@ -62,7 +63,7 @@ static inline size_t matrix_calc_ssize(size_t size) {
 /**
  * \brief Returns amount of floats actually allocated
  *
- * Scalar: no modification
+ * Scalar: padded to nearest multiple of 2
  * AVX: padded to nearest multiple of 8
  *
  * @return The amount of floats actually allocated depending on instruction set used

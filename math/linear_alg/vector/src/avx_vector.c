@@ -3,11 +3,11 @@
 
 #include <string.h>
 
-#include "avx.h"
-#include "avxmm.h"
-
 #include "logger.h"
 #include "allocator.h"
+
+#include "avx.h"
+#include "avxmm.h"
 
 //////////////
 // Creation //

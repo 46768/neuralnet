@@ -1,7 +1,7 @@
 #ifdef SIMD_AVX
-#include <immintrin.h>
-
 #include "avxmm.h"
+
+#include <immintrin.h>
 
 // Loading/Unloading
 

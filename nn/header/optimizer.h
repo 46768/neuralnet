@@ -1,20 +1,18 @@
 #ifndef NN_OPTIMIZER_H
 #define NN_OPTIMIZER_H
 
-#include "matrix.h"
-
 // Optimizer Function Types
 typedef void(*OptimizerFn)(float*, float*, void*); // Optimizer Function
 
 // Batch Type Enum
 typedef enum {
-	FullBatch,
+	Stochastic=0,
 	MiniBatch,
-	Stochastic
+	FullBatch
 } BatchTypeEnum;
 // Optimizer Function Enum
 typedef enum {
-	GD,
+	GD=0,
 	Momentum
 } OptimizerFnEnum;
 

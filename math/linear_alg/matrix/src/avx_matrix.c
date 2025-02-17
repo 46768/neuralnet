@@ -8,7 +8,6 @@
 
 #include "vector.h"
 
-#include "logger.h"
 #include "allocator.h"
 
 //////////////

@@ -1,5 +1,7 @@
 #include "optimizer.h"
 
+#include <stdlib.h>
+
 OptimizerFn resolve_optimizer_fn(OptimizerFnEnum fn) {
 	switch(fn) {
 		case GD:

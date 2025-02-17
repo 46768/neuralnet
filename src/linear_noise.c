@@ -34,16 +34,16 @@ int main() {
 	ffn_set_cost_fn(model, MSE);
 	ffn_finalize(model);
 
-	info("Pre train");
-	ffn_dump_data(model->nn);
+	info("Pre train:");
+	ffn_dump_param(model->papool);
 
 	for (int t = 0; t < 1000; t++) {
 		float loss = ffn_train(model, vecs, targets, REGS_RANGE - REGS_RANGEL, 0.01, -1);
 		fprintf(training_csv->file_pointer, "%.10f,", loss);
 	}
 
-	info("Post train");
-	ffn_dump_data(model->nn);
+	info("Post train:");
+	ffn_dump_param(model->papool);
 
 	char* fpath = (char*)allocate(strlen(training_csv->filename));
 	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));

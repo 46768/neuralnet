@@ -11,11 +11,15 @@
 #include "optimizer.h"
 
 #include "ffn_mempool.h"
-#include "ffn_type.h"
+#include "ffn_init.h"
 
 typedef struct {
-	FFN* nn;
-	FFNMempool* pool;
+	FFNParams* init_data;
+	FFNParameterPool* papool;
+	FFNPropagationPool* prpool;
+	FFNGradientPool* gpool;
+	FFNIntermediatePool* ipool;
+
 	OptimizerFnEnum optimizer;
 	booltype immutable;
 } FFNModel;

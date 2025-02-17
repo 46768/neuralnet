@@ -13,7 +13,6 @@
 #include "generator.h"
 
 #include "ffn.h"
-#include "ffn_util.h"
 
 int main() {
 	FileData* training_csv = get_file_write("nmist_loss.csv");
@@ -68,7 +67,7 @@ int main() {
 		float test_loss = 0.0f;
 		for (int i = 0; i < test_ubound; i++) {
 			Vector* res = ffn_run(model, test_input[i]);
-			test_loss += model->nn->cost_fn(res, test_target[i]);
+			test_loss += model->papool->cost_fn(res, test_target[i]);
 			printr("Testing %d/%d\r", i + 1, test_ubound);
 		}
 		newline();
