@@ -4,18 +4,34 @@
 #include "matrix.h"
 
 // Optimizer Function Types
-typedef void(*OptimizerFn)(Matrix*, Matrix*); // Optimizer Function
+typedef void(*OptimizerFn)(float*, float*, void*); // Optimizer Function
 
-// Cost Function Enum
+// Batch Type Enum
 typedef enum {
-	SGD,
+	FullBatch,
+	MiniBatch,
+	Stochastic
+} BatchTypeEnum;
+// Optimizer Function Enum
+typedef enum {
+	GD,
 	Momentum
 } OptimizerFnEnum;
 
-// Gradient Descent
-void nn_gradient_descent(Matrix*, Matrix*);
+// Resolvers
 
-// Momentum Optimizer
-void nn_momentun_optimize(Matrix*, Matrix*);
+OptimizerFn resolve_optimizer_fn(OptimizerFnEnum);
+
+// Optimizers
+
+typedef struct {
+
+} GradientDescentExtra;
+void nn_gradient_descent(float*, float*, void*);
+
+typedef struct {
+
+} MomentumExtra;
+void nn_momentun_optimize(float*, float*, void*);
 
 #endif
