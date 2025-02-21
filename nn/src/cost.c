@@ -35,12 +35,14 @@ CostFnD resolve_cost_fn_d(CostFnEnum fn_type) {
 ////////////////////////
 
 float nn_mse(Vector* actual, Vector* target) {
+#ifndef NO_BOUND_CHECK
 	if (actual->dimension != target->dimension) {
 		fatal("Mismatched z to t size: z: %zu t: %zu",
 				actual->dimension,
 				target->dimension
 			 );
 	}
+#endif
 
 	float cost = 0;
 	for (size_t i = 0; i < actual->dimension; i++) {
@@ -51,6 +53,7 @@ float nn_mse(Vector* actual, Vector* target) {
 	return cost/(float)actual->dimension;
 }
 void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
+#ifndef NO_BOUND_CHECK
 	if (actual->dimension != target->dimension) {
 		fatal("Mismatched z to t size: z: %zu t: %zu",
 				actual->dimension,
@@ -63,6 +66,7 @@ void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
 				driv->dimension
 			 );
 	}
+#endif
 
 	// dMse/dwrt_x = 2(wrt_x - target_x)/wrt.dim
 	float driv_coef = 2/(float)target->dimension;
@@ -78,12 +82,14 @@ void nn_mse_d(Vector* actual, Vector* target, Vector* driv) {
 ////////////////////////////////////
 
 float nn_ccel(Vector* actual, Vector* target) {
+#ifndef NO_BOUND_CHECK
 	if (actual->dimension != target->dimension) {
 		fatal("Mismatched z to t size, z: %zu t: %zu",
 				actual->dimension,
 				target->dimension
 			 );
 	}
+#endif
 
 	float loss = 0;
 	for (size_t i = 0; i < actual->dimension; i++) {
@@ -100,6 +106,7 @@ float nn_ccel(Vector* actual, Vector* target) {
 	return loss;
 }
 void nn_ccel_d(Vector* actual, Vector* target, Vector* res) {
+#ifndef NO_BOUND_CHECK
 	if (actual->dimension != target->dimension) {
 		fatal("Mismatched z to t size, z: %zu t: %zu",
 				actual->dimension,
@@ -112,6 +119,7 @@ void nn_ccel_d(Vector* actual, Vector* target, Vector* res) {
 				res->dimension
 			 );
 	}
+#endif
 
 	for (size_t i = 0; i < actual->dimension; i++) {
 		if (0.0f > target->data[i] || target->data[i] > 1.0f) {
@@ -129,6 +137,7 @@ void nn_ccel_d(Vector* actual, Vector* target, Vector* res) {
 ///////////////////////////////
 
 float nn_bcel(Vector* actual, Vector* target) {
+#ifndef NO_BOUND_CHECK
 	if (actual->dimension != target->dimension) {
 		fatal("Mismatched z to t size, z: %zu t: %zu",
 				actual->dimension,
@@ -138,9 +147,13 @@ float nn_bcel(Vector* actual, Vector* target) {
 	if (actual->dimension != 1) {
 		fatal("Using BCEL for non 1D vector, use CCEL instead");
 	}
+#endif
+#ifndef NO_STATE_CHECK
 	if (0.0f > actual->data[0] || actual->data[0] > 1.0f) {
 		fatal("actual not a probability, got %f", actual->data[0]);
 	}
+#endif
+
 	float clipped_a = fmaxf(fminf(actual->data[0], 1.0-1e-15), 1e-15);
 	//float clipped_a = actual->data[0];
 	debug("clipped activation: %.10f", clipped_a);
@@ -155,6 +168,7 @@ float nn_bcel(Vector* actual, Vector* target) {
 	}
 }
 void nn_bcel_d(Vector* actual, Vector* target, Vector* res) {
+#ifndef NO_BOUND_CHECK
 	if (actual->dimension != target->dimension) {
 		fatal("Mismatched z to t size, z: %zu t: %zu",
 				actual->dimension,
@@ -170,9 +184,12 @@ void nn_bcel_d(Vector* actual, Vector* target, Vector* res) {
 	if (actual->dimension != 1) {
 		fatal("Using BCELd for non 1D vector, use CCELd instead");
 	}
+#endif
+#ifndef NO_STATE_CHECK
 	if (0.0f > target->data[0] || target->data[0] > 1.0f) {
 		fatal("target not a probability, got %f", target->data[0]);
 	}
+#endif
 	float clipped_a = fmaxf(fminf(actual->data[0], 1.0-1e-15), 1e-15);
 	res->data[0] = (clipped_a - target->data[0]) / (clipped_a * (1 - clipped_a));
 }

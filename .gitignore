@@ -2,9 +2,14 @@
 target/
 debug/
 prof/
+prod/
 
 # Clang cache
 .cache/
 
 # Data files
 data/
+
+# Doxygen documentation
+html/
+latex/

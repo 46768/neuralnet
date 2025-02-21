@@ -5,6 +5,7 @@
 
 // Linear Regression Generator
 void generate_linear_regs(int, int, float, float, Vector***, Vector***);
+void generate_noised_linear_regs(int, int, float, float, Vector***, Vector***);
 
 // Binary XOR Generator
 void generate_xor(int*, int*, Vector***, Vector***);

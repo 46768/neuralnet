@@ -1,162 +1,160 @@
+#include "ffn.h"
 #include "ffn_init.h"
 
-#include "activation.h"
-#include "cost.h"
-#include "initer.h"
+#include <string.h>
 
-#include <stdlib.h>
-
-#include "booltype.h"
-#include "logger.h"
 #include "allocator.h"
 
+#ifdef SIMD_AVX
+#include "avx.h"
+#define _init_alloc(s) avx_allocate(s)
+#else
+#define _init_alloc(s) allocate(s)
+#endif
 
-//////////////
-// Creation //
-//////////////
+// Initialization
 
-// Create a feed forward network
-FFN* ffn_init() {
-	FFN* ffn = (FFN*)allocate(sizeof(FFN));
-	ffn->hidden_size = 0;
-	ffn->hidden_capacity = 10;
-	ffn->hidden_layers = (LayerData**)callocate(ffn->hidden_capacity, sizeof(LayerData*));
-	ffn->immutable = FALSE;
+FFNModel* ffn_new_model() {
+	FFNModel* model = (FFNModel*)callocate(1, sizeof(FFNModel));
+	FFNParams* init_data = (FFNParams*)allocate(sizeof(FFNParams));
 
-	return ffn;
+	init_data->hidden_size = 0;
+	init_data->hidden_capacity = 10;
+	init_data->hidden_layers = (LayerData**)callocate(init_data->hidden_capacity, sizeof(LayerData*));
+	init_data->cost_fn_enum = -1;
+
+	model->init_data = init_data;
+	model->optimizer = 0;
+	model->immutable = FALSE;
+	return model;
 }
 
-//////////////////////
-// Network settings //
-//////////////////////
-
-// Set network's cost function
-void ffn_set_cost_fn(FFN* nn, CostFnEnum cost_type) {
-	if (nn->immutable) {
-		error("Unable to modify ffn: Immutable");
-		return;
+static inline void _ffn_check_immutability(FFNModel* model) {
+#ifndef NO_STATE_CHECK
+	if (model->immutable) {
+		fatal("FFN Model already finalized");
 	}
-	nn->cost_fn = resolve_cost_fn(cost_type);
-	nn->cost_fn_d = resolve_cost_fn_d(cost_type);
+#endif
+}
+static inline void _ffn_check_cost_fn(FFNModel* model) {
+#ifndef NO_STATE_CHECK
+	if ((int)(model->init_data->cost_fn_enum) == -1) {
+		fatal("Cost function not set yet");
+	}
+#endif
 }
 
-//////////////////////////
-// Layer Initialization //
-//////////////////////////
-
-void _ffn_init_layer(FFN* nn, size_t size, ActivationFNEnum fn_type, LayerType l_type,
-		IniterEnum w_init_type, IniterEnum b_init_type) {
-	if (nn->immutable) {
-		error("Unable to modify ffn: Immutable");
-		return;
-	}
-	size_t hidden_size = nn->hidden_size;
-	if (hidden_size >= nn->hidden_capacity) {
-		nn->hidden_capacity += 10;
-		size_t hidden_cap = nn->hidden_capacity;
-		nn->hidden_layers = reallocate(nn->hidden_layers, hidden_cap*sizeof(LayerData*));
+void _ffn_init_layer(FFNParams* init_data, size_t size, LayerType l_type,
+		ActivationFNEnum fn_type,
+		IniterEnum w_init_type,
+		IniterEnum b_init_type
+		) {
+	size_t hidden_size = init_data->hidden_size;
+	if (hidden_size >= init_data->hidden_capacity) {
+		init_data->hidden_capacity += 10;
+		init_data->hidden_layers = reallocate(
+				init_data->hidden_layers,
+				init_data->hidden_capacity * sizeof(LayerData*)
+				);
 	}
 
-	(nn->hidden_layers)[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
-	LayerData* layer = (nn->hidden_layers)[hidden_size];
-	layer->node_cnt = size;
-	layer->fn_type = fn_type;
-	layer->l_type = l_type;
-	layer->w_init_type = w_init_type;
-	layer->b_init_type = b_init_type;
-	nn->hidden_size++;
+	init_data->hidden_layers[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
+	LayerData* l = init_data->hidden_layers[hidden_size];
+	l->node_cnt = size;
+	l->fn_type = fn_type;
+	l->w_init_type = w_init_type;
+	l->b_init_type = b_init_type;
+	l->l_type = l_type;
+	init_data->hidden_size++;
 }
 
-// Push a dense (fully connected) layer
-void ffn_init_dense(FFN* nn, size_t dense_size, ActivationFNEnum fn_type,
-		IniterEnum w_init_type, IniterEnum b_init_type) {
-	_ffn_init_layer(nn, dense_size, fn_type, Dense, w_init_type, b_init_type);
+void ffn_add_dense(FFNModel* model, size_t size, ActivationFNEnum activation_fn,
+		IniterEnum w_init, IniterEnum b_init) {
+	_ffn_check_immutability(model);
+	_ffn_init_layer(model->init_data, size, Dense, activation_fn, w_init, b_init);
 }
-
-void ffn_init_passthru(FFN* nn, ActivationFNEnum fn_type) {
-	size_t prev_size = nn->hidden_layers[nn->hidden_size-1]->node_cnt;
-	_ffn_init_layer(nn, prev_size, fn_type, PassThrough, Zero, Zero);
+void ffn_add_passthrough(FFNModel* model, ActivationFNEnum activation_fn) {
+	_ffn_check_immutability(model);
+	FFNParams* init_data = model->init_data;
+	size_t prev_size = init_data->hidden_layers[init_data->hidden_size-1]->node_cnt;
+	_ffn_init_layer(model->init_data, prev_size, Dense, activation_fn, Zero, Zero);
 }
-
-// Finalize a network's layer
-void ffn_init_params(FFN* nn) {
-	if (nn->cost_fn == NULL || nn->cost_fn_d == NULL) {
-		error("Network's cost function unset");
-		return;
-	}
-	if (nn->immutable) {
-		error("Unable to initialize ffn: Already initialized");
-		return;
-	}
-
-	// Allocate space for weights, biases, and activation functions and their derivative
-	size_t hidden_cnt = nn->hidden_size-1;
-	nn->weights = (Matrix**)allocate(hidden_cnt*sizeof(Matrix*));
-	nn->biases = (Vector**)allocate(hidden_cnt*sizeof(Vector*));
-	nn->layer_activation = (ActivationFn*)allocate(hidden_cnt*sizeof(ActivationFn));
-	nn->layer_activation_d = (ActivationFnD*)allocate(hidden_cnt*sizeof(ActivationFnD));
-
-	// Logs layer for debugging
-	LayerData** layer_data = nn->hidden_layers;
-	for (size_t l = 0; l < nn->hidden_size; l++) {
-		LayerData* layer_cur = layer_data[l];
-		debug("Layer Data:");
-		debug("Node count: %zu", layer_cur->node_cnt);
-		if (layer_cur->l_type == Dense) {
-			debug("Layer type: Dense");
-		} else if (layer_cur->l_type == PassThrough) {
-			debug("Layer type: PassThrough");
-		}
-		debug("Activation function: %s", resolve_activation_fn_str(layer_cur->fn_type));
+void ffn_add_layer(FFNModel* model, LayerData* l_data) {
+	FFNParams* init_data = model->init_data;
+	size_t hidden_size = init_data->hidden_size;
+	if (hidden_size >= init_data->hidden_capacity) {
+		init_data->hidden_capacity += 10;
+		init_data->hidden_layers = reallocate(
+				init_data->hidden_layers,
+				init_data->hidden_capacity * sizeof(LayerData*)
+				);
 	}
 
-	// Initialize the data
-	for (size_t l = 0; l < nn->hidden_size-1; l++) {
-		LayerData* layer_cur = layer_data[l];
-		LayerData* layer_nxt = layer_data[l+1];
+	init_data->hidden_layers[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
+	memcpy(init_data->hidden_layers[hidden_size], l_data, sizeof(LayerData));
+	init_data->hidden_size++;
+}
+void ffn_set_cost_fn(FFNModel* model, CostFnEnum cost_fn) {
+	_ffn_check_immutability(model);
+	model->init_data->cost_fn_enum = cost_fn;
+}
+void ffn_set_optimizer(FFNModel* model, Optimizer* optimizer) {
+	_ffn_check_immutability(model);
+	model->optimizer = optimizer;
+}
+void ffn_set_batch_type(FFNModel* model, BatchTypeEnum batch_type) {
+	model->batch_type = batch_type;
+}
+void ffn_set_batch_size(FFNModel* model, size_t batch_size) {
+	model->batch_size = batch_size;
+}
+void ffn_finalize(FFNModel* model) {
+	_ffn_check_cost_fn(model);
+	_ffn_check_immutability(model);
 
+	model->papool = ffn_init_parameter_pool(model->init_data);
+	model->prpool = ffn_init_propagation_pool(model->init_data);
+	model->gpool = ffn_init_gradient_pool(model->init_data);
+	model->ipool = ffn_init_intermediate_pool(model->init_data);
+	model->optimizer->buf = (float*)_init_alloc(model->gpool->base.data_size);
 
+	if (model->batch_type == FullBatch) {
+		model->batch_size = (size_t)(-1);
+	} else if (model->batch_type == Stochastic) {
+		model->batch_size = 1;
+	}
+	model->optimizer->batch_size = model->batch_size;
+
+	FFNParams* init_data = model->init_data;
+	FFNParameterPool* papool = model->papool;
+	LayerData** l_data = init_data->hidden_layers;
+
+	for (int l = 0; l < ((int)papool->base.layer_cnt-1); l++) {
+		LayerData* layer_cur = l_data[l];
+		LayerData* layer_nxt = l_data[l+1];
+		Matrix* weight = &(papool->weights[l]);
+		Vector* bias = &(papool->biases[l]);
 		size_t sx = layer_cur->node_cnt;
 		size_t sy = layer_nxt->node_cnt;
 
-		// Initialize the data structure
-		(nn->weights)[l] = matrix_iden_xy(sx, sy);
-		(nn->biases)[l] = vec_zero(sy);
-		(nn->layer_activation)[l] = resolve_activation_fn(layer_cur->fn_type);
-		(nn->layer_activation_d)[l] = resolve_activation_fn_d(layer_cur->fn_type);
+		matrix_iden(weight);
+		papool->activation_fn[l] = resolve_activation_fn(layer_cur->fn_type);
+		papool->activation_fn_d[l] = resolve_activation_fn_d(layer_cur->fn_type);
 
-		// Initialize the actual data
 		if (layer_nxt->l_type == Dense) {
 			Initer w_initer = resolve_initer(layer_cur->w_init_type);
 			Initer b_initer = resolve_initer(layer_cur->b_init_type);
 			for (size_t y = 0; y < sy; y++) {
-				((nn->biases[l])->data)[y] = b_initer(sx);
+				bias->data[y] = b_initer(sx);
 				for (size_t x = 0; x < sx; x++) {
-					((nn->weights[l])->data)[y*sx + x] = w_initer(sx);
+					*matrix_get_ptr(weight, x, y) = w_initer(sx);
 				}
 			}
 		}
 	}
 
-	nn->immutable = TRUE;
-}
+	papool->cost_fn = resolve_cost_fn(init_data->cost_fn_enum);
+	papool->cost_fn_d = resolve_cost_fn_d(init_data->cost_fn_enum);
 
-///////////////////////
-// Memory Management //
-///////////////////////
-
-// Deallocate a network
-void ffn_deallocate(FFN* nn) {
-	for (size_t i = 0; i < nn->hidden_size-1; i++) {
-		matrix_deallocate(nn->weights[i]);
-		vec_deallocate(nn->biases[i]);
-		deallocate(nn->hidden_layers[i]);
-	}
-	deallocate(nn->hidden_layers[nn->hidden_size-1]);
-	deallocate(nn->weights);
-	deallocate(nn->biases);
-	deallocate(nn->hidden_layers);
-	deallocate(nn->layer_activation);
-	deallocate(nn->layer_activation_d);
-	deallocate(nn);
+	model->immutable = TRUE;
 }

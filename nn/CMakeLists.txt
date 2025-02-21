@@ -4,6 +4,7 @@ include_directories(
 )
 file(GLOB srcs
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/optimizer/*.c"
 )
 
 # Define neural network libraries
@@ -18,6 +19,6 @@ target_include_directories(NeuralNetwork PUBLIC
 
 # Link other libraries to the library
 target_link_libraries(NeuralNetwork PUBLIC MathLinearAlg)
-target_link_libraries(NeuralNetwork PUBLIC compiler_flags)
+target_link_libraries(NeuralNetwork PUBLIC CompilerFlags)
 target_link_libraries(NeuralNetwork PUBLIC m)
 target_link_libraries(NeuralNetwork PRIVATE ComLib)

@@ -12,14 +12,13 @@
 
 #include "generator.h"
 
-#include "ffn_init.h"
-#include "ffn_fpropagate.h"
-#include "ffn_bpropagate.h"
-#include "ffn_mempool.h"
-#include "ffn_util.h"
+#include "ffn.h"
+#include "ffn_io.h"
+#include "optimizer.h"
 
 int main() {
 	FileData* training_csv = get_file_write("nmist_loss.csv");
+	FileData* param_bin = get_file_write("nmist_param.bin");
 	fprintf(training_csv->file_pointer, "2,");
 	fprintf(training_csv->file_pointer, "Training loss,");
 	fprintf(training_csv->file_pointer, "Validation loss,");
@@ -49,46 +48,35 @@ int main() {
 			);
 
 	// Network Building
-	FFN* nn = ffn_init();
-	ffn_init_dense(nn, 784, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 16, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 16, Sigmoid, Xavier, RandomEN2);
-	ffn_init_dense(nn, 10, None, Zero, Zero);
-	ffn_init_passthru(nn, Softmax);
-	ffn_init_passthru(nn, None);
-	ffn_set_cost_fn(nn, CCE);
-	ffn_init_params(nn);
-	FFNMempool* pool = ffn_init_pool(nn);
+	FFNModel* model = ffn_new_model();
+	ffn_add_dense(model, 784, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 16, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 16, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 10, None, Zero, Zero);
+	ffn_add_passthrough(model, Softmax);
+	ffn_add_passthrough(model, None);
+	ffn_set_cost_fn(model, CCE);
+	ffn_set_batch_type(model, MiniBatch);
+	ffn_set_batch_size(model, 100);
+	ffn_set_optimizer(model, nn_momentum_optimize_init(0.99));
+	ffn_finalize(model);
 
 	float learning_rate = 0.01;
 	for (int t = 0; t < 300; t++) {
-		// Sample random range of training data
-		int range_lower = floorf(f_random((float)train_lbound, (float)train_ubound));
-		int range_upper = floorf(f_random((float)range_lower, (float)train_ubound));
-
 		// Train the network on data from the range
-		float train_loss = 0.0f;
-		for (int i = range_lower; i < range_upper; i++) {
-			printr("Training %d/%d\r", i - range_lower + 1, range_upper - range_lower);
-			train_loss += ffn_bpropagate(nn, pool, train_input[i], train_target[i], learning_rate);
-		}
+		float train_loss = ffn_train(model, train_input, train_target, train_ubound, learning_rate, -1);
 		newline();
-		train_loss /= range_upper - range_lower;
 		fprintf(training_csv->file_pointer, "%.10f,", train_loss);
-
-		// Sample random range of training data
-		range_lower = floorf(f_random((float)test_lbound, (float)test_ubound));
-		range_upper = floorf(f_random((float)range_lower, (float)test_ubound));
 
 		// Test the network on data from the range
 		float test_loss = 0.0f;
-		for (int i = range_lower; i < range_upper; i++) {
-			printr("Testing %d/%d\r", i - range_lower + 1, range_upper - range_lower);
-			ffn_fpropagate(nn, pool, test_input[i]);
-			test_loss += nn->cost_fn(pool->activations[nn->hidden_size-1], test_target[i]);
+		for (int i = 0; i < test_ubound; i++) {
+			Vector* res = ffn_run(model, test_input[i]);
+			test_loss += model->papool->cost_fn(res, test_target[i]);
+			printr("Testing %d/%d\r", i + 1, test_ubound);
 		}
 		newline();
-		test_loss /= range_upper - range_lower;
+		test_loss /= test_ubound;
 		fprintf(training_csv->file_pointer, "%.10f,", test_loss);
 		info("Training epoch loss: %.10f", train_loss);
 		info("Validation epoch loss: %.10f", test_loss);
@@ -96,10 +84,9 @@ int main() {
 	}
 
 	// Network forward propagation
-	ffn_fpropagate(nn, pool, train_input[0]);
-	ffn_dump_output(pool);
-	ffn_fpropagate(nn, pool, train_input[1]);
-	ffn_dump_output(pool);
+	vec_dump(ffn_run(model, train_input[0]));
+	newline();
+	vec_dump(ffn_run(model, train_input[1]));
 
 	char* fpath = (char*)allocate(strlen(training_csv->filename)+1);
 	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
@@ -108,6 +95,9 @@ int main() {
 	close_file(training_csv);
 	info("training filename: %s", fpath);
 	python_graph(fpath);
+
+	ffn_export_model(model, param_bin);
+	close_file(param_bin);
 
 	// Post train cleanup
 	deallocate(fpath);
@@ -124,9 +114,7 @@ int main() {
 	}
 	deallocate(test_input);
 	deallocate(test_target);
-
-	ffn_deallocate(nn);
-	ffn_deallocate_pool(pool);
+	ffn_deallocate_model(model);
 
 	return 0;
 }
