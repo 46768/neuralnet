@@ -1,27 +1,18 @@
-#include <math.h>
-#include <string.h>
+#include <time.h>
 
 #include "random.h"
 #include "logger.h"
 #include "allocator.h"
-#include "file_io.h"
 
 #include "python_interface.h"
-#include "python_grapher.h"
 #include "python_get_mnist.h"
 
 #include "generator.h"
 
 #include "ffn.h"
-#include "ffn_io.h"
 #include "optimizer.h"
 
 int main() {
-	FileData* training_csv = get_file_write("nmist_loss.csv");
-	FileData* param_bin = get_file_write("nmist_param.bin");
-	fprintf(training_csv->file_pointer, "2,");
-	fprintf(training_csv->file_pointer, "Training loss,");
-	fprintf(training_csv->file_pointer, "Validation loss,");
 	python_create_venv(PROJECT_PATH "/requirements.txt");
 	python_get_mnist(PROJECT_PATH "/data/mnist");
 	init_random();
@@ -61,46 +52,26 @@ int main() {
 	ffn_set_optimizer(model, nn_momentum_optimize_init(0.99));
 	ffn_finalize(model);
 
+	clock_t start, end;
+	double cpu_time;
+
+#define FLOPS_PER_SAMPLE 25920
+	int epochs = 10, total_samples = 60000 * epochs;
 	float learning_rate = 0.01;
-	for (int t = 0; t < 300; t++) {
+	start = clock();
+	for (int t = 0; t < epochs; t++) {
 		// Train the network on data from the range
-		float train_loss = ffn_train(model, train_input, train_target, train_ubound, learning_rate, -1);
-		newline();
-		fprintf(training_csv->file_pointer, "%.10f,", train_loss);
-
-		// Test the network on data from the range
-		float test_loss = 0.0f;
-		for (int i = 0; i < test_ubound; i++) {
-			Vector* res = ffn_run(model, test_input[i]);
-			test_loss += model->papool->cost_fn(res, test_target[i]);
-			printr("Testing %d/%d\r", i + 1, test_ubound);
-		}
-		newline();
-		test_loss /= test_ubound;
-		fprintf(training_csv->file_pointer, "%.10f,", test_loss);
-		info("Training epoch loss: %.10f", train_loss);
-		info("Validation epoch loss: %.10f", test_loss);
-		info("-Epoch %d--------------------------------------", t);
+		ffn_train(model, train_input, train_target, train_ubound, learning_rate, -1);
 	}
+	end = clock();
+	cpu_time = ((double)(end-start)) / CLOCKS_PER_SEC;
+	double flops = ((double)total_samples * FLOPS_PER_SAMPLE) / cpu_time;
 
-	// Network forward propagation
-	vec_dump(ffn_run(model, train_input[0]));
-	newline();
-	vec_dump(ffn_run(model, train_input[1]));
-
-	char* fpath = (char*)allocate(strlen(training_csv->filename)+1);
-	memcpy(fpath, training_csv->filename, strlen(training_csv->filename));
-	fpath[strlen(training_csv->filename)] = '\0';
-	fprintf(training_csv->file_pointer, "\n");
-	close_file(training_csv);
-	info("training filename: %s", fpath);
-	python_graph(fpath);
-
-	ffn_export_model(model, param_bin);
-	close_file(param_bin);
+	info("CPU Time: %f", cpu_time);
+	info("sample/sec: %f", 60000.0 / cpu_time);
+	info("FLOPs: %.2f GFLOPs: %.2f", flops, flops / 1e9);
 
 	// Post train cleanup
-	deallocate(fpath);
 	for (int i = 0; i < train_ubound; i++) {
 		vec_deallocate(train_input[i]);
 		vec_deallocate(train_target[i]);

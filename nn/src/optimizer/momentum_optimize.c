@@ -15,6 +15,7 @@ Optimizer* nn_momentum_optimize_init(float velocity_coef) {
 	((MomentumConfig*)(optimizer->config))->velocity_coef = velocity_coef;
 	optimizer->fn = nn_momentum_optimize;
 	optimizer->finalize = nn_momentum_optimize_finalize;
+	optimizer->type = Momentum;
 
 	return optimizer;
 }

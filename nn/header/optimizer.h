@@ -13,14 +13,31 @@ typedef enum {
 	FullBatch
 } BatchTypeEnum;
 
+// Optimizer Type Enum
+typedef enum {
+	GD,
+	Momentum
+} OptimizerTypeEnum;
+
 // Generic Optimizer Struct
 typedef struct {
 	void* config;
 	float* buf;
 	size_t batch_size;
+	OptimizerTypeEnum type;
 	OptimizerFn fn;
 	OptimizerFn finalize;
 } Optimizer;
+
+// Optimizer resolvers
+
+size_t resolve_optimizer_config_size(OptimizerTypeEnum);
+OptimizerFn resolve_optimizer(OptimizerTypeEnum);
+OptimizerFn resolve_optimizer_finalizer(OptimizerTypeEnum);
+
+// Optimizer builder
+
+Optimizer* nn_build_optimizer(OptimizerTypeEnum, void*);
 
 // Optimizers
 

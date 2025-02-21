@@ -37,6 +37,7 @@ void ffn_deallocate_model(FFNModel*);
 
 void ffn_add_dense(FFNModel*, size_t, ActivationFNEnum, IniterEnum, IniterEnum);
 void ffn_add_passthrough(FFNModel*, ActivationFNEnum);
+void ffn_add_layer(FFNModel*, LayerData*);
 void ffn_set_cost_fn(FFNModel*, CostFnEnum);
 void ffn_set_optimizer(FFNModel*, Optimizer*);
 void ffn_set_batch_type(FFNModel*, BatchTypeEnum);

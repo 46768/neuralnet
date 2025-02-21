@@ -14,6 +14,7 @@ Optimizer* nn_gradient_descent_init() {
 	optimizer->config = allocate(sizeof(GradientDescentConfig));
 	optimizer->fn = nn_gradient_descent;
 	optimizer->finalize = nn_gradient_descent_finalize;
+	optimizer->type = GD;
 
 	return optimizer;
 }

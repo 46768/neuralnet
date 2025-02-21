@@ -1,6 +1,8 @@
 #include "ffn.h"
 #include "ffn_init.h"
 
+#include <string.h>
+
 #include "allocator.h"
 
 #ifdef SIMD_AVX
@@ -76,6 +78,21 @@ void ffn_add_passthrough(FFNModel* model, ActivationFNEnum activation_fn) {
 	FFNParams* init_data = model->init_data;
 	size_t prev_size = init_data->hidden_layers[init_data->hidden_size-1]->node_cnt;
 	_ffn_init_layer(model->init_data, prev_size, Dense, activation_fn, Zero, Zero);
+}
+void ffn_add_layer(FFNModel* model, LayerData* l_data) {
+	FFNParams* init_data = model->init_data;
+	size_t hidden_size = init_data->hidden_size;
+	if (hidden_size >= init_data->hidden_capacity) {
+		init_data->hidden_capacity += 10;
+		init_data->hidden_layers = reallocate(
+				init_data->hidden_layers,
+				init_data->hidden_capacity * sizeof(LayerData*)
+				);
+	}
+
+	init_data->hidden_layers[hidden_size] = (LayerData*)allocate(sizeof(LayerData));
+	memcpy(init_data->hidden_layers[hidden_size], l_data, sizeof(LayerData));
+	init_data->hidden_size++;
 }
 void ffn_set_cost_fn(FFNModel* model, CostFnEnum cost_fn) {
 	_ffn_check_immutability(model);

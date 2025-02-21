@@ -20,6 +20,9 @@ void ffn_deallocate_model(FFNModel* model) {
 	}
 	deallocate(model->init_data->hidden_layers);
 	deallocate(model->init_data);
+	deallocate(model->optimizer->config);
+	deallocate(model->optimizer->buf);
+	deallocate(model->optimizer);
 	deallocate(model);
 }
 
