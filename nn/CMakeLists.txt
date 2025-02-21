@@ -4,6 +4,7 @@ include_directories(
 )
 file(GLOB srcs
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/optimizer/*.c"
 )
 
 # Define neural network libraries

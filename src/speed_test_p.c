@@ -13,6 +13,7 @@
 #include "generator.h"
 
 #include "ffn.h"
+#include "optimizer.h"
 
 int main() {
 	python_create_venv(PROJECT_PATH "/requirements.txt");
@@ -50,6 +51,8 @@ int main() {
 	ffn_add_passthrough(model, Softmax);
 	ffn_add_passthrough(model, None);
 	ffn_set_cost_fn(model, CCE);
+	ffn_set_batch_type(model, Stochastic);
+	ffn_set_optimizer(model, nn_gradient_descent_init(1));
 	ffn_finalize(model);
 
 	// Test the network on data from the range

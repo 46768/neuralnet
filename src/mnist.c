@@ -13,6 +13,7 @@
 #include "generator.h"
 
 #include "ffn.h"
+#include "optimizer.h"
 
 int main() {
 	FileData* training_csv = get_file_write("nmist_loss.csv");
@@ -47,13 +48,15 @@ int main() {
 	// Network Building
 	FFNModel* model = ffn_new_model();
 	ffn_add_dense(model, 784, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 8, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 8, Sigmoid, Xavier, RandomEN2);
-	//ffn_add_dense(model, 64, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 16, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 16, Sigmoid, Xavier, RandomEN2);
 	ffn_add_dense(model, 10, None, Zero, Zero);
 	ffn_add_passthrough(model, Softmax);
 	ffn_add_passthrough(model, None);
 	ffn_set_cost_fn(model, CCE);
+	ffn_set_batch_type(model, MiniBatch);
+	ffn_set_batch_size(model, 100);
+	ffn_set_optimizer(model, nn_momentum_optimize_init(0.99));
 	ffn_finalize(model);
 
 	float learning_rate = 0.01;
@@ -80,6 +83,7 @@ int main() {
 
 	// Network forward propagation
 	vec_dump(ffn_run(model, train_input[0]));
+	newline();
 	vec_dump(ffn_run(model, train_input[1]));
 
 	char* fpath = (char*)allocate(strlen(training_csv->filename)+1);

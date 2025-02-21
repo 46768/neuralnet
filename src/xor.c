@@ -11,6 +11,7 @@
 #include "generator.h"
 
 #include "ffn.h"
+#include "optimizer.h"
 
 int main() {
 	debug("init");
@@ -33,6 +34,8 @@ int main() {
 	ffn_add_dense(model, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_add_dense(model, 1, None, Zero, Zero);
 	ffn_set_cost_fn(model, BCE);
+	ffn_set_batch_type(model, Stochastic);
+	ffn_set_optimizer(model, nn_gradient_descent_init(1));
 	ffn_finalize(model);
 
 	for (int t = 0; t < 100000; t++) {

@@ -12,6 +12,7 @@
 
 #include "ffn.h"
 #include "ffn_util.h"
+#include "optimizer.h"
 
 int main() {
 	debug("init");
@@ -28,10 +29,14 @@ int main() {
 	generate_linear_regs(REGS_RANGEL, REGS_RANGE, 4.0f, -5.0f, &vecs, &targets);
 	//generate_xor(&REGS_RANGEL, &REGS_RANGE, &vecs, &targets);
 	
+#define BATCH_SIZE 10
 	FFNModel* model = ffn_new_model();
 	ffn_add_dense(model, 1, None, He, RandomEN2);
 	ffn_add_dense(model, 1, None, He, RandomEN2);
 	ffn_set_cost_fn(model, MSE);
+	ffn_set_batch_type(model, MiniBatch);
+	ffn_set_batch_size(model, 5);
+	ffn_set_optimizer(model, nn_momentum_optimize_init(0.8));
 	ffn_finalize(model);
 
 	info("Pre train:");

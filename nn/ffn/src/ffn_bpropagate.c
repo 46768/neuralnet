@@ -27,7 +27,7 @@ void _ffn_next_error(
 void ffn_apply_gradient(FFNParams* init_data, FFNParameterPool* papool, FFNGradientPool* gpool, float learning_rate) {
 	// Apply backward propagation gradient
 	// Going from L-1 to 0
-	size_t L = papool->layer_cnt;
+	size_t L = papool->base.layer_cnt;
 	for (int l = 0; l < ((int)L-1); l++) {
 		if (init_data->hidden_layers[l+1]->l_type == PassThrough) {
 			continue;
@@ -40,16 +40,6 @@ void ffn_apply_gradient(FFNParams* init_data, FFNParameterPool* papool, FFNGradi
 		// Apply weight gradient
 		matrix_coef_add_ip(gradient_w_l, weight_l, -learning_rate, weight_l);
 		vec_coef_add_ip(gradient_b_l, bias_l, -learning_rate, bias_l);
-
-		/*
-		for (size_t y = 0; y < gradient_w_l->sy; y++) {
-			(nn->biases)[l]->data[y] -= learning_rate*gradient_b_l->data[y];
-			for (size_t x = 0; x < gradient_w_l->sx; x++) {
-				*matrix_get_ptr(nn->weights[l], x, y) -= 
-					learning_rate*matrix_get(gradient_w_l, x, y);
-			}
-		}
-		*/
 	}
 }
 

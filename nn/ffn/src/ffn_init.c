@@ -3,6 +3,13 @@
 
 #include "allocator.h"
 
+#ifdef SIMD_AVX
+#include "avx.h"
+#define _init_alloc(s) avx_allocate(s)
+#else
+#define _init_alloc(s) allocate(s)
+#endif
+
 // Initialization
 
 FFNModel* ffn_new_model() {
@@ -74,9 +81,15 @@ void ffn_set_cost_fn(FFNModel* model, CostFnEnum cost_fn) {
 	_ffn_check_immutability(model);
 	model->init_data->cost_fn_enum = cost_fn;
 }
-void ffn_set_optimizer(FFNModel* model, OptimizerFnEnum optimizer_fn) {
+void ffn_set_optimizer(FFNModel* model, Optimizer* optimizer) {
 	_ffn_check_immutability(model);
-	model->optimizer = optimizer_fn;
+	model->optimizer = optimizer;
+}
+void ffn_set_batch_type(FFNModel* model, BatchTypeEnum batch_type) {
+	model->batch_type = batch_type;
+}
+void ffn_set_batch_size(FFNModel* model, size_t batch_size) {
+	model->batch_size = batch_size;
 }
 void ffn_finalize(FFNModel* model) {
 	_ffn_check_cost_fn(model);
@@ -86,12 +99,20 @@ void ffn_finalize(FFNModel* model) {
 	model->prpool = ffn_init_propagation_pool(model->init_data);
 	model->gpool = ffn_init_gradient_pool(model->init_data);
 	model->ipool = ffn_init_intermediate_pool(model->init_data);
+	model->optimizer->buf = (float*)_init_alloc(model->gpool->base.data_size);
+
+	if (model->batch_type == FullBatch) {
+		model->batch_size = (size_t)(-1);
+	} else if (model->batch_type == Stochastic) {
+		model->batch_size = 1;
+	}
+	model->optimizer->batch_size = model->batch_size;
 
 	FFNParams* init_data = model->init_data;
 	FFNParameterPool* papool = model->papool;
 	LayerData** l_data = init_data->hidden_layers;
 
-	for (int l = 0; l < ((int)papool->layer_cnt-1); l++) {
+	for (int l = 0; l < ((int)papool->base.layer_cnt-1); l++) {
 		LayerData* layer_cur = l_data[l];
 		LayerData* layer_nxt = l_data[l+1];
 		Matrix* weight = &(papool->weights[l]);

@@ -9,14 +9,14 @@
 
 void ffn_dump_param(FFNParameterPool* papool) {
 	info("Weights");
-	for (int l = 0; l < ((int)(papool->layer_cnt)-1); l++) {
+	for (int l = 0; l < ((int)(papool->base.layer_cnt)-1); l++) {
 		info("Layer %d:", l);
 		matrix_dump_raw(&(papool->weights[l]));
 		newline();
 	}
 	newline();
 	info("Biases");
-	for (int l = 0; l < ((int)(papool->layer_cnt)-1); l++) {
+	for (int l = 0; l < ((int)(papool->base.layer_cnt)-1); l++) {
 		info("Layer %d:", l);
 		vec_dump(&(papool->biases[l]));
 		newline();

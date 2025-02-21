@@ -12,6 +12,7 @@
 
 #include "ffn.h"
 #include "ffn_util.h"
+#include "optimizer.h"
 
 int main() {
 	debug("init");
@@ -32,6 +33,8 @@ int main() {
 	ffn_add_dense(model, 1, None, He, RandomEN2);
 	ffn_add_dense(model, 1, None, He, RandomEN2);
 	ffn_set_cost_fn(model, MSE);
+	ffn_set_batch_type(model, Stochastic);
+	ffn_set_optimizer(model, nn_gradient_descent_init(1));
 	ffn_finalize(model);
 
 	info("Pre train:");

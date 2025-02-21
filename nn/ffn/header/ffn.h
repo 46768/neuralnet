@@ -19,8 +19,9 @@ typedef struct {
 	FFNPropagationPool* prpool;
 	FFNGradientPool* gpool;
 	FFNIntermediatePool* ipool;
-
-	OptimizerFnEnum optimizer;
+	BatchTypeEnum batch_type;
+	size_t batch_size;
+	Optimizer* optimizer;
 	booltype immutable;
 } FFNModel;
 
@@ -37,7 +38,9 @@ void ffn_deallocate_model(FFNModel*);
 void ffn_add_dense(FFNModel*, size_t, ActivationFNEnum, IniterEnum, IniterEnum);
 void ffn_add_passthrough(FFNModel*, ActivationFNEnum);
 void ffn_set_cost_fn(FFNModel*, CostFnEnum);
-void ffn_set_optimizer(FFNModel*, OptimizerFnEnum);
+void ffn_set_optimizer(FFNModel*, Optimizer*);
+void ffn_set_batch_type(FFNModel*, BatchTypeEnum);
+void ffn_set_batch_size(FFNModel*, size_t);
 void ffn_finalize(FFNModel*);
 
 // Running and Training

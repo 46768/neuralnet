@@ -29,7 +29,7 @@ void ffn_fpropagate(FFNParameterPool* papool, FFNPropagationPool* prpool, Vector
 	memcpy((&a[0])->data, input->data, input->dimension * sizeof(float));
 
 	// Propagate input to each layer
-	for (int l = 0; l < ((int)(papool->layer_cnt)-1); l++) {
+	for (int l = 0; l < ((int)(papool->base.layer_cnt)-1); l++) {
 		Matrix* weight = &weights[l];
 		Vector* bias = &biases[l];
 		Vector* al = &a[l];
