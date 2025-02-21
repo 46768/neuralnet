@@ -1,4 +1,5 @@
 #ifndef FFN_BPROPAGATE_H
+/** \file */
 #define FFN_BPROPAGATE_H
 
 #include "ffn_mempool.h"

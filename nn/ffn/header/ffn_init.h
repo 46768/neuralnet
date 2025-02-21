@@ -1,4 +1,5 @@
 #ifndef FFN_TYPE_H
+/** \file */
 #define FFN_TYPE_H
 
 #include <stdlib.h>

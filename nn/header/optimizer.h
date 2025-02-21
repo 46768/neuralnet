@@ -41,16 +41,24 @@ Optimizer* nn_build_optimizer(OptimizerTypeEnum, void*);
 
 // Optimizers
 
+/**
+ * \struct GradientDescentConfig
+ * \brief Gradient descent configuration
+ */
 typedef struct {
-	size_t batch_size;
+	size_t batch_size; /**< Batch size */
 } GradientDescentConfig;
 Optimizer* nn_gradient_descent_init();
 void nn_gradient_descent(float*, float*, size_t, void*);
 void nn_gradient_descent_finalize(float*, float*, size_t, void*);
 
+/**
+ * \struct MomentumConfig
+ * \brief Momentum configuration
+ */
 typedef struct {
-	size_t batch_size;
-	float velocity_coef;
+	size_t batch_size; /**< Batch size */
+	float velocity_coef; /**< Velocity/Momentum term */
 } MomentumConfig;
 Optimizer* nn_momentum_optimize_init(float);
 void nn_momentum_optimize(float*, float*, size_t, void*);

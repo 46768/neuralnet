@@ -1,4 +1,5 @@
 #ifndef FFN_IO_H
+/** \file */
 #define FFN_IO_H
 
 #include "ffn.h"

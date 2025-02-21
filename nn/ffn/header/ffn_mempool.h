@@ -1,4 +1,5 @@
 #ifndef FFN_MEMPOOL_H
+/** \file */
 #define FFN_MEMPOOL_H
 
 #include "vector.h"

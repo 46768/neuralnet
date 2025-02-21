@@ -29,6 +29,8 @@ void nn_none_fn_d(Vector*, Vector*);
 // ReLU
 void nn_relu(Vector*, Vector*);
 void nn_relu_d(Vector*, Vector*);
+
+// CReLU
 void nn_crelu(Vector*, Vector*);
 void nn_crelu_d(Vector*, Vector*);
 

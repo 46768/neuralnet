@@ -1,0 +1,28 @@
+/** \page Building
+# Building
+
+## Supported OS
+- Linux
+
+## Required tools
+- CMake 3.15+
+- C compiler (GCC/Clang)
+- Python 3
+
+CMake options: [Build Options](Build_01Options.html)
+
+```sh
+# Clone the project
+$ git clone https://github.com/46768/neuralnet.git
+$ cd /path/to/project
+
+# Create target directory
+$ mkdir target
+$ cd target
+
+$ cmake ..
+
+# Build the project
+$ make
+```
+*/

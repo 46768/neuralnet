@@ -1,0 +1,24 @@
+/** \page "Build Options"
+
+## PROFILING
+Turns on profiling for gprof
+
+## USE_SCALAR
+Turns off all SIMD operation
+
+## PROD
+Turns on -O2 flag in GCC
+
+## NO_PYTHON
+Turns off python binding
+
+## NO_BOUND_CHECK
+Turns off vector/matrix dimension check in operations
+
+## NO_STATE_CHECK
+Turns off model immutability state check
+
+## NEED_SPEED
+Turns on -O3 flag in GCC, also turn on NO_BOUND_CHECK and NO_STATE_CHECK
+
+*/

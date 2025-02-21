@@ -1,4 +1,5 @@
 #ifndef FFN_STATISTIC_H
+/** \file */
 #define FFN_STATISTIC_H
 
 #include "file_io.h"

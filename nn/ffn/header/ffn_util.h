@@ -1,4 +1,5 @@
 #ifndef FFN_UTIL_H
+/** \file */
 #define FFN_UTIL_H
 
 #include "ffn_mempool.h"
