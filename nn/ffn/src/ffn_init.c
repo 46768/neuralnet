@@ -77,7 +77,7 @@ void ffn_add_passthrough(FFNModel* model, ActivationFNEnum activation_fn) {
 	_ffn_check_immutability(model);
 	FFNParams* init_data = model->init_data;
 	size_t prev_size = init_data->hidden_layers[init_data->hidden_size-1]->node_cnt;
-	_ffn_init_layer(model->init_data, prev_size, Dense, activation_fn, Zero, Zero);
+	_ffn_init_layer(model->init_data, prev_size, PassThrough, activation_fn, Zero, Zero);
 }
 void ffn_add_layer(FFNModel* model, LayerData* l_data) {
 	FFNParams* init_data = model->init_data;

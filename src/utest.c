@@ -31,6 +31,8 @@ int main() {
 	Matrix* m2 = matrix_zero(3, 3);
 	Matrix* m3 = matrix_zero(3, 3);
 	Matrix* m4 = matrix_zero(3, 3);
+	Matrix* m5 = matrix_zero(3, 3);matrix_iden(m5);
+	Matrix* m6 = matrix_zero(3, 12);matrix_iden(m6);
 
 	vec_add_ip(v1, v2, v3);
 	vec_mul_ip(v1, v2, v4);
@@ -47,6 +49,12 @@ int main() {
 	newline();
 	info("Base Matrix:");
 	matrix_dump_raw(m1);
+	newline();
+	info("Identity square Matrix:");
+	matrix_dump_raw(m5);
+	newline();
+	info("Identity rect Matrix:");
+	matrix_dump_raw(m6);
 	newline();
 
 	info("Vector addition:");
@@ -74,4 +82,6 @@ int main() {
 	matrix_deallocate(m2);
 	matrix_deallocate(m3);
 	matrix_deallocate(m4);
+	matrix_deallocate(m5);
+	matrix_deallocate(m6);
 }
