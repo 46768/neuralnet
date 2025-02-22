@@ -34,18 +34,10 @@ void matrix_dump_raw(Matrix*);
 // Matrix operation
 // Get a value at x, y
 static inline float matrix_get(Matrix* mat, size_t x, size_t y) {
-#ifndef NO_BOUND_CHECK
-	if (x >= mat->rsx || y >= mat->rsy) {fatal("Matrix index out of bound %zux%zu %zuy%zu",
-			x,mat->rsx,y,mat->rsy);}
-#endif
 	return mat->data[(x*(mat->rsy)) + y];
 }
 // Get a value at x, y
 static inline float* matrix_get_ptr(Matrix* mat, size_t x, size_t y) {
-#ifndef NO_BOUND_CHECK
-	if (x >= mat->rsx || y >= mat->rsy) {fatal("Matrix index out of bound %zux%zu %zuy%zu",
-			x,mat->rsx,y,mat->rsy);}
-#endif
 	return (mat->data)+((x*(mat->rsy)) + y);
 }
 void matrix_transpose_ip(Matrix*, Matrix*); // Transpose a matrix in place

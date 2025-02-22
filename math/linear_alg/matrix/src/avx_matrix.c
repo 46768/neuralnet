@@ -43,9 +43,9 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 
 static inline void _tranpose_kernel(Matrix* mat, Matrix* res, int off_x, int off_y) {
 #pragma GCC unroll 8
-	for (int x = 0; x < 8; x++) {
-#pragma GCC unroll 8
 		for (int y = 0; y < 8; y++) {
+#pragma GCC unroll 8
+			for (int x = 0; x < 8; x++) {
 			*matrix_get_ptr(res, off_y+y, off_x+x) = matrix_get(mat, off_x+x, off_y+y);
 		}
 	}

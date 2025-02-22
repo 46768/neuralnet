@@ -41,8 +41,8 @@ int main() {
 	// Network Building
 	FFNModel* model = ffn_new_model();
 	ffn_add_dense(model, 784, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 16, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 16, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 32, Sigmoid, Xavier, RandomEN2);
+	ffn_add_dense(model, 32, Sigmoid, Xavier, RandomEN2);
 	ffn_add_dense(model, 10, None, Zero, Zero);
 	ffn_add_passthrough(model, Softmax);
 	ffn_add_passthrough(model, None);
