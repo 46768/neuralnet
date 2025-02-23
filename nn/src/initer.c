@@ -19,6 +19,8 @@ Initer resolve_initer(IniterEnum init_type) {
 			return xavier_init;
 		case RandomEN2:
 			return random_en2_init;
+		case RandomE0:
+			return random_e0_init;
 		default:
 			fatal("Unknown Initializer");
 			return NULL;
@@ -45,4 +47,8 @@ float xavier_init(size_t node_cnt) {
 
 float random_en2_init(size_t _) {
 	return f_random(-0.01f, 0.01f);
+}
+
+float random_e0_init(size_t _) {
+	return f_random(-1.0f, 1.0f);
 }

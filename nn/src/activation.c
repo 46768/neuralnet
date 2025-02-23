@@ -3,6 +3,10 @@
 #include <math.h>
 #include <string.h>
 
+#ifdef SIMD_AVX
+#include "avxmm.h"
+#endif
+
 #include "logger.h"
 
 ActivationFn resolve_activation_fn(ActivationFNEnum fn_type) {
@@ -89,19 +93,38 @@ void nn_none_fn_d(Vector* z, Vector* d) {
 
 void nn_relu(Vector* z, Vector* a) {
 	_check_vec_size(z, a);
-	for (size_t i = 0; i < z->dimension; i++) {
-		if (z->data[i] > 0) a->data[i] = z->data[i];
+#ifdef SIMD_AVX
+	AVX256 vlbound = AVX256ZERO;
+	for (size_t i = 0; i < z->dimension; i+=8) {
+		avxmm256_unload_ptr(
+				avxmm256_max(avxmm256_load_ptr(&(z->data[i])), vlbound), &(a->data[i])
+				);
 	}
+#else
+	for (size_t i = 0; i < z->dimension; i++) {
+		a->data[i] = fmaxf(z->data[i], 0.0f);
+	}
+#endif
 }
 void nn_relu_d(Vector* z, Vector* d) {
 	_check_vec_size(z, d);
-	for (size_t i = 0; i < z->dimension; i++) {
-		if (z->data[i] > 0) {
-			d->data[i] = 1.0f;
-		} else {
-			d->data[i] = 0.0f;
-		}
+#ifdef SIMD_AVX
+	AVX256 vlbound = AVX256ZERO;
+	AVX256 vmask = AVX256ONE;
+	for (size_t i = 0; i < z->dimension; i+=8) {
+		avxmm256_unload_ptr(
+				avxmm256_mask(
+					avxmm256_cmp_GT(avxmm256_load_ptr(&(z->data[i])), vlbound),
+					vmask
+					)
+					, &(d->data[i])
+				);
 	}
+#else
+	for (size_t i = 0; i < z->dimension; i++) {
+		d->data[i] = z->data[i] > 0.0f;
+	}
+#endif
 }
 void nn_crelu(Vector* z, Vector* a) {
 	_check_vec_size(z, a);

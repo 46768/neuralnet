@@ -58,21 +58,21 @@ int main() {
 
 	// Network Building
 	FFNModel* model = ffn_new_model();
-	ffn_add_dense(model, 784, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 32, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 32, Sigmoid, Xavier, RandomEN2);
-	ffn_add_dense(model, 10, None, RandomEN2, Zero);
+	ffn_add_dense(model, 784, ReLU, He, RandomE0);
+	ffn_add_dense(model, 64, ReLU, He, RandomE0);
+	ffn_add_dense(model, 64, ReLU, He, RandomE0);
+	ffn_add_dense(model, 10, None, Zero, Zero);
 	ffn_add_passthrough(model, Softmax);
 	ffn_add_passthrough(model, None);
 	ffn_set_cost_fn(model, CCE);
 	ffn_set_batch_type(model, MiniBatch);
-	ffn_set_batch_size(model, 100);
-	ffn_set_optimizer(model, nn_momentum_optimize_init(0.99));
+	ffn_set_batch_size(model, 50);
+	ffn_set_optimizer(model, nn_momentum_optimize_init(0.75));
 	//ffn_set_optimizer(model, nn_gradient_descent_init());
 	ffn_finalize(model);
 
 	float learning_rate = 0.01;
-	for (int t = 0; t < 300; t++) {
+	for (int t = 0; t < 100; t++) {
 		// Train the network on data from the range
 		float train_loss = ffn_train(model, train_input, train_target, train_ubound, learning_rate, -1);
 		newline();
@@ -96,7 +96,7 @@ int main() {
 		info("-Epoch %d--------------------------------------", t);
 	}
 
-	//ffn_dump_param(model->papool);
+	ffn_dump_param(model->papool);
 
 	// Network forward propagation
 	vec_dump(ffn_run(model, train_input[0]));

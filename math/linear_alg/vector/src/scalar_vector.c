@@ -17,7 +17,7 @@ void vec_init(size_t dimension, float* dat, Vector* vec) {
 // Create a vector with all element to 0
 Vector* vec_zero(size_t dimension) {
 	Vector* vec = (Vector*)allocate(sizeof(Vector));
-	float* dat = (float*)callocate(dimension*sizeof(float));
+	float* dat = (float*)callocate(dimension, sizeof(float));
 	vec_init(dimension, dat, vec);
 
 	return vec;

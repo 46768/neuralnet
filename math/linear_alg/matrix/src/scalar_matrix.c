@@ -28,7 +28,7 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 	Matrix* mat = (Matrix*)allocate(sizeof(Matrix));
 	size_t padded_sx = matrix_calc_ssize(sx);
 	size_t padded_sy = matrix_calc_ssize(sy);
-	float* dat = (float*)callocate(padded_sx*padded_sy*sizeof(float));
+	float* dat = (float*)callocate(padded_sx*padded_sy, sizeof(float));
 	matrix_init(sx, sy, dat, mat);
 
 	return mat;

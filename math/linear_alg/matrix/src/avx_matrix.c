@@ -42,13 +42,50 @@ Matrix* matrix_zero(size_t sx, size_t sy) {
 /////////////////////
 
 static inline void _tranpose_kernel(Matrix* mat, Matrix* res, int off_x, int off_y) {
-#pragma GCC unroll 8
-		for (int y = 0; y < 8; y++) {
-#pragma GCC unroll 8
-			for (int x = 0; x < 8; x++) {
-			*matrix_get_ptr(res, off_y+y, off_x+x) = matrix_get(mat, off_x+x, off_y+y);
-		}
-	}
+	AVX256 r0 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x, off_y));
+	AVX256 r1 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+1, off_y));
+	AVX256 r2 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+2, off_y));
+	AVX256 r3 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+3, off_y));
+	AVX256 r4 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+4, off_y));
+	AVX256 r5 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+5, off_y));
+	AVX256 r6 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+6, off_y));
+	AVX256 r7 = avxmm256_load_ptr(matrix_get_ptr(mat, off_x+7, off_y));
+
+	AVX256 t0 = avxmm256_unpacklo(r0, r1);
+	AVX256 t1 = avxmm256_unpacklo(r2, r3);
+	AVX256 t2 = avxmm256_unpacklo(r4, r5);
+	AVX256 t3 = avxmm256_unpacklo(r6, r7);
+	AVX256 t4 = avxmm256_unpackhi(r0, r1);
+	AVX256 t5 = avxmm256_unpackhi(r2, r3);
+	AVX256 t6 = avxmm256_unpackhi(r4, r5);
+	AVX256 t7 = avxmm256_unpackhi(r6, r7);
+
+	AVX256 tt0 = avxmm256_shuffle(t0, t1, 0x44);
+	AVX256 tt1 = avxmm256_shuffle(t0, t1, 0xEE);
+	AVX256 tt2 = avxmm256_shuffle(t2, t3, 0x44);
+	AVX256 tt3 = avxmm256_shuffle(t2, t3, 0xEE);
+	AVX256 tt4 = avxmm256_shuffle(t4, t5, 0x44);
+	AVX256 tt5 = avxmm256_shuffle(t4, t5, 0xEE);
+	AVX256 tt6 = avxmm256_shuffle(t6, t7, 0x44);
+	AVX256 tt7 = avxmm256_shuffle(t6, t7, 0xEE);
+
+	AVX256 o0 = avxmm256_permute2f128(tt0, tt2, 0x20);
+	AVX256 o1 = avxmm256_permute2f128(tt1, tt3, 0x20);
+	AVX256 o2 = avxmm256_permute2f128(tt4, tt6, 0x20);
+	AVX256 o3 = avxmm256_permute2f128(tt5, tt7, 0x20);
+	AVX256 o4 = avxmm256_permute2f128(tt0, tt2, 0x31);
+	AVX256 o5 = avxmm256_permute2f128(tt1, tt3, 0x31);
+	AVX256 o6 = avxmm256_permute2f128(tt4, tt6, 0x31);
+	AVX256 o7 = avxmm256_permute2f128(tt5, tt7, 0x31);
+
+	avxmm256_unload_ptr(o0, matrix_get_ptr(res, off_y, off_x));
+	avxmm256_unload_ptr(o1, matrix_get_ptr(res, off_y+1, off_x));
+	avxmm256_unload_ptr(o2, matrix_get_ptr(res, off_y+2, off_x));
+	avxmm256_unload_ptr(o3, matrix_get_ptr(res, off_y+3, off_x));
+	avxmm256_unload_ptr(o4, matrix_get_ptr(res, off_y+4, off_x));
+	avxmm256_unload_ptr(o5, matrix_get_ptr(res, off_y+5, off_x));
+	avxmm256_unload_ptr(o6, matrix_get_ptr(res, off_y+6, off_x));
+	avxmm256_unload_ptr(o7, matrix_get_ptr(res, off_y+7, off_x));
 }
 
 // Transpose a matrix in place

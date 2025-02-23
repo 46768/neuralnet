@@ -5,6 +5,8 @@
 
 #include "logger.h"
 
+#include "activation.h"
+
 int main() {
 	info("Vector Library Type: %s", VECTOR_LIB_TYPE);
 	info("Matrix Library Type: %s", MATRIX_LIB_TYPE);
@@ -27,6 +29,9 @@ int main() {
 	Vector* v4 = vec_zero(3);
 	Vector* v5 = vec_zero(3);
 	Vector* v6 = vec_zero(3);
+	Vector* v7 = vec_zero(3); vec_rand(-1.0f, 1.0f, v7);
+	Vector* v8 = vec_zero(3);
+	Vector* v9 = vec_zero(3);
 	Matrix* m1 = matrix_zero(3, 3); matrix_rand(0.0f, 1.0f, m1);
 	Matrix* m2 = matrix_zero(3, 3);
 	Matrix* m3 = matrix_zero(3, 3);
@@ -41,11 +46,15 @@ int main() {
 	matrix_transpose_ip(m1, m2);
 	column_row_vec_mul_ip(v1, v2, m3);
 	vec_matrix_hadamard_ip(v1, m3, m4);
+	nn_relu(v7, v8);
+	nn_relu_d(v7, v9);
 
 	info("Base Vector:");
 	vec_dump(v1);
 	newline();
 	vec_dump(v2);
+	newline();
+	vec_dump(v7);
 	newline();
 	info("Base Matrix:");
 	matrix_dump_raw(m1);
@@ -65,6 +74,10 @@ int main() {
 	vec_dump(v5);
 	info("Matrix Vector multiplication with offset:");
 	vec_dump(v6);
+	info("Relu");
+	vec_dump(v8);
+	info("Relu Derivative");
+	vec_dump(v9);
 	info("Matrix transposition:");
 	matrix_dump_raw(m2);
 	info("Column row multiplication:");

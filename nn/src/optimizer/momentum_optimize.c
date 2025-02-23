@@ -19,10 +19,11 @@ Optimizer* nn_momentum_optimize_init(float velocity_coef) {
 
 	return optimizer;
 }
-void nn_momentum_optimize(float* buffer, float* gradient, size_t gradient_size, void* self) {
+void nn_momentum_optimize(float* buffer, float* gradient, size_t gradient_size, void* config) {
 	size_t float_cnt = gradient_size / sizeof(float);
-	float momentum_coef = ((MomentumConfig*)(((Optimizer*)(self))->config))->velocity_coef;
+	float momentum_coef = ((MomentumConfig*)config)->velocity_coef;
 	float inverse_coef = 1 - momentum_coef;
+
 #ifdef SIMD_AVX
 	AVX256 vmomentum_coef = avxmm256_load_single_ptr(momentum_coef);
 	AVX256 vinverse_coef = avxmm256_load_single_ptr(inverse_coef);
