@@ -1,19 +1,8 @@
-# Include all source files
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
-file(GLOB srcs
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
-)
+set(LIB_NAME ThreadingLib)
 
-# Define common libraries
-add_library(ThreadingLib STATIC
-	${srcs}
-)
+add_library(${LIB_NAME} STATIC)
 
-target_include_directories(ThreadingLib PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/header"
-)
+file(GLOB_RECURSE srcs CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+target_sources(${LIB_NAME} PRIVATE ${srcs})
 
-target_link_libraries(ThreadingLib PUBLIC CompilerFlags)
-target_link_libraries(ThreadingLib PUBLIC ComLib)
+target_include_directories(${LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/header")

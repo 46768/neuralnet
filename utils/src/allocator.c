@@ -4,34 +4,24 @@
 
 #include "logger.h"
 
+#define _check_ptr(ptr, size) if(ptr==NULL){fatal("Failed to allocate pointer sized %zu bytes",size);}
+
 void* allocate(size_t size) {
 	void* ptr = malloc(size);
-	if (ptr == NULL) {
-		fatal("Failed to allocate a pointer sized %zu bytes", size);
-		exit(1);
-	}
+	_check_ptr(ptr, size);
 	return ptr;
 }
 
 void* callocate(size_t size, size_t t_size) {
 	void* ptr = calloc(size, t_size);
-	if (ptr == NULL) {
-		fatal("Failed to allocate a pointer sized %zu bytes", size);
-		exit(1);
-	}
+	_check_ptr(ptr, size);
 	return ptr;
 }
 
 void* reallocate(void* ptr, size_t size) {
-	if (ptr == NULL) {
-		fatal("Provided pointer is NULL");
-		exit(1);
-	}
+	if (ptr == NULL) {fatal("Provided pointer is NULL");}
 	void* ptr_new = realloc(ptr, size);
-	if (ptr_new == NULL) {
-		fatal("Failed to reallocate a pointer sized %zu bytes", size);
-		exit(1);
-	}
+	_check_ptr(ptr, size);
 	return ptr_new;
 }
 

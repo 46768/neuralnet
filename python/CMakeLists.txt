@@ -1,19 +1,8 @@
-# Include all source files
-include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
-file(GLOB srcs
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
-)
+set(LIB_NAME PythonBinding)
 
-add_library(PythonInterface STATIC
-	${srcs}
-)
+add_library(${LIB_NAME} STATIC)
 
-# Link headers to the library
-target_include_directories(PythonInterface PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/header"
-)
+file(GLOB_RECURSE srcs CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+target_sources(${LIB_NAME} PRIVATE ${srcs})
 
-target_link_libraries(PythonInterface PUBLIC CompilerFlags)
-target_link_libraries(PythonInterface PRIVATE ComLib)
+target_include_directories(${LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/header")
