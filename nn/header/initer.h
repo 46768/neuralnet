@@ -12,6 +12,7 @@ typedef enum {
 	He,
 	Xavier,
 	RandomEN2,
+	RandomE0,
 } IniterEnum;
 
 // Initializer Function Resolver
@@ -21,5 +22,6 @@ float zero_init(size_t); // Initialize to 0.0f
 float he_init(size_t); // Initialize with He Initialization
 float xavier_init(size_t); // Initialize with Xavier Initialization
 float random_en2_init(size_t); // Initialize randomly in range of -0.01 to 0.01
+float random_e0_init(size_t); // Initialize randomly in range of -1 to 1
 
 #endif

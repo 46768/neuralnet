@@ -49,7 +49,7 @@ int main() {
 	ffn_set_cost_fn(model, CCE);
 	ffn_set_batch_type(model, MiniBatch);
 	ffn_set_batch_size(model, 100);
-	ffn_set_optimizer(model, nn_momentum_optimize_init(0.99));
+	ffn_set_optimizer(model, nn_momentum_optimize_init(0.9));
 	ffn_finalize(model);
 
 	clock_t start, end;
