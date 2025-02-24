@@ -1,7 +1,10 @@
 function(get_all_targets _result _dir)
     get_property(_subdirs DIRECTORY "${_dir}" PROPERTY SUBDIRECTORIES)
     foreach(_subdir IN LISTS _subdirs)
-        get_all_targets(${_result} "${_subdir}")
+		string(FIND ${_subdir} "target" _is_target)
+		if (${_is_target} EQUAL -1)
+			get_all_targets(${_result} "${_subdir}")
+		endif()
     endforeach()
 
     get_directory_property(_sub_targets DIRECTORY "${_dir}" BUILDSYSTEM_TARGETS)
