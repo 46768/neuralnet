@@ -1,10 +1,10 @@
+/** \file */
+#ifndef COM_LOGGER_H
+#define COM_LOGGER_H
 // Uncomment to enable debugging
 //#define DEBUG_MODE
 // Uncomment to enable verbose logging
 //#define VERBOSE_MODE
-
-#ifndef COM_LOGGER_H
-#define COM_LOGGER_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +17,7 @@
 // 4 - FATAL
 
 void _log(int, const char*, int, const char*, const char*, ...);
-void newline();
+#define newline() fprintf(stderr,"\n")
 
 #define info(format, ...) _log(0, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
 #define warn(format, ...) _log(1, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
