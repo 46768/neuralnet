@@ -50,7 +50,7 @@ FFNParameterPool* _ffn_init_papool(size_t layer_cnt, size_t mat_size_sum, size_t
 		mat_accum_size += matrix_calc_size(l_size, l1_size);
 
 		vec_init(l1_size, vec_dat_ptr + vec_accum_size, &vec_ptr[l]);
-		vec_accum_size += vec_calc_size(l1_size);
+		vec_accum_size += vec_calc_size(l_size);
 	}
 
 	papool->biases = vec_ptr;

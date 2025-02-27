@@ -92,7 +92,11 @@ void nn_none_fn_d(Vector* z, Vector* d) {
 //////////
 
 void nn_relu(Vector* z, Vector* a) {
-	_check_vec_size(z, a);
+#ifndef NO_BOUND_CHECK
+	if (z->dimension != a->dimension) {
+		fatal("Mismatched vector size, z: %zu a: %zu", z->dimension, a->dimension);
+	}
+#endif
 #ifdef SIMD_AVX
 	AVX256 vlbound = AVX256ZERO;
 	for (size_t i = 0; i < z->dimension; i+=8) {
@@ -107,7 +111,11 @@ void nn_relu(Vector* z, Vector* a) {
 #endif
 }
 void nn_relu_d(Vector* z, Vector* d) {
-	_check_vec_size(z, d);
+#ifndef NO_BOUND_CHECK
+	if (z->dimension != d->dimension) {
+		fatal("Mismatched vector size, z: %zu d: %zu", z->dimension, d->dimension);
+	}
+#endif
 #ifdef SIMD_AVX
 	AVX256 vlbound = AVX256ZERO;
 	AVX256 vmask = AVX256ONE;

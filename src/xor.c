@@ -34,8 +34,10 @@ int main() {
 	ffn_add_dense(model, 2, Sigmoid, Xavier, RandomEN2);
 	ffn_add_dense(model, 1, None, Zero, Zero);
 	ffn_set_cost_fn(model, BCE);
-	ffn_set_batch_type(model, Stochastic);
-	ffn_set_optimizer(model, nn_gradient_descent_init(1));
+	ffn_set_batch_type(model, MiniBatch);
+	ffn_set_batch_size(model, 2);
+	//ffn_set_optimizer(model, nn_momentum_optimize_init(0.9));
+	ffn_set_optimizer(model, nn_gradient_descent_init());
 	ffn_finalize(model);
 
 	for (int t = 0; t < 100000; t++) {
