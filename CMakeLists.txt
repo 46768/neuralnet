@@ -15,7 +15,6 @@ include(cmake/SIMDCheck.cmake) # Get SIMD capabilites
 include(cmake/CompilerFlags.cmake) # Set compiler flags
 include(cmake/PlatformMacros.cmake) # Platform macro
 include(cmake/GetTargets.cmake)
-include(cmake/FetchCMocka.cmake)
 
 # Project root path as macro
 target_compile_definitions(CompilerFlags INTERFACE
@@ -48,6 +47,7 @@ target_link_libraries(NNLib
 	Utility # Utilities
 )
 
+# Generate Executables
 file(GLOB_RECURSE EntryPoints CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c")
 
 foreach (EntryPoint ${EntryPoints})
@@ -55,41 +55,3 @@ foreach (EntryPoint ${EntryPoints})
 	add_executable(${TargetExecName} ${EntryPoint})
 	target_link_libraries(${TargetExecName} PRIVATE NNLib)
 endforeach()
-
-# Unit tests
-file(GLOB_RECURSE UnitTests CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tests/unit/*.c")
-
-foreach (Test ${UnitTests})
-	get_filename_component(TargetTestName ${Test} NAME_WLE)
-	add_executable(${TargetTestName} ${Test})
-	target_link_libraries(${TargetTestName} PRIVATE cmocka-static)
-	set_target_properties(${TargetTestName}
-		PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/unit"
-	)
-endforeach()
-# Unit test runner
-file(GENERATE
-	OUTPUT "${CMAKE_BINARY_DIR}/UnitTest"
-	CONTENT "cd ${CMAKE_BINARY_DIR}/tests/unit; for i in $(ls ${CMAKE_BINARY_DIR}/tests/unit); do echo \"running test $i\"; ./$i; echo ; done"
-	FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE
-)
-
-# Integration tests
-file(GLOB_RECURSE IntegrationTests CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/tests/integration/*.c")
-
-foreach (Test ${IntegrationTests})
-	get_filename_component(TargetTestName ${Test} NAME_WLE)
-	add_executable(${TargetTestName} ${Test})
-	target_link_libraries(${TargetTestName} PRIVATE cmocka-static)
-	set_target_properties(${TargetTestName}
-		PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/integration"
-	)
-endforeach()
-# Unit test runner
-file(GENERATE
-	OUTPUT "${CMAKE_BINARY_DIR}/IntegrationTest"
-	CONTENT "cd ${CMAKE_BINARY_DIR}/tests/integration; for i in $(ls ${CMAKE_BINARY_DIR}/tests/integration); do echo \"running test $i\"; ./$i; echo ; done"
-	FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE
-)
