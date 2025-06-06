@@ -33,4 +33,8 @@ void mat_fmva(Matrix*, Matrix*, Vector*);
 void mat_hadamard(Matrix*, Vector*);
 void mat_t_hadamard(Matrix*, Vector*);
 
+// Vector Operation (Matrix return)
+
+void vec_crmul(Vector*, Vector*, Matrix*);
+
 #endif

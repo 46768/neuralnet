@@ -17,4 +17,12 @@ typedef struct {
 
 void vec_init(uint32_t, float*, Vector*);
 
+// Vector Indexing
+
+#define get_vec_ctx(ctx_name, vec) Vector ctx_name = {vec->size, vec->data}
+#define vec_idx(ctx, i) (ctx.data)[i]
+
+void vec_cadd(Vector*, Vector*, float);
+void vec_mul(Vector*, Vector*);
+
 #endif
