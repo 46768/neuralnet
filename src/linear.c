@@ -1,6 +1,9 @@
 #include "stdio.h"
 
 int main() {
-	printf("Hello world!");
+	int a = 5;
+	int *ptr = &a;
+	printf("Hello world!\n");
+	printf("%ld\n", sizeof(ptr));
 	return 0;
 }
