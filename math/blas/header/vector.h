@@ -21,6 +21,7 @@ void vec_init(uint32_t, float*, Vector*);
 
 #define get_vec_ctx(ctx_name, vec) Vector ctx_name = {vec->size, vec->data}
 #define vec_idx(ctx, i) (ctx.data)[i]
+#define vec_idx_ptr(ctx, i) &((ctx.data)[i])
 
 void vec_cadd(Vector*, Vector*, float);
 void vec_mul(Vector*, Vector*);
