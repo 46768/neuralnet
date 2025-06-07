@@ -46,8 +46,8 @@ void mat_init(uint32_t, uint32_t, float*, Matrix*);
 #define mat_idx(ctx, x, y) (ctx.data)[y+(x*(ctx.rsy))]
 #define mat_t_idx(ctx, x, y) (ctx.data)[x+(y*(ctx.rsx))]
 
-#define mat_idx_ptr(ctx, x, y) &((ctx.data)[y+(x*(ctx.rsy))])
-#define mat_t_idx_ptr(ctx, x, y) &((ctx.data)[x+(y*(ctx.rsx))])
+#define mat_idx_ptr(ctx, x, y) &mat_idx(ctx, x, y)
+#define mat_t_idx_ptr(ctx, x, y) &mat_t_idx(ctx, x, y)
 
 // Matrix Operation
 

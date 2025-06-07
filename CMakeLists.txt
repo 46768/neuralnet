@@ -44,6 +44,8 @@ add_library(NNLib INTERFACE)
 target_link_libraries(NNLib
 	INTERFACE
 	CompilerFlags # Compiler Flags
+	BLAS
+	SIMDLib
 	Utility # Utilities
 )
 
