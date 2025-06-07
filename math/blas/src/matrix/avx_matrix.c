@@ -28,23 +28,14 @@ static inline void _mat_vmul_kernel(MatrixCtx mat, Vector vec_ctx,
 	__m256 m6 = _mm256_load_ps(mat_t_idx_ptr(mat, kx_offset+6, ky_offset+0));
 	__m256 m7 = _mm256_load_ps(mat_t_idx_ptr(mat, kx_offset+7, ky_offset+0));
 
-	__m256 vm0 = _mm256_mul_ps(v0, m0);
-	__m256 vm1 = _mm256_mul_ps(v1, m1);
-	__m256 vm2 = _mm256_mul_ps(v2, m2);
-	__m256 vm3 = _mm256_mul_ps(v3, m3);
-	__m256 vm4 = _mm256_mul_ps(v4, m4);
-	__m256 vm5 = _mm256_mul_ps(v5, m5);
-	__m256 vm6 = _mm256_mul_ps(v6, m6);
-	__m256 vm7 = _mm256_mul_ps(v7, m7);
-
-	r = _mm256_add_ps(vm0, r);
-	r = _mm256_add_ps(vm1, r);
-	r = _mm256_add_ps(vm2, r);
-	r = _mm256_add_ps(vm3, r);
-	r = _mm256_add_ps(vm4, r);
-	r = _mm256_add_ps(vm5, r);
-	r = _mm256_add_ps(vm6, r);
-	r = _mm256_add_ps(vm7, r);
+	r = _mm256_fmadd_ps(v0, m0, r);
+	r = _mm256_fmadd_ps(v1, m1, r);
+	r = _mm256_fmadd_ps(v2, m2, r);
+	r = _mm256_fmadd_ps(v3, m3, r);
+	r = _mm256_fmadd_ps(v4, m4, r);
+	r = _mm256_fmadd_ps(v5, m5, r);
+	r = _mm256_fmadd_ps(v6, m6, r);
+	r = _mm256_fmadd_ps(v7, m7, r);
 
 	_mm256_store_ps(vec_idx_ptr(res_ctx, ky_offset), r);
 }
