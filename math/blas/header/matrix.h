@@ -18,6 +18,13 @@ typedef struct {
 	float* data; /**< Data pointer of the matrix - float* (64bit)*/
 } Matrix;
 
+typedef struct {
+	uint32_t sx; /**< Width of the matrix - uint32 (32bit)*/
+	uint32_t sy; /**< Height of the matrix - uint32 (32bit)*/
+	float* data; /**< Data pointer of the matrix - float* (64bit)*/
+	float* data_t; /**< Data pointer of the transposed matrix - float* (64bit)*/
+} MatrixTranpose;
+
 /**
  * \struct MatrixCtx
  * \brief A nxm-dimensional matrix context for optimized indexing
@@ -30,6 +37,7 @@ typedef struct {
 	uint32_t rsx; /**< Allocated width of the matrix - uint32 (32bit)*/
 	uint32_t rsy; /**< Allocated height of the matrix - uint32 (32bit)*/
 	float* data; /**< Data pointer of the matrix - float* (64bit)*/
+	float* data_t; /**< Data pointer of the transpose matrix - float* (64bit)*/
 } MatrixCtx;
 
 void mat_init(uint32_t, uint32_t, float*, Matrix*);
@@ -42,19 +50,24 @@ void mat_init(uint32_t, uint32_t, float*, Matrix*);
 
 // Matrix indexing
 
-#define get_mat_ctx(ctx_name, mat) MatrixCtx ctx_name = {mat->sx, mat->sy, get_mat_rsize(mat->sx), get_mat_rsize(mat->sy), mat->data}
+#define get_mat_ctx(ctx_name, mat) MatrixCtx ctx_name = {mat->sx, mat->sy, get_mat_rsize(mat->sx), get_mat_rsize(mat->sy), mat->data, NULL}
+#define get_mat_t_ctx(ctx_name, mat) MatrixCtx ctx_name = {mat->sx, mat->sy, get_mat_rsize(mat->sx), get_mat_rsize(mat->sy), mat->data, mat->data_t}
+
 #define mat_idx(ctx, x, y) (ctx.data)[((y)&7)+((x)*8)+(((y)>>3)*ctx.rsx*8)]
 #define mat_t_idx(ctx, x, y) (ctx.data)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
+#define mat_dt_idx(ctx, x, y) (ctx.data_t)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
+#define mat_dtt_idx(ctx, x, y) (ctx.data_t)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
 
 #define mat_idx_ptr(ctx, x, y) &mat_idx(ctx, x, y)
 #define mat_t_idx_ptr(ctx, x, y) &mat_t_idx(ctx, x, y)
+#define mat_dt_idx_ptr(ctx, x, y) &mat_dt_idx(ctx, x, y)
+#define mat_dtt_idx_ptr(ctx, x, y) &mat_dtt_idx(ctx, x, y)
 
 // Matrix Operation
 
 void mat_vmul(Matrix*, Vector*, Vector*);
 void mat_fmva(Matrix*, Vector*, Vector*);
-void mat_hadamard(Matrix*, Vector*);
-void mat_t_hadamard(Matrix*, Vector*);
+void mat_t_vmul(MatrixTranpose*, Vector*, Vector*);
 
 // Vector Operation (Matrix return)
 

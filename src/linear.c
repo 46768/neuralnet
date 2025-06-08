@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "matrix.h"
 #include "vector.h"
 #include "avx.h"
 
-#define SX 784
-#define SY 16
+#define SX 64
+#define SY 64
 
 int main() {
 	Matrix* mat = (Matrix*)malloc(sizeof(Matrix));
@@ -61,7 +62,13 @@ int main() {
 	printf("\n");
 	*/
 
+	clock_t s, e;
+	s = clock();
 	mat_vmul(mat, vec, res);
+	e = clock();
+	double t = ((double)(e-s)) / CLOCKS_PER_SEC;
+
+	printf("%f\n", t);
 
 	/*
 	get_vec_ctx(r, res);
