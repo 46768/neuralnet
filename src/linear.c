@@ -5,8 +5,8 @@
 #include "vector.h"
 #include "avx.h"
 
-#define SX 12
-#define SY 6
+#define SX 16384
+#define SY 16384
 
 int main() {
 	Matrix* mat = (Matrix*)malloc(sizeof(Matrix));
@@ -17,8 +17,8 @@ int main() {
 	mat->sy = SY;
 	mat->data = avx_allocate(((SX+7)&~7)*((SY+7)&~7)*sizeof(float));
 
-	vec->size = SY;
-	vec->data = avx_allocate(((SY+7)&~7)*sizeof(float));
+	vec->size = SX;
+	vec->data = avx_allocate(((SX+7)&~7)*sizeof(float));
 
 	res->size = SY;
 	res->data = avx_allocate(((SY+7)&~7)*sizeof(float));
@@ -26,36 +26,49 @@ int main() {
 	get_mat_ctx(m, mat);
 	get_vec_ctx(v, vec);
 
+	int cnt = 1;
 	for (int i = 0; i < SY; i++) {
-		vec_idx(v, i) = (float)i+1;
 		for (int j = 0; j < SX; j++) {
-			mat_idx(m, j, i) = (i*SY)+j+1;
+			mat_idx(m, j, i) = cnt;
+			cnt++;
 		}
 	}
+	for (int j = 0; j < SX; j++) {
+		vec_idx(v, j) = (float)j+1;
+	}
 
-	for (int i = 0; i < SY; i++) {
-		printf("vec %d: %f\n", i, vec_idx(v, i));
+	/*
+	for (int i = 0; i < SX; i++) {
 		printf("mat %d: ", i);
-		for (int j = 0; j < SX; j++) {
-			printf("%f ", mat_idx(m, j, i));
+		for (int j = 0; j < SY; j++) {
+			printf("%f ", mat_t_idx(m, j, i));
 		}
 		printf("\n");
 	}
+	for (int j = 0; j < SX; j++) {
+		printf("vec %d: %f\n", j, vec_idx(v, j));
+	}
 
 	for (int i = 0; i < ((SX+7)&~7)*((SY+7)&~7); i++) {
-		if (i % ((SX+7)&~7) == 0) {
+		if (i % 8 == 0) {
+			printf("\n");
+		}
+		if (i % 64 == 0) {
 			printf("\n");
 		}
 		printf("%f ", m.data[i]);
 	}
 	printf("\n");
+	*/
 
 	mat_vmul(mat, vec, res);
 
+	/*
 	get_vec_ctx(r, res);
-	for (int i = 0; i < SY; i++) {
+	for (int i = 0; i < ((SY+7)&~7); i++) {
 		printf("res %d: %f\n", i, vec_idx(r, i));
 	}
+	*/
 
 	free(mat->data);
 	free(vec->data);

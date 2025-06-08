@@ -43,8 +43,8 @@ void mat_init(uint32_t, uint32_t, float*, Matrix*);
 // Matrix indexing
 
 #define get_mat_ctx(ctx_name, mat) MatrixCtx ctx_name = {mat->sx, mat->sy, get_mat_rsize(mat->sx), get_mat_rsize(mat->sy), mat->data}
-#define mat_idx(ctx, x, y) (ctx.data)[y+(x*(ctx.rsy))]
-#define mat_t_idx(ctx, x, y) (ctx.data)[x+(y*(ctx.rsx))]
+#define mat_idx(ctx, x, y) (ctx.data)[((y)&7)+((x)*8)+(((y)>>3)*ctx.rsx*8)]
+#define mat_t_idx(ctx, x, y) (ctx.data)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
 
 #define mat_idx_ptr(ctx, x, y) &mat_idx(ctx, x, y)
 #define mat_t_idx_ptr(ctx, x, y) &mat_t_idx(ctx, x, y)
