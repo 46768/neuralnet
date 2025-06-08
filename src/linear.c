@@ -5,8 +5,8 @@
 #include "vector.h"
 #include "avx.h"
 
-#define SX 16384
-#define SY 16384
+#define SX 784
+#define SY 16
 
 int main() {
 	Matrix* mat = (Matrix*)malloc(sizeof(Matrix));

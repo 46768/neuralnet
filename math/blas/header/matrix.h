@@ -52,7 +52,7 @@ void mat_init(uint32_t, uint32_t, float*, Matrix*);
 // Matrix Operation
 
 void mat_vmul(Matrix*, Vector*, Vector*);
-void mat_fmva(Matrix*, Matrix*, Vector*);
+void mat_fmva(Matrix*, Vector*, Vector*);
 void mat_hadamard(Matrix*, Vector*);
 void mat_t_hadamard(Matrix*, Vector*);
 
