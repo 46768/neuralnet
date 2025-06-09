@@ -1,4 +1,4 @@
-#ifdef SIMD_AVX
+#ifdef SIMD_AVX2
 #include <immintrin.h>
 #include <string.h>
 
