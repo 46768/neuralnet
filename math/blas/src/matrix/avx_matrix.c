@@ -1,4 +1,3 @@
-#ifndef SIMD_AVX2
 #ifdef SIMD_AVX
 #include <immintrin.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 
 // Matrix Operation
 
+#ifndef SIMD_AVX2
 void mat_vmul(Matrix *mat, Vector *vec, Vector *res) {
 	// Get contexts for the kernel
 
@@ -191,11 +191,50 @@ void mat_t_vmul(MatrixTranpose* mat, Vector* vec, Vector* res) {
 		_mm256_store_ps(vec_idx_ptr(res_ctx, x), m7);
 	}
 }
+#endif
 
 // Vector Operation (Matrix return)
 
 void vec_crmul(Vector* c_vec, Vector* r_vec, Matrix* mat) {
+	// Get contexts
+	
+	get_vec_ctx(cv, c_vec);
+	get_vec_ctx(rv, r_vec);
+	get_mat_ctx(m, mat);
+
+	__m256 b,
+		   r0,r1,r2,r3,r4,r5,r6,r7;
+	for (uint32_t i = 0; i < cv.size; i+=8) {
+		b = _mm256_load_ps(vec_idx_ptr(cv, i));
+		for (uint32_t j = 0; j < rv.size; j+=8) {
+			r0 = _mm256_set1_ps(vec_idx(rv, j+0));
+			r1 = _mm256_set1_ps(vec_idx(rv, j+1));
+			r2 = _mm256_set1_ps(vec_idx(rv, j+2));
+			r3 = _mm256_set1_ps(vec_idx(rv, j+3));
+			r4 = _mm256_set1_ps(vec_idx(rv, j+4));
+			r5 = _mm256_set1_ps(vec_idx(rv, j+5));
+			r6 = _mm256_set1_ps(vec_idx(rv, j+6));
+			r7 = _mm256_set1_ps(vec_idx(rv, j+7));
+
+			r0 = _mm256_mul_ps(b, r0);
+			r1 = _mm256_mul_ps(b, r1);
+			r2 = _mm256_mul_ps(b, r2);
+			r3 = _mm256_mul_ps(b, r3);
+			r4 = _mm256_mul_ps(b, r4);
+			r5 = _mm256_mul_ps(b, r5);
+			r6 = _mm256_mul_ps(b, r6);
+			r7 = _mm256_mul_ps(b, r7);
+
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+0), r0);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+1), r1);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+2), r2);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+3), r3);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+4), r4);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+5), r5);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+6), r6);
+			_mm256_store_ps(mat_t_idx_ptr(m, i, j+7), r7);
+		}
+	}
 }
 
-#endif
 #endif

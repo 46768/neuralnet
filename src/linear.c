@@ -6,8 +6,8 @@
 #include "vector.h"
 #include "avx.h"
 
-#define SX 64
-#define SY 64
+#define SX 3
+#define SY 3
 
 int main() {
 	Matrix* mat = (Matrix*)malloc(sizeof(Matrix));
@@ -38,7 +38,6 @@ int main() {
 		vec_idx(v, j) = (float)j+1;
 	}
 
-	/*
 	for (int i = 0; i < SX; i++) {
 		printf("mat %d: ", i);
 		for (int j = 0; j < SY; j++) {
@@ -60,7 +59,6 @@ int main() {
 		printf("%f ", m.data[i]);
 	}
 	printf("\n");
-	*/
 
 	clock_t s, e;
 	s = clock();
@@ -70,12 +68,10 @@ int main() {
 
 	printf("%f\n", t);
 
-	/*
 	get_vec_ctx(r, res);
 	for (int i = 0; i < ((SY+7)&~7); i++) {
 		printf("res %d: %f\n", i, vec_idx(r, i));
 	}
-	*/
 
 	free(mat->data);
 	free(vec->data);
