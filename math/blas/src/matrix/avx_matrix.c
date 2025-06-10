@@ -1,6 +1,5 @@
 #ifdef SIMD_AVX
 #include <immintrin.h>
-#include <string.h>
 
 #include "matrix.h"
 
