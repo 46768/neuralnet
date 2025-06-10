@@ -204,8 +204,10 @@ void vec_crmul(Vector* c_vec, Vector* r_vec, Matrix* mat) {
 
 	__m256 b,
 		   r0,r1,r2,r3,r4,r5,r6,r7;
+	// cv.size -> mat.sy
 	for (uint32_t i = 0; i < cv.size; i+=8) {
 		b = _mm256_load_ps(vec_idx_ptr(cv, i));
+		// rv.size -> mat.sx
 		for (uint32_t j = 0; j < rv.size; j+=8) {
 			r0 = _mm256_set1_ps(vec_idx(rv, j+0));
 			r1 = _mm256_set1_ps(vec_idx(rv, j+1));
