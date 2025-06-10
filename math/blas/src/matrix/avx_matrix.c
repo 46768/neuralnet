@@ -162,16 +162,30 @@ void mat_t_vmul(MatrixTranpose* mat, Vector* vec, Vector* res) {
 			m5 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x+0, y+5));
 			m6 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x+0, y+6));
 
-			m7 = _mm256_fmadd_ps(v0, m0, m7);
-			m7 = _mm256_fmadd_ps(v1, m1, m7);
-			m7 = _mm256_fmadd_ps(v2, m2, m7);
-			m7 = _mm256_fmadd_ps(v3, m3, m7);
-			m7 = _mm256_fmadd_ps(v4, m4, m7);
-			m7 = _mm256_fmadd_ps(v5, m5, m7);
-			m7 = _mm256_fmadd_ps(v6, m6, m7);
+			m0 = _mm256_mul_ps(v0, m0);
+			m7 = _mm256_add_ps(m0, m7);
+
+			m1 = _mm256_mul_ps(v1, m1);
+			m7 = _mm256_add_ps(m1, m7);
+
+			m2 = _mm256_mul_ps(v2, m2);
+			m7 = _mm256_add_ps(m2, m7);
+
+			m3 = _mm256_mul_ps(v3, m3);
+			m7 = _mm256_add_ps(m3, m7);
+
+			m4 = _mm256_mul_ps(v4, m4);
+			m7 = _mm256_add_ps(m4, m7);
+
+			m5 = _mm256_mul_ps(v5, m5);
+			m7 = _mm256_add_ps(m5, m7);
+
+			m6 = _mm256_mul_ps(v6, m6);
+			m7 = _mm256_add_ps(m6, m7);
 
 			m0 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x+0, y+7));
-			m7 = _mm256_fmadd_ps(v7, m0, m7);
+			m0 = _mm256_mul_ps(v7, m0);
+			m7 = _mm256_add_ps(m0, m7);
 		}
 
 		_mm256_store_ps(vec_idx_ptr(res_ctx, x), m7);
