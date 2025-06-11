@@ -146,10 +146,4 @@ void mat_t_vmul(MatrixTranpose* mat, Vector* vec, Vector* res) {
 		_mm256_store_ps(vec_idx_ptr(res_ctx, x), m7);
 	}
 }
-
-// Vector Operation (Matrix return)
-
-void vec_crmul(Vector* c_vec, Vector* r_vec, Matrix* mat) {
-}
-
 #endif
