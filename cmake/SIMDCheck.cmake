@@ -15,6 +15,6 @@ check_c_source_runs("
 int main() {
 unsigned int eax,ebx,ecx,edx;
 __cpuid_count(1,0,eax,ebx,ecx,edx);
-return (edx & (1 << 28)) == 0;
+return (ecx & (1 << 28)) == 0;
 }" haveAVX
 )
