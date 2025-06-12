@@ -11,8 +11,7 @@ void vec_cadd(Vector* vec1, Vector* vec2, float mcoef) {
 	for (uint32_t i = 0; i < v1.size; i+=8) {
 		v1d = _mm256_load_ps(vec_idx_ptr(v1, i));
 		v2d = _mm256_load_ps(vec_idx_ptr(v2, i));
-		v2d = _mm256_mul_ps(v2d, vcoef);
-		v1d = _mm256_add_ps(v1d, v2d);
+		v1d = _mm256_fmadd_ps(v2d, vcoef, v1d);
 		_mm256_store_ps(vec_idx_ptr(v1, i), v1d);
 	}
 }
