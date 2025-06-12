@@ -7,4 +7,6 @@ typedef enum {
 
 typedef void(*InitFn)();
 
+InitFn initer_resolve(IniterEnum);
+
 #endif

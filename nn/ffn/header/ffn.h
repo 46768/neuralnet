@@ -21,6 +21,7 @@ typedef struct {
 	uint32_t layer_cnt;
 	uint32_t layer_cap;
 	FFNLayerData* layer_data;
+	CostEnum cost_fn;
 } FFNInitData;
 
 typedef struct {
@@ -47,12 +48,13 @@ typedef struct {
 
 	FFNPropagationBuffer propagations;
 	FFNGradientBuffer gradients;
-	Vector layer_deriv;
+	Vector* layer_deriv;
 	Vector* err_coef;
 
 	void* data;
 } FFNModel;
 
+FFNInitData* ffn_init();
 void ffn_add_layer(FFNInitData*, uint32_t, ActivationEnum, IniterEnum, IniterEnum);
 void ffn_set_output(FFNInitData*, uint32_t);
 void ffn_set_cost_fn(FFNInitData*, CostEnum);

@@ -8,4 +8,7 @@ typedef enum {
 typedef void(*CostFn)();
 typedef void(*CostFnD)();
 
+CostFn cost_resolve(CostEnum);
+CostFnD cost_d_resolve(CostEnum);
+
 #endif

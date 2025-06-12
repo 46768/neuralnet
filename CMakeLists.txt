@@ -28,6 +28,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/utils") # Common utilities
 add_subdirectory("${PROJECT_SOURCE_DIR}/math/blas") # Linear algebra
 add_subdirectory("${PROJECT_SOURCE_DIR}/simd") # AVX SIMD
 add_subdirectory("${PROJECT_SOURCE_DIR}/nn") # Neural network
+add_subdirectory("${PROJECT_SOURCE_DIR}/nn/ffn") # Fully connected network
 
 get_all_targets(TargetList ${CMAKE_CURRENT_LIST_DIR})
 foreach (target ${TargetList})
@@ -37,7 +38,9 @@ foreach (target ${TargetList})
 	if (NOT (${target} STREQUAL "Utility" OR ${target} STREQUAL "CompilerFlags"))
 		target_link_libraries(${target} PUBLIC Utility)
 	endif()
+	message(${target})
 endforeach()
+
 
 # Add the commonly used libraries
 add_library(NNLib INTERFACE)
@@ -46,6 +49,7 @@ target_link_libraries(NNLib
 	CompilerFlags # Compiler Flags
 	BLAS
 	SIMDLib
+	FFNLib
 	Utility # Utilities
 )
 
