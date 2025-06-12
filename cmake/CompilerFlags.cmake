@@ -30,20 +30,6 @@ if (PROFILING)
 		"$<BUILD_INTERFACE:-g;-pg>")
 endif()
 
-if (NO_PYTHON OR NEED_SPEED)
-	message("Disabling python interface")
-	target_compile_definitions(CompilerFlags INTERFACE "NO_PYTHON")
-endif()
-
-if (NO_BOUND_CHECK OR NEED_SPEED)
-	message("Disabling bound checking")
-	target_compile_definitions(CompilerFlags INTERFACE "NO_BOUND_CHECK")
-endif()
-if (NO_STATE_CHECK OR NEED_SPEED)
-	message("Disabling state checking")
-	target_compile_definitions(CompilerFlags INTERFACE "NO_STATE_CHECK")
-endif()
-
 if (useAVX512)
 	target_compile_options(CompilerFlags INTERFACE
 		"$<BUILD_INTERFACE:-mavx512f>")
