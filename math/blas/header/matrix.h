@@ -56,7 +56,7 @@ void mat_init(uint32_t, uint32_t, float*, Matrix*);
 #define mat_idx(ctx, x, y) (ctx.data)[((y)&7)+((x)*8)+(((y)>>3)*ctx.rsx*8)]
 #define mat_t_idx(ctx, x, y) (ctx.data)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
 #define mat_dt_idx(ctx, x, y) (ctx.data_t)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
-#define mat_dtt_idx(ctx, x, y) (ctx.data_t)[((x)&7)+((y)*8)+(((x)>>3)*ctx.rsy*8)]
+#define mat_dtt_idx(ctx, x, y) (ctx.data_t)[((y)&7)+((x)*8)+(((y)>>3)*ctx.rsx*8)]
 
 #define mat_idx_ptr(ctx, x, y) &mat_idx(ctx, x, y)
 #define mat_t_idx_ptr(ctx, x, y) &mat_t_idx(ctx, x, y)
@@ -68,6 +68,7 @@ void mat_init(uint32_t, uint32_t, float*, Matrix*);
 void mat_vmul(Matrix*, Vector*, Vector*);
 void mat_fmva(Matrix*, Vector*, Vector*);
 void mat_t_vmul(MatrixTranpose*, Vector*, Vector*);
+void mat_phy_transpose(MatrixTranpose*);
 
 // Vector Operation (Matrix return)
 
