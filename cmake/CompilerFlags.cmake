@@ -38,6 +38,7 @@ endif()
 
 if (useAVX2)
 	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX2")
+	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX")
 	target_compile_options(CompilerFlags INTERFACE
 		"$<BUILD_INTERFACE:-mavx2;-mfma>")
 endif()
