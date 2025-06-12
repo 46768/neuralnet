@@ -44,21 +44,24 @@ if (NO_STATE_CHECK OR NEED_SPEED)
 	target_compile_definitions(CompilerFlags INTERFACE "NO_STATE_CHECK")
 endif()
 
-if (USE_SCALAR)
-	message("Using scalar operations")
-	target_compile_definitions(CompilerFlags INTERFACE "SIMD_NONE")
-elseif (haveAVX2 AND haveAVX)
-	message("Using AVX2 operations")
+if (useAVX512)
+	target_compile_options(CompilerFlags INTERFACE
+		"$<BUILD_INTERFACE:-mavx512f>")
+	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX512")
+endif()
+
+if (useAVX2)
+	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX2")
 	target_compile_options(CompilerFlags INTERFACE
 		"$<BUILD_INTERFACE:-mavx2;-mfma>")
+endif()
+
+if (useAVX)
 	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX")
-	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX2")
-elseif (haveAVX)
-	message("Using AVX operations")
 	target_compile_options(CompilerFlags INTERFACE
 		"$<BUILD_INTERFACE:-mavx>")
-	target_compile_definitions(CompilerFlags INTERFACE "SIMD_AVX")
-else()
-	message("Using scalar operations")
+endif()
+
+if (NOT (useAVX512 AND useAVX2 AND useAVX))
 	target_compile_definitions(CompilerFlags INTERFACE "SIMD_NONE")
 endif()
