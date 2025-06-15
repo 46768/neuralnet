@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "random.h"
+
 #include "matrix.h"
 #include "vector.h"
 
@@ -105,7 +107,7 @@ void _ffn_init_parameter(FFNInitData *initd, FFNModel *model) {
         uint64_t m_size = calc_mat_size(l_size, l1_size);
 
         mat_t_init(l_size, l1_size, d_ptr + d_offset, d_ptr + d_offset + m_size,
-                   w_ptr);
+                   w_ptr + (l-1));
 
         d_offset += m_size * 2;
     }
@@ -273,12 +275,46 @@ void _ffn_init_intermediate(FFNInitData *initd, FFNModel *model) {
 }
 
 void ffn_build(FFNInitData *initd, FFNModel *model) {
-    model->layer_cnt = initd->layer_cnt;
+	init_random();
+
+	uint32_t l_cnt = initd->layer_cnt;
+	FFNLayerData* layer = initd->layer_data;
+
+    model->layer_cnt = l_cnt;
 
     _ffn_init_parameter(initd, model);
     _ffn_init_propagation(initd, model);
     _ffn_init_gradient(initd, model);
     _ffn_init_intermediate(initd, model);
+
+	Vector* bias = model->parameter.bias;
+	MatrixTranpose* weight = model->parameter.weight;
+	ActivationFn* activation_fn = model->parameter.activation;
+	ActivationFnD* activation_fnd = model->parameter.activation_d;
+
+	for (uint32_t l = 0; l < l_cnt-1; l++) {
+		InitFn bias_initer = initer_resolve(layer[l].b_initier);
+		InitFn weight_initer = initer_resolve(layer[l].w_initier);
+
+		activation_fn[l] = activation_resolve(layer[l].activation_fn);
+		activation_fnd[l] = activation_d_resolve(layer[l].activation_fn);
+		
+		uint32_t l_size = layer[l].size;
+		uint32_t l1_size = layer[l+1].size;
+
+		get_vec_ctx(b, bias+l);
+		get_mat_t_ctx(w, weight+l);
+
+		for (uint32_t y = 0; y < l1_size; y++) {
+			vec_idx(b, y) = bias_initer();
+			for (uint32_t x = 0; x < l_size; x++) {
+				mat_idx(w, x, y) = weight_initer();
+			}
+		}
+	}
+
+	model->parameter.cost = cost_resolve(initd->cost_fn);
+	model->parameter.cost_d = cost_d_resolve(initd->cost_fn);
 }
 
 void ffn_free(FFNModel *model) {
@@ -287,4 +323,9 @@ void ffn_free(FFNModel *model) {
     free(model->gradient.data);
     free(model->intermediate.data);
     free(model);
+}
+
+void ffn_free_init(FFNInitData *initd) {
+	free(initd->layer_data);
+	free(initd);
 }

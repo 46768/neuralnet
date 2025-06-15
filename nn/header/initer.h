@@ -3,8 +3,10 @@
 
 typedef enum { Zero } IniterEnum;
 
-typedef void (*InitFn)();
+typedef float (*InitFn)();
 
 InitFn initer_resolve(IniterEnum);
+
+float initer_zero();
 
 #endif

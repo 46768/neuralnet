@@ -2,14 +2,47 @@
 #include "cost.h"
 #include "initer.h"
 
-#include <stdlib.h>
+ActivationFn activation_resolve(ActivationEnum enm) {
+	switch (enm) {
+		case None:
+			return activation_none;
+	}
 
-ActivationFn activation_resolve(ActivationEnum enm) { return NULL; }
+	return activation_none;
+}
 
-ActivationFnD activation_d_resolve(ActivationEnum enm) { return NULL; }
+ActivationFnD activation_d_resolve(ActivationEnum enm) {
+	switch (enm) {
+		case None:
+			return activation_none_d;
+	}
 
-CostFn cost_resolve(CostEnum enm) { return NULL; }
+	return activation_none_d;
+}
 
-CostFnD cost_d_resolve(CostEnum enm) { return NULL; }
+CostFn cost_resolve(CostEnum enm) {
+	switch (enm) {
+		case MSE:
+			return cost_mse;
+	}
 
-InitFn initer_resolve(IniterEnum enm) { return NULL; }
+	return cost_mse;
+}
+
+CostFnD cost_d_resolve(CostEnum enm) {
+	switch (enm) {
+		case MSE:
+			return cost_mse_d;
+	}
+
+	return cost_mse_d;
+}
+
+InitFn initer_resolve(IniterEnum enm) {
+	switch (enm) {
+		case Zero:
+			return initer_zero;
+	}
+
+	return initer_zero;
+}

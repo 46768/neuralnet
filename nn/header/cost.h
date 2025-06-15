@@ -1,12 +1,17 @@
 #ifndef NN_COST_H
 #define NN_COST_H
 
+#include "vector.h"
+
 typedef enum { MSE } CostEnum;
 
-typedef void (*CostFn)();
-typedef void (*CostFnD)();
+typedef float (*CostFn)(Vector*);
+typedef void (*CostFnD)(Vector*, Vector*);
 
 CostFn cost_resolve(CostEnum);
 CostFnD cost_d_resolve(CostEnum);
+
+float cost_mse(Vector*);
+void cost_mse_d(Vector*, Vector*);
 
 #endif

@@ -69,5 +69,6 @@ void ffn_set_cost_fn(FFNInitData *, CostEnum);
 
 void ffn_build(FFNInitData *, FFNModel *);
 void ffn_free(FFNModel *);
+void ffn_free_init(FFNInitData *);
 
 #endif
