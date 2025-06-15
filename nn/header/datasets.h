@@ -14,11 +14,11 @@
  * pair, input[i] correspond to target[i]
  */
 typedef struct {
-	uint32_t size; /**< Amount of datapoint pairs in the dataset */
-	Vector* input; /**< Input of the dataset */
-	Vector* target; /**< Target of the dataset */
+    uint32_t size;  /**< Amount of datapoint pairs in the dataset */
+    Vector *input;  /**< Input of the dataset */
+    Vector *target; /**< Target of the dataset */
 
-	void* data; /**< Data pool of the dataset */
+    void *data; /**< Data pool of the dataset */
 } Dataset;
 
 #endif

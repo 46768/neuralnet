@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void* avx_allocate(uint32_t size);
+void *avx_allocate(uint32_t size);
 
 #endif

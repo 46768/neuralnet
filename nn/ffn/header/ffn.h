@@ -7,59 +7,67 @@
 #include "vector.h"
 
 #include "activation.h"
-#include "initer.h"
 #include "cost.h"
+#include "initer.h"
 
 typedef struct {
-	uint32_t size;
-	ActivationEnum activation_fn;
-	IniterEnum w_initier;
-	IniterEnum b_initier;
+    uint32_t size;
+    ActivationEnum activation_fn;
+    IniterEnum w_initier;
+    IniterEnum b_initier;
 } FFNLayerData;
 
 typedef struct {
-	uint32_t layer_cnt;
-	uint32_t layer_cap;
-	FFNLayerData* layer_data;
-	CostEnum cost_fn;
+    uint32_t layer_cnt;
+    uint32_t layer_cap;
+    FFNLayerData *layer_data;
+    CostEnum cost_fn;
 } FFNInitData;
 
 typedef struct {
-	Matrix* weights;
-	Vector* bias;
-	Vector cost;
-} FFNGradientBuffer;
+    uint32_t layer_cnt;
 
-typedef struct {
-	Vector* preactivation;
-	Vector* activation;
-} FFNPropagationBuffer;
+    struct {
+        MatrixTranpose *weight;
+        Vector *bias;
+        ActivationFn *activation;
+        ActivationFnD *activation_d;
+        CostFn cost;
+        CostFnD cost_d;
 
-typedef struct {
-	uint32_t layer_cnt;
+        void *data;
+    } parameter;
 
-	ActivationFn* activation;
-	ActivationFnD* activation_d;
-	CostFn cost;
-	CostFnD cost_d;
+    struct {
+        Vector *preactivation;
+        Vector *activation;
 
-	MatrixTranpose* weights;
-	Vector* bias;
+        void *data;
+    } propagation;
 
-	FFNPropagationBuffer propagations;
-	FFNGradientBuffer gradients;
-	Vector* layer_deriv;
-	Vector* err_coef;
+    struct {
+        Matrix *weight;
+        Vector *bias;
+        Vector *cost;
 
-	void* data;
+        void *data;
+    } gradient;
+
+    struct {
+        Vector *layer_deriv;
+        Vector *err_coef;
+
+        void *data;
+    } intermediate;
 } FFNModel;
 
-FFNInitData* ffn_init();
-void ffn_add_layer(FFNInitData*, uint32_t, ActivationEnum, IniterEnum, IniterEnum);
-void ffn_set_output(FFNInitData*, uint32_t);
-void ffn_set_cost_fn(FFNInitData*, CostEnum);
+FFNInitData *ffn_init();
+void ffn_add_layer(FFNInitData *, uint32_t, ActivationEnum, IniterEnum,
+                   IniterEnum);
+void ffn_set_output(FFNInitData *, uint32_t);
+void ffn_set_cost_fn(FFNInitData *, CostEnum);
 
-void ffn_build(FFNInitData*, FFNModel*);
-void ffn_free(FFNModel*);
+void ffn_build(FFNInitData *, FFNModel *);
+void ffn_free(FFNModel *);
 
 #endif

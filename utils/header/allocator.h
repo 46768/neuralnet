@@ -14,7 +14,7 @@
  *
  * \return A pointer pointing to the memory allocated
  */
-void* allocate(size_t);
+void *allocate(size_t);
 
 /**
  * \brief calloc wrapper with pointer check
@@ -27,7 +27,7 @@ void* allocate(size_t);
  *
  * \return A pointer pointing to memory sized size*t_size bytes
  */
-void* callocate(size_t, size_t);
+void *callocate(size_t, size_t);
 
 /**
  * \brief realloc wrapper with pointer check
@@ -42,7 +42,7 @@ void* callocate(size_t, size_t);
  *
  * \return A pointer pointing to new memory with the new size and same data
  */
-void* reallocate(void*, size_t);
+void *reallocate(void *, size_t);
 
 /**
  * \brief free wrapper with pointer check
@@ -52,6 +52,6 @@ void* reallocate(void*, size_t);
  *
  * \param ptr Memory pointer to free
  */
-void deallocate(void*);
+void deallocate(void *);
 
 #endif
