@@ -9,6 +9,9 @@
 #include "activation.h"
 #include "cost.h"
 #include "initer.h"
+#include "datasets.h"
+
+// FFN Initalization data
 
 typedef struct {
     uint32_t size;
@@ -23,6 +26,8 @@ typedef struct {
     FFNLayerData *layer_data;
     CostEnum cost_fn;
 } FFNInitData;
+
+// FFN Model data
 
 typedef struct {
     uint32_t layer_cnt;
@@ -61,14 +66,26 @@ typedef struct {
     } intermediate;
 } FFNModel;
 
+// FFN Initalizer
+
 FFNInitData *ffn_init();
 void ffn_add_layer(FFNInitData *, uint32_t, ActivationEnum, IniterEnum,
                    IniterEnum);
 void ffn_set_output(FFNInitData *, uint32_t);
 void ffn_set_cost_fn(FFNInitData *, CostEnum);
 
+// FFN Builder
+
 void ffn_build(FFNInitData *, FFNModel *);
+
+// Memory Management
+
 void ffn_free(FFNModel *);
 void ffn_free_init(FFNInitData *);
+
+// Training / Inference
+
+void ffn_run(FFNModel *, Vector *);
+void ffn_train(FFNModel *, Dataset *);
 
 #endif

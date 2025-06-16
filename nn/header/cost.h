@@ -5,13 +5,16 @@
 
 typedef enum { MSE } CostEnum;
 
-typedef float (*CostFn)(Vector*);
-typedef void (*CostFnD)(Vector*, Vector*);
+typedef float (*CostFn)(Vector*, Vector*);
+typedef void (*CostFnD)(Vector*, Vector*, Vector*);
 
 CostFn cost_resolve(CostEnum);
 CostFnD cost_d_resolve(CostEnum);
 
-float cost_mse(Vector*);
-void cost_mse_d(Vector*, Vector*);
+float cost_mse(Vector*, Vector*);
+void cost_mse_d(Vector*, Vector*, Vector*);
+
+float cost_ccel(Vector*, Vector*);
+void cost_ccel_d(Vector*, Vector*, Vector*);
 
 #endif

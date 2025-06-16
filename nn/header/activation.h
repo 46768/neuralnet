@@ -3,7 +3,10 @@
 
 #include "vector.h"
 
-typedef enum { None } ActivationEnum;
+typedef enum {
+	None,
+	Sigmoid,
+} ActivationEnum;
 
 typedef void (*ActivationFn)(Vector*, Vector*);
 typedef void (*ActivationFnD)(Vector*, Vector*);
@@ -13,5 +16,8 @@ ActivationFnD activation_d_resolve(ActivationEnum);
 
 void activation_none(Vector*, Vector*);
 void activation_none_d(Vector*, Vector*);
+
+void activation_sigmoid(Vector*, Vector*);
+void activation_sigmoid_d(Vector*, Vector*);
 
 #endif

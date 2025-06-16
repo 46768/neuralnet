@@ -306,9 +306,9 @@ void ffn_build(FFNInitData *initd, FFNModel *model) {
 		get_mat_t_ctx(w, weight+l);
 
 		for (uint32_t y = 0; y < l1_size; y++) {
-			vec_idx(b, y) = bias_initer();
+			vec_idx(b, y) = bias_initer(l1_size);
 			for (uint32_t x = 0; x < l_size; x++) {
-				mat_idx(w, x, y) = weight_initer();
+				mat_idx(w, x, y) = weight_initer(l_size);
 			}
 		}
 	}
