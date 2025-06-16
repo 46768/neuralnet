@@ -5,6 +5,57 @@
 
 // Matrix Operation
 
+void mat_cadd(Matrix *mat1, Matrix *mat2, float coef) {
+    get_mat_ctx(m1, mat1);
+    get_mat_ctx(m2, mat2);
+
+    __m256 m10, m11, m12, m13, m14, m15, m16, m17, m20, m21, m22, m23, m24, m25,
+        m26, m27;
+
+    m17 = _mm256_set1_ps(coef);
+
+    for (uint32_t y = 0; y < m1.sy; y += 8) {
+        for (uint32_t x = 0; x < m1.sx; x += 8) {
+            m20 = _mm256_load_ps(mat_idx_ptr(m2, x + 0, y + 0));
+            m21 = _mm256_load_ps(mat_idx_ptr(m2, x + 1, y + 0));
+            m22 = _mm256_load_ps(mat_idx_ptr(m2, x + 2, y + 0));
+            m23 = _mm256_load_ps(mat_idx_ptr(m2, x + 3, y + 0));
+            m24 = _mm256_load_ps(mat_idx_ptr(m2, x + 4, y + 0));
+            m25 = _mm256_load_ps(mat_idx_ptr(m2, x + 5, y + 0));
+            m26 = _mm256_load_ps(mat_idx_ptr(m2, x + 6, y + 0));
+            m27 = _mm256_load_ps(mat_idx_ptr(m2, x + 7, y + 0));
+
+            m10 = _mm256_load_ps(mat_idx_ptr(m1, x + 0, y + 0));
+            m11 = _mm256_load_ps(mat_idx_ptr(m1, x + 1, y + 0));
+            m12 = _mm256_load_ps(mat_idx_ptr(m1, x + 2, y + 0));
+            m13 = _mm256_load_ps(mat_idx_ptr(m1, x + 3, y + 0));
+            m14 = _mm256_load_ps(mat_idx_ptr(m1, x + 4, y + 0));
+            m15 = _mm256_load_ps(mat_idx_ptr(m1, x + 5, y + 0));
+            m16 = _mm256_load_ps(mat_idx_ptr(m1, x + 6, y + 0));
+
+            m10 = _mm256_fmadd_ps(m20, m17, m10);
+            m11 = _mm256_fmadd_ps(m21, m17, m11);
+            m12 = _mm256_fmadd_ps(m22, m17, m12);
+            m13 = _mm256_fmadd_ps(m23, m17, m13);
+            m14 = _mm256_fmadd_ps(m24, m17, m14);
+            m15 = _mm256_fmadd_ps(m25, m17, m15);
+            m16 = _mm256_fmadd_ps(m26, m17, m16);
+
+            _mm256_store_ps(mat_idx_ptr(m1, x + 0, y + 0), m10);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 1, y + 0), m11);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 2, y + 0), m12);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 3, y + 0), m13);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 4, y + 0), m14);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 5, y + 0), m15);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 6, y + 0), m16);
+
+            m10 = _mm256_load_ps(mat_idx_ptr(m1, x + 7, y + 0));
+            m10 = _mm256_fmadd_ps(m27, m17, m10);
+            _mm256_store_ps(mat_idx_ptr(m1, x + 7, y + 0), m10);
+        }
+    }
+}
+
 void mat_vmul(Matrix *mat, Vector *vec, Vector *res) {
     // Get contexts for the kernel
 

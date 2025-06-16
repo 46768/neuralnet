@@ -8,8 +8,8 @@
 
 #include "activation.h"
 #include "cost.h"
-#include "initer.h"
 #include "datasets.h"
+#include "initer.h"
 
 // FFN Initalization data
 
@@ -59,7 +59,6 @@ typedef struct {
     } gradient;
 
     struct {
-        Vector *layer_deriv;
         Vector *err_coef;
 
         void *data;
@@ -86,6 +85,6 @@ void ffn_free_init(FFNInitData *);
 // Training / Inference
 
 void ffn_run(FFNModel *, Vector *);
-void ffn_train(FFNModel *, Dataset *);
+void ffn_train(FFNModel *, Dataset *, float);
 
 #endif

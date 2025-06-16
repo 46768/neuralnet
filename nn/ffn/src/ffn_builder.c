@@ -107,7 +107,7 @@ void _ffn_init_parameter(FFNInitData *initd, FFNModel *model) {
         uint64_t m_size = calc_mat_size(l_size, l1_size);
 
         mat_t_init(l_size, l1_size, d_ptr + d_offset, d_ptr + d_offset + m_size,
-                   w_ptr + (l-1));
+                   w_ptr + (l - 1));
 
         d_offset += m_size * 2;
     }
@@ -172,7 +172,7 @@ void _ffn_init_gradient(FFNInitData *initd, FFNModel *model) {
     uint32_t l_cnt = initd->layer_cnt;
     FFNLayerData *layer = initd->layer_data;
 
-    uint64_t b_mdata_size = (l_cnt - 1) * sizeof(Vector);
+    uint64_t b_mdata_size = l_cnt * sizeof(Vector);
     uint64_t w_mdata_size = (l_cnt - 1) * sizeof(Matrix);
     uint64_t c_mdata_size = sizeof(Vector);
 
@@ -181,6 +181,7 @@ void _ffn_init_gradient(FFNInitData *initd, FFNModel *model) {
     uint32_t padding = data_pad(mdata_size);
 
     uint64_t data_size = 0;
+    data_size += calc_vec_size(layer[0].size);
     for (uint32_t l = 1; l < l_cnt; l++) {
         data_size += calc_vec_size(layer[l].size);
         data_size += calc_mat_size(layer[l - 1].size, layer[l].size);
@@ -191,17 +192,17 @@ void _ffn_init_gradient(FFNInitData *initd, FFNModel *model) {
     void *dptr = data_alloc(mdata_size + padding + data_size);
 
     Vector *b_ptr = (Vector *)dptr;
-    Vector *c_ptr = b_ptr + (l_cnt - 1);
+    Vector *c_ptr = b_ptr + l_cnt;
     Matrix *w_ptr = (Matrix *)(c_ptr + 1);
 
     float *d_ptr = (float *)((((char *)(w_ptr + (l_cnt - 1))) + padding));
 
     uint64_t d_offset = 0;
 
-    for (uint32_t l = 1; l < l_cnt; l++) {
+    for (uint32_t l = 0; l < l_cnt; l++) {
         uint32_t l_size = layer[l].size;
 
-        vec_init(l_size, d_ptr + d_offset, b_ptr + (l - 1));
+        vec_init(l_size, d_ptr + d_offset, b_ptr + l);
 
         d_offset += calc_vec_size(l_size);
     }
@@ -228,104 +229,88 @@ void _ffn_init_intermediate(FFNInitData *initd, FFNModel *model) {
     uint32_t l_cnt = initd->layer_cnt;
     FFNLayerData *layer = initd->layer_data;
 
-    uint64_t l_deriv_mdata_size = l_cnt * sizeof(Vector);
     uint64_t err_coef_mdata_size = (l_cnt - 1) * sizeof(Vector);
 
-    uint64_t mdata_size = l_deriv_mdata_size + err_coef_mdata_size;
+    uint64_t mdata_size = err_coef_mdata_size;
 
     uint32_t padding = data_pad(mdata_size);
 
     uint64_t data_size = 0;
     for (uint32_t l = 0; l < (l_cnt - 1); l++) {
-        uint32_t l_size = layer[l].size;
-
-        data_size += calc_vec_size(l_size) * 2;
+        data_size += calc_vec_size(layer[l].size);
     }
-    data_size += calc_vec_size(layer[l_cnt - 1].size);
     data_size *= FLOAT_S;
 
     void *dptr = data_alloc(mdata_size + padding + data_size);
 
-    Vector *ld_ptr = (Vector *)dptr;
-    Vector *ec_ptr = ld_ptr + l_cnt;
+    Vector *ec_ptr = (Vector *)dptr;
 
     float *d_ptr = (float *)(((char *)(ec_ptr + l_cnt)) + padding);
 
     uint64_t d_offset = 0;
 
-    for (uint32_t l = 0; l < l_cnt; l++) {
-        uint32_t l_size = layer[l].size;
-
-        vec_init(l_size, d_ptr + d_offset, ld_ptr + l);
-
-        d_offset += calc_vec_size(l_size);
-    }
-
     for (uint32_t l = 0; l < (l_cnt - 1); l++) {
         uint32_t l_size = layer[l].size;
 
-        vec_init(l_size, d_ptr + d_offset, ld_ptr + l);
+        vec_init(l_size, d_ptr + d_offset, ec_ptr + l);
 
         d_offset += calc_vec_size(l_size);
     }
 
-    model->intermediate.layer_deriv = ld_ptr;
     model->intermediate.err_coef = ec_ptr;
     model->intermediate.data = dptr;
 }
 
 void ffn_build(FFNInitData *initd, FFNModel *model) {
-	init_random();
+    init_random();
 
-	uint32_t l_cnt = initd->layer_cnt;
-	FFNLayerData* layer = initd->layer_data;
+    uint32_t l_cnt = initd->layer_cnt;
+    FFNLayerData *layer = initd->layer_data;
 
     model->layer_cnt = l_cnt;
 
     _ffn_init_parameter(initd, model);
     _ffn_init_propagation(initd, model);
     _ffn_init_gradient(initd, model);
-    _ffn_init_intermediate(initd, model);
 
-	Vector* bias = model->parameter.bias;
-	MatrixTranpose* weight = model->parameter.weight;
-	ActivationFn* activation_fn = model->parameter.activation;
-	ActivationFnD* activation_fnd = model->parameter.activation_d;
+    Vector *bias = model->parameter.bias;
+    MatrixTranpose *weight = model->parameter.weight;
+    ActivationFn *activation_fn = model->parameter.activation;
+    ActivationFnD *activation_fnd = model->parameter.activation_d;
 
-	for (uint32_t l = 0; l < l_cnt-1; l++) {
-		InitFn bias_initer = initer_resolve(layer[l].b_initier);
-		InitFn weight_initer = initer_resolve(layer[l].w_initier);
+    for (uint32_t l = 0; l < l_cnt - 1; l++) {
+        InitFn bias_initer = initer_resolve(layer[l].b_initier);
+        InitFn weight_initer = initer_resolve(layer[l].w_initier);
 
-		activation_fn[l] = activation_resolve(layer[l].activation_fn);
-		activation_fnd[l] = activation_d_resolve(layer[l].activation_fn);
-		
-		uint32_t l_size = layer[l].size;
-		uint32_t l1_size = layer[l+1].size;
+        activation_fn[l] = activation_resolve(layer[l].activation_fn);
+        activation_fnd[l] = activation_d_resolve(layer[l].activation_fn);
 
-		get_vec_ctx(b, bias+l);
-		get_mat_t_ctx(w, weight+l);
+        uint32_t l_size = layer[l].size;
+        uint32_t l1_size = layer[l + 1].size;
 
-		for (uint32_t y = 0; y < l1_size; y++) {
-			vec_idx(b, y) = bias_initer(l1_size);
-			for (uint32_t x = 0; x < l_size; x++) {
-				mat_idx(w, x, y) = weight_initer(l_size);
-			}
-		}
-	}
+        get_vec_ctx(b, bias + l);
+        get_mat_t_ctx(w, weight + l);
 
-	model->parameter.cost = cost_resolve(initd->cost_fn);
-	model->parameter.cost_d = cost_d_resolve(initd->cost_fn);
+        for (uint32_t y = 0; y < l1_size; y++) {
+            vec_idx(b, y) = bias_initer(l1_size);
+            for (uint32_t x = 0; x < l_size; x++) {
+                mat_idx(w, x, y) = weight_initer(l_size);
+            }
+        }
+    }
+
+    model->parameter.cost = cost_resolve(initd->cost_fn);
+    model->parameter.cost_d = cost_d_resolve(initd->cost_fn);
 }
 
 void ffn_free(FFNModel *model) {
     free(model->parameter.data);
     free(model->propagation.data);
     free(model->gradient.data);
-    free(model->intermediate.data);
     free(model);
 }
 
 void ffn_free_init(FFNInitData *initd) {
-	free(initd->layer_data);
-	free(initd);
+    free(initd->layer_data);
+    free(initd);
 }

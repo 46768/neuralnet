@@ -83,6 +83,7 @@ void mat_t_init(uint32_t, uint32_t, float *, float *, MatrixTranpose *);
 
 // Matrix Operation
 
+void mat_cadd(Matrix *, Matrix *, float);
 void mat_vmul(Matrix *, Vector *, Vector *);
 void mat_fmva(Matrix *, Vector *, Vector *);
 void mat_t_vmul(MatrixTranpose *, Vector *, Vector *);

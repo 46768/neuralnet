@@ -3,18 +3,18 @@
 
 #include "vector.h"
 
-typedef enum { MSE } CostEnum;
+typedef enum { MSE, CCEL } CostEnum;
 
-typedef float (*CostFn)(Vector*, Vector*);
-typedef void (*CostFnD)(Vector*, Vector*, Vector*);
+typedef float (*CostFn)(Vector *, Vector *);
+typedef void (*CostFnD)(Vector *, Vector *, Vector *);
 
 CostFn cost_resolve(CostEnum);
 CostFnD cost_d_resolve(CostEnum);
 
-float cost_mse(Vector*, Vector*);
-void cost_mse_d(Vector*, Vector*, Vector*);
+float cost_mse(Vector *, Vector *);
+void cost_mse_d(Vector *, Vector *, Vector *);
 
-float cost_ccel(Vector*, Vector*);
-void cost_ccel_d(Vector*, Vector*, Vector*);
+float cost_ccel(Vector *, Vector *);
+void cost_ccel_d(Vector *, Vector *, Vector *);
 
 #endif
