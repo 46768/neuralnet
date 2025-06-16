@@ -12,8 +12,6 @@ int main() {
 
     ffn_build(initd, model);
 
-    mat_phy_transpose(model->parameter.weight);
-
     ffn_free(model);
     ffn_free_init(initd);
 

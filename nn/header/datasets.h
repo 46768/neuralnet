@@ -21,4 +21,8 @@ typedef struct {
     void *data; /**< Data pool of the dataset */
 } Dataset;
 
+Dataset* dataset_init();
+
+void dataset_linear(int32_t, int32_t, int32_t, int32_t, Dataset*);
+
 #endif
