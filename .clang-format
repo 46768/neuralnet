@@ -5,3 +5,7 @@ IndentWidth: 4
 Language: C
 ColumnLimit: 80
 PointerAlignment: Right
+---
+Language: Cpp
+ColumnLimit: 80
+PointerAlignment: Right

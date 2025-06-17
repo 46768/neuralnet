@@ -1,8 +1,8 @@
 add_library(CompilerFlags INTERFACE)
-target_compile_features(CompilerFlags INTERFACE c_std_17)
+target_compile_features(CompilerFlags INTERFACE c_std_17 cxx_std_17)
 
 # Compiler flags
-set(CompilerFlagss "-Wall;-Wextra;-g;-lpthread;-march=native")
+set(CompilerFlagss "-Wall;-Wextra;-g;-march=native")
 
 # Set compiler flags
 target_compile_options(CompilerFlags INTERFACE

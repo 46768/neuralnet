@@ -2,6 +2,10 @@
 #ifndef BLAS_MATRIX_H
 #define BLAS_MATRIX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #include "vector.h"
@@ -92,5 +96,9 @@ void mat_phy_transpose(MatrixTranpose *);
 // Vector Operation (Matrix return)
 
 void vec_crmul(Vector *, Vector *, Matrix *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -2,6 +2,10 @@
 #ifndef BLAS_VECTOR_H
 #define BLAS_VECTOR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 /**
@@ -32,5 +36,9 @@ void vec_init(uint32_t, float *, Vector *);
 
 void vec_cadd(Vector *, Vector *, float);
 void vec_mul(Vector *, Vector *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
