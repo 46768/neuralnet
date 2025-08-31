@@ -1,5 +1,6 @@
 #ifdef SIMD_AVX2
 #include <immintrin.h>
+#include <stdio.h>
 
 #include "matrix.h"
 
@@ -149,17 +150,27 @@ void mat_fmva(Matrix *mat, Vector *vec, Vector *res) {
 }
 
 void mat_t_vmul(MatrixTranpose *mat, Vector *vec, Vector *res) {
+	printf("t\n");
     // Get contexts for the kernel
 
+	printf("h\n");
     get_mat_t_ctx(mat_ctx, mat);
+	printf("j\n");
     get_vec_ctx(vec_ctx, vec);
+	printf("j\n");
     get_vec_ctx(res_ctx, res);
+	printf("j\n");
+	printf("t\n");
 
     // Compute the multiplication with the kernel
 
+	printf("t\n");
     __m256 v0, v1, v2, v3, v4, v5, v6, v7, m0, m1, m2, m3, m4, m5, m6, m7;
+	printf("t\n");
     for (uint32_t x = 0; x < mat_ctx.sy; x += 8) {
+		printf("n\n");
         m7 = _mm256_setzero_ps();
+		printf("t\n");
         for (uint32_t y = 0; y < mat_ctx.sx; y += 8) {
             v0 = _mm256_set1_ps(vec_idx(vec_ctx, y + 0));
             v1 = _mm256_set1_ps(vec_idx(vec_ctx, y + 1));
@@ -189,8 +200,11 @@ void mat_t_vmul(MatrixTranpose *mat, Vector *vec, Vector *res) {
             m0 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 7));
             m7 = _mm256_fmadd_ps(v7, m0, m7);
         }
+		printf("t\n");
 
         _mm256_store_ps(vec_idx_ptr(res_ctx, x), m7);
+		printf("t\n");
     }
+	printf("t\n");
 }
 #endif

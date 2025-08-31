@@ -1,6 +1,7 @@
 #include "ffn.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "random.h"
 
@@ -272,6 +273,7 @@ void ffn_build(FFNInitData *initd, FFNModel *model) {
     _ffn_init_parameter(initd, model);
     _ffn_init_propagation(initd, model);
     _ffn_init_gradient(initd, model);
+	_ffn_init_intermediate(initd, model);
 
     Vector *bias = model->parameter.bias;
     MatrixTranpose *weight = model->parameter.weight;

@@ -1,6 +1,7 @@
 #include "ffn.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #include "matrix.h"
 #include "vector.h"
@@ -29,6 +30,7 @@ void ffn_run(FFNModel *model, Vector *data_in) {
 }
 
 void ffn_train(FFNModel *model, Dataset *dataset, float learning_rate) {
+	printf("t\n");
     uint32_t dsize = dataset->size;
     uint32_t l_cnt = model->layer_cnt;
 
@@ -51,30 +53,51 @@ void ffn_train(FFNModel *model, Dataset *dataset, float learning_rate) {
     ActivationFnD *act_d = model->parameter.activation_d;
 
     CostFnD cost_d = model->parameter.cost_d;
+	printf("t\n");
 
     for (uint32_t i = 0; i < dsize; i++) {
-
+		printf("e\n");
         // Get model preact + act
         ffn_run(model, d_in + i);
+		printf("t\n");
 
         // Compute gradients
 
         cost_d(activation + l_cnt - 1, d_target + i, cost_d_v);
         act_d[l_cnt - 2](preactivation + l_cnt - 1, err_L);
+		printf("t\n");
 
         vec_mul(err_L, cost_d_v);
+		printf("t\n");
 
         for (int64_t l = l_cnt - 2; l >= 0; l--) {
+			printf("d\n");
             Vector *err_l1 = bias_g + l + 1;
 
             vec_crmul(err_l1, activation + l, weight_g + l);
+			printf("t\n");
 
             // Next error calculation
 
+			printf("l\n");
+			printf("%ld\n", (uintptr_t)(model->intermediate.data));
+			printf("%ld\n", (uintptr_t)(err_coef));
+			printf("%ld\n", (uintptr_t)(err_coef+l));
+			printf("%d\n", (err_coef+l)->size);
+			printf("%ld\n", (uintptr_t)((err_coef+l)->data));
+			printf("%d\n", (err_l1)->size);
+			printf("%ld\n", (uintptr_t)((err_l1)->data));
             mat_t_vmul(weight + l, err_l1, err_coef + l);
+			printf("l\n");
+
+			printf("t\n");
             act_d[l](preactivation + l, bias_g + l);
+			printf("t\n");
             vec_mul(bias_g + l, err_coef + l);
+			printf("t\n");
+			printf("f\n");
         }
+		printf("t\n");
 
         // Apply graidents
 
@@ -86,5 +109,7 @@ void ffn_train(FFNModel *model, Dataset *dataset, float learning_rate) {
 
             mat_phy_transpose(weight + l);
         }
+		printf("t\n");
     }
+	printf("t\n");
 }

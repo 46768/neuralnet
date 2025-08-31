@@ -8,6 +8,7 @@ target_sources(${LIB_NAME} PRIVATE ${srcs})
 target_include_directories(${LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/header")
 
 target_link_libraries(${LIB_NAME}
+	PUBLIC m
 	PRIVATE BLAS
 	PRIVATE SIMDLib
 )
