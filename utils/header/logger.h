@@ -2,9 +2,9 @@
 #ifndef COM_LOGGER_H
 #define COM_LOGGER_H
 // Uncomment to enable debugging
-// #define DEBUG_MODE
+//#define DEBUG_MODE
 // Uncomment to enable verbose logging
-// #define VERBOSE_MODE
+//#define VERBOSE_MODE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,13 +30,19 @@ void _log(int, const char *, int, const char *, const char *, ...);
     abort()
 #define printr(format, ...) fprintf(stderr, format, ##__VA_ARGS__)
 
+#define _printm(level, name, ptr) _log(level, __FILE__, __LINE__, __func__, "%s: 0x%x 32BOff: %d 64BOff: %d", name, ptr, (uintptr_t)(ptr) % 32, (uintptr_t)(ptr) % 64)
+
+#define infom(name, ptr) _printm(0, name, ptr)
+
 #ifdef DEBUG_MODE
 #define debug(format, ...)                                                     \
     _log(3, __FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
+#define debugm(name, ptr) _printm(3, name, ptr)
 #define printr_d(format, ...) fprintf(stderr, format, ##__VA_ARGS__)
 #define newline_d() newline()
 #else
 #define debug(format, ...)
+#define debugm(name, ptr)
 #define printr_d(format, ...)
 #define newline_d()
 #endif

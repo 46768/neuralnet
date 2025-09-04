@@ -4,7 +4,7 @@
 #include <string.h>
 
 void activation_none(Vector *vin, Vector *vout) {
-    memcpy(vin->data, vout->data, vin->size * sizeof(float));
+    memcpy(vout->data, vin->data, vin->size * sizeof(float));
 }
 
 void activation_none_d(Vector *vin, Vector *vout) {

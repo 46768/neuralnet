@@ -1,9 +1,9 @@
 #include "ffn.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "random.h"
+#include "logger.h"
 
 #include "matrix.h"
 #include "vector.h"
@@ -246,13 +246,12 @@ void _ffn_init_intermediate(FFNInitData *initd, FFNModel *model) {
 
     Vector *ec_ptr = (Vector *)dptr;
 
-    float *d_ptr = (float *)(((char *)(ec_ptr + l_cnt)) + padding);
+    float *d_ptr = (float *)(((char *)(ec_ptr + l_cnt - 1)) + padding);
 
     uint64_t d_offset = 0;
 
     for (uint32_t l = 0; l < (l_cnt - 1); l++) {
         uint32_t l_size = layer[l].size;
-
         vec_init(l_size, d_ptr + d_offset, ec_ptr + l);
 
         d_offset += calc_vec_size(l_size);
@@ -299,6 +298,7 @@ void ffn_build(FFNInitData *initd, FFNModel *model) {
                 mat_idx(w, x, y) = weight_initer(l_size);
             }
         }
+		mat_phy_transpose(weight + l);
     }
 
     model->parameter.cost = cost_resolve(initd->cost_fn);

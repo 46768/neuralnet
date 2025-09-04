@@ -1,7 +1,6 @@
 #include "datasets.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "vector.h"
 
@@ -66,7 +65,6 @@ void dataset_free(Dataset *dataset) {
 Dataset *dataset_linear(int32_t lower_bound, int32_t upper_bound, int32_t slope,
                     int32_t y_intercept) {
 	uint32_t point_count = upper_bound - lower_bound + 1;
-	printf("%d %d %d\n", lower_bound, upper_bound, point_count);
 	Dataset *dataset = dataset_init(point_count, 1, 1);
 
 	Vector *input_vector = dataset->input;

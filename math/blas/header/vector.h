@@ -17,6 +17,8 @@ typedef struct {
 
 void vec_init(uint32_t, float *, Vector *);
 
+void vec_print(Vector *);
+
 #ifdef SIMD_AVX
 #define get_vec_rsize(s) (((s) + 7) & ~7)
 #else

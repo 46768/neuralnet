@@ -89,6 +89,9 @@ void mat_fmva(Matrix *, Vector *, Vector *);
 void mat_t_vmul(MatrixTranpose *, Vector *, Vector *);
 void mat_phy_transpose(MatrixTranpose *);
 
+void mat_print(Matrix *);
+void mat_t_print(MatrixTranpose *);
+
 // Vector Operation (Matrix return)
 
 void vec_crmul(Vector *, Vector *, Matrix *);

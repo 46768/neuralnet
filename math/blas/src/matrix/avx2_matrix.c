@@ -1,6 +1,7 @@
 #ifdef SIMD_AVX2
 #include <immintrin.h>
-#include <stdio.h>
+
+#include "logger.h"
 
 #include "matrix.h"
 
@@ -150,28 +151,31 @@ void mat_fmva(Matrix *mat, Vector *vec, Vector *res) {
 }
 
 void mat_t_vmul(MatrixTranpose *mat, Vector *vec, Vector *res) {
-	printf("t\n");
+	debug("Begin Matrix transpose vector multiplication");
     // Get contexts for the kernel
 
-	printf("h\n");
+	debug("Retreving Context");
     get_mat_t_ctx(mat_ctx, mat);
-	printf("j\n");
     get_vec_ctx(vec_ctx, vec);
-	printf("j\n");
     get_vec_ctx(res_ctx, res);
-	printf("j\n");
-	printf("t\n");
+	debug("Retreived");
+	debugm("Matrix data", mat_ctx.data);
+	debugm("Matrix Tdata", mat_ctx.data_t);
+	newline_d();
+	debugm("Vector data", vec_ctx.data);
+	newline_d();
+	debugm("Result data", res_ctx.data);
 
     // Compute the multiplication with the kernel
 
-	printf("t\n");
+	debug("Computing");
     __m256 v0, v1, v2, v3, v4, v5, v6, v7, m0, m1, m2, m3, m4, m5, m6, m7;
-	printf("t\n");
     for (uint32_t x = 0; x < mat_ctx.sy; x += 8) {
-		printf("n\n");
+		debug("Zeroing result 7");
         m7 = _mm256_setzero_ps();
-		printf("t\n");
+		debug("Zeroed");
         for (uint32_t y = 0; y < mat_ctx.sx; y += 8) {
+			debug("Loading vector data");
             v0 = _mm256_set1_ps(vec_idx(vec_ctx, y + 0));
             v1 = _mm256_set1_ps(vec_idx(vec_ctx, y + 1));
             v2 = _mm256_set1_ps(vec_idx(vec_ctx, y + 2));
@@ -180,15 +184,19 @@ void mat_t_vmul(MatrixTranpose *mat, Vector *vec, Vector *res) {
             v5 = _mm256_set1_ps(vec_idx(vec_ctx, y + 5));
             v6 = _mm256_set1_ps(vec_idx(vec_ctx, y + 6));
             v7 = _mm256_set1_ps(vec_idx(vec_ctx, y + 7));
+			debug("Loaded");
 
-            m0 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 0));
-            m1 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 1));
-            m2 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 2));
-            m3 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 3));
-            m4 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 4));
-            m5 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 5));
-            m6 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 6));
+			debug("Loading matrix data");
+            debugm("m0", mat_dt_idx_ptr(mat_ctx, x + 0, y + 0));m0 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 0)); debug("Loaded m0");
+            debugm("m1", mat_dt_idx_ptr(mat_ctx, x + 0, y + 1));m1 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 1)); debug("Loaded m1");
+            debugm("m2", mat_dt_idx_ptr(mat_ctx, x + 0, y + 2));m2 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 2)); debug("Loaded m2");
+            debugm("m3", mat_dt_idx_ptr(mat_ctx, x + 0, y + 3));m3 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 3)); debug("Loaded m3");
+            debugm("m4", mat_dt_idx_ptr(mat_ctx, x + 0, y + 4));m4 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 4)); debug("Loaded m4");
+            debugm("m5", mat_dt_idx_ptr(mat_ctx, x + 0, y + 5));m5 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 5)); debug("Loaded m5");
+            debugm("m6", mat_dt_idx_ptr(mat_ctx, x + 0, y + 6));m6 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 6)); debug("Loaded m6");
+			debug("Loaded");
 
+			debug("Computing");
             m7 = _mm256_fmadd_ps(v0, m0, m7);
             m7 = _mm256_fmadd_ps(v1, m1, m7);
             m7 = _mm256_fmadd_ps(v2, m2, m7);
@@ -199,12 +207,15 @@ void mat_t_vmul(MatrixTranpose *mat, Vector *vec, Vector *res) {
 
             m0 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 7));
             m7 = _mm256_fmadd_ps(v7, m0, m7);
+			debug("Computed");
         }
-		printf("t\n");
 
+		debug("Storing result");
+		debugm("Store ptr", vec_idx_ptr(res_ctx, x));
         _mm256_store_ps(vec_idx_ptr(res_ctx, x), m7);
-		printf("t\n");
+		debug("Stored");
     }
-	printf("t\n");
+	debug("Computed");
+	debug("End Matrix transpose vector multiplication");
 }
 #endif
