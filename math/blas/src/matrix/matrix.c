@@ -55,9 +55,9 @@ void mat_t_print(MatrixTranpose *mat) {
 	printf("Matrix Row*Column: %d*%d\n", m.sx, m.sy);
 
 	printf("Normal Data:\n");
-	for (uint32_t x = 0; x < m.sx; x++) {
+	for (uint32_t y = 0; y < m.sy; y++) {
 		printf("[");
-		for (uint32_t y = 0; y < m.sy; y++) {
+		for (uint32_t x = 0; x < m.sx; x++) {
 			printf("%f ", mat_idx(m, x, y));
 		}
 		printf("]\n");

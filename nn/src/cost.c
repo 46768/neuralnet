@@ -61,6 +61,6 @@ void cost_ccel_d(Vector *vin, Vector *target, Vector *vout) {
     get_vec_ctx(vo, vout);
 
     for (uint32_t i = 0; i < vi.size; i++) {
-        vec_idx(vo, i) = vec_idx(tg, i) - vec_idx(vi, i);
+        vec_idx(vo, i) = vec_idx(vi, i) - vec_idx(tg, i);
     }
 }

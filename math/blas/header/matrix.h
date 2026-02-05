@@ -67,14 +67,16 @@ void mat_t_init(uint32_t, uint32_t, float *, float *, MatrixTranpose *);
                           (mat)->data,                                         \
                           (mat)->data_t}
 
+// x -> width(column)(logical)(physical) y -> height(row)(logical)(physical)
+// NOTE: ((x_or_y) >> 3) get rids of the first 3 bits (the first 3 is handled already)
 #define mat_idx(ctx, x, y)                                                     \
-    (ctx.data)[((y) & 7) + ((x) * 8) + (((y) >> 3) * ctx.rsx * 8)]
+    (ctx.data)[((y) & 0b111) + ((x) * 8) + (((y) >> 3) * ctx.rsx * 8)]
 #define mat_t_idx(ctx, x, y)                                                   \
-    (ctx.data)[((x) & 7) + ((y) * 8) + (((x) >> 3) * ctx.rsy * 8)]
+    (ctx.data)[((x) & 0b111) + ((y) * 8) + (((x) >> 3) * ctx.rsy * 8)]
 #define mat_dt_idx(ctx, x, y)                                                  \
-    (ctx.data_t)[((x) & 7) + ((y) * 8) + (((x) >> 3) * ctx.rsy * 8)]
+    (ctx.data_t)[((x) & 0b111) + ((y) * 8) + (((x) >> 3) * ctx.rsy * 8)]
 #define mat_dtt_idx(ctx, x, y)                                                 \
-    (ctx.data_t)[((y) & 7) + ((x) * 8) + (((y) >> 3) * ctx.rsx * 8)]
+    (ctx.data_t)[((y) & 0b111) + ((x) * 8) + (((y) >> 3) * ctx.rsx * 8)]
 
 #define mat_idx_ptr(ctx, x, y) &mat_idx(ctx, x, y)
 #define mat_t_idx_ptr(ctx, x, y) &mat_t_idx(ctx, x, y)

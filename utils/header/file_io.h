@@ -14,8 +14,8 @@ typedef struct {
     FILE *file_pointer; /**< File pointer */
 } FileData;
 
-FileData *get_file_read(char *);
-FileData *get_file_write(char *);
-int close_file(FileData *);
+FileData *file_get_read(char *);
+FileData *file_get_write(char *);
+int file_close(FileData *);
 
 #endif

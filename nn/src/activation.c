@@ -32,3 +32,27 @@ void activation_sigmoid_d(Vector *vin, Vector *vout) {
         vec_idx(vo, i) = sig * (1 - sig);
     }
 }
+
+
+void activation_softmax(Vector* vin, Vector* vout) {
+	get_vec_ctx(vi, vin);
+	get_vec_ctx(vo, vout);
+
+	// Find largest element of the vector
+	float z_max = 0;
+	for (uint32_t i = 0; i < vi.size; i++) {
+		if (vi.data[i] > z_max) {
+			z_max = vi.data[i];
+		}
+	}
+
+	float exp_sum = 0;
+	for (uint32_t i = 0; i < vi.size; i++) {
+		float z_exp = exp(vi.data[i] - z_max);
+		exp_sum += z_exp;
+		vo.data[i] = z_exp;
+	}
+	for (uint32_t i = 0; i < vi.size; i++) {
+		vo.data[i] /= exp_sum;
+	}
+}

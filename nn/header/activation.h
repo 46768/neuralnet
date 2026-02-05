@@ -6,6 +6,7 @@
 typedef enum {
     None,
     Sigmoid,
+	Softmax,
 } ActivationEnum;
 
 typedef void (*ActivationFn)(Vector *, Vector *);
@@ -19,5 +20,7 @@ void activation_none_d(Vector *, Vector *);
 
 void activation_sigmoid(Vector *, Vector *);
 void activation_sigmoid_d(Vector *, Vector *);
+
+void activation_softmax(Vector *, Vector *);
 
 #endif

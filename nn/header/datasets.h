@@ -2,6 +2,7 @@
 #ifndef NN_DATASETS_H
 #define NN_DATASETS_H
 
+#include <stdio.h>
 #include <stdint.h>
 
 #include "vector.h"
@@ -24,6 +25,8 @@ typedef struct {
 Dataset *dataset_init(uint32_t, uint32_t, uint32_t);
 void dataset_free(Dataset *);
 
+Dataset *dataset_file(FILE *);
 Dataset *dataset_linear(int32_t, int32_t, int32_t, int32_t);
+Dataset *dataset_xor();
 
 #endif

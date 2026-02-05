@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+#include "logger.h"
+
 #include "matrix.h"
 #include "vector.h"
 
@@ -26,9 +28,12 @@ void ffn_run(FFNModel *model, Vector *data_in) {
 
         memcpy(preactivation[l + 1].data, bias_v.data,
                bias_v.size * sizeof(float));
+		debug("FMVA %d", l);
         mat_fmva((Matrix *)(weight + l), activation + l, preactivation + l + 1);
         activation_fn[l](preactivation + l + 1, activation + l + 1);
     }
+
+	model->parameter.output_activation(activation + l_cnt - 1, model->propagation.output);
 }
 
 void ffn_train(FFNModel *model, Dataset *dataset, float learning_rate) {
@@ -68,7 +73,8 @@ void ffn_train(FFNModel *model, Dataset *dataset, float learning_rate) {
         for (int64_t l = l_cnt - 2; l >= 0; l--) {
             Vector *err_l1 = bias_g + l + 1;
 
-            vec_crmul(err_l1, activation + l, weight_g + l);
+            //vec_crmul(err_l1, activation + l, weight_g + l);
+            vec_crmul(activation + l, err_l1, weight_g + l);
 
             // Next error calculation
 

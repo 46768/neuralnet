@@ -25,6 +25,7 @@ typedef struct {
     uint32_t layer_cap;
     FFNLayerData *layer_data;
     CostEnum cost_fn;
+	ActivationEnum output_fn;
 } FFNInitData;
 
 // FFN Model data
@@ -39,6 +40,7 @@ typedef struct {
         ActivationFnD *activation_d;
         CostFn cost;
         CostFnD cost_d;
+		ActivationFn output_activation;
 
         void *data;
     } parameter;
@@ -46,6 +48,8 @@ typedef struct {
     struct {
         Vector *preactivation;
         Vector *activation;
+
+		Vector *output;
 
         void *data;
     } propagation;
@@ -70,7 +74,7 @@ typedef struct {
 FFNInitData *ffn_init();
 void ffn_add_layer(FFNInitData *, uint32_t, ActivationEnum, IniterEnum,
                    IniterEnum);
-void ffn_set_output(FFNInitData *, uint32_t);
+void ffn_set_output(FFNInitData *, uint32_t, ActivationEnum);
 void ffn_set_cost_fn(FFNInitData *, CostEnum);
 
 // FFN Builder

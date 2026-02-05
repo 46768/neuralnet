@@ -115,7 +115,7 @@ void mat_fmva(Matrix *mat, Vector *vec, Vector *res) {
 
     __m256 v0, v1, v2, v3, v4, v5, v6, v7, m0, m1, m2, m3, m4, m5, m6, m7;
     for (uint32_t x = 0; x < mat_ctx.sy; x += 8) {
-        m7 = _mm256_load_ps(vec_idx_ptr(res_ctx, x));
+        debugm("m7", vec_idx_ptr(res_ctx, x));m7 = _mm256_load_ps(vec_idx_ptr(res_ctx, x));
         for (uint32_t y = 0; y < mat_ctx.sx; y += 8) {
             v0 = _mm256_set1_ps(vec_idx(vec_ctx, y + 0));
             v1 = _mm256_set1_ps(vec_idx(vec_ctx, y + 1));
@@ -205,7 +205,9 @@ void mat_t_vmul(MatrixTranpose *mat, Vector *vec, Vector *res) {
             m7 = _mm256_fmadd_ps(v5, m5, m7);
             m7 = _mm256_fmadd_ps(v6, m6, m7);
 
-            m0 = _mm256_load_ps(mat_dtt_idx_ptr(mat_ctx, x + 0, y + 7));
+            debugm("m7", mat_dt_idx_ptr(mat_ctx, x + 0, y + 7));
+			m0 = _mm256_load_ps(mat_dt_idx_ptr(mat_ctx, x + 0, y + 7));
+			debug("Loaded m7");
             m7 = _mm256_fmadd_ps(v7, m0, m7);
 			debug("Computed");
         }

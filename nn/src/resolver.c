@@ -8,6 +8,8 @@ ActivationFn activation_resolve(ActivationEnum enm) {
         return activation_none;
     case Sigmoid:
         return activation_sigmoid;
+	case Softmax:
+		return activation_softmax;
     }
 
     return activation_none;
@@ -19,6 +21,8 @@ ActivationFnD activation_d_resolve(ActivationEnum enm) {
         return activation_none_d;
     case Sigmoid:
         return activation_sigmoid_d;
+	case Softmax:
+		return activation_none_d;
     }
 
     return activation_none_d;

@@ -50,8 +50,9 @@ void ffn_add_layer(FFNInitData *initd, uint32_t l_size,
     layer_data[layer_cnt].size = l_size;
 }
 
-void ffn_set_output(FFNInitData *initd, uint32_t o_size) {
+void ffn_set_output(FFNInitData *initd, uint32_t o_size, ActivationEnum o_act) {
     ffn_add_layer(initd, o_size, None, Zero, Zero);
+	initd->output_fn = o_act;
 }
 
 void ffn_set_cost_fn(FFNInitData *initd, CostEnum cost_fn) {
@@ -125,11 +126,13 @@ void _ffn_init_parameter(FFNInitData *initd, FFNModel *model) {
 void _ffn_init_propagation(FFNInitData *initd, FFNModel *model) {
     uint32_t l_cnt = initd->layer_cnt;
     FFNLayerData *layer = initd->layer_data;
+	FFNLayerData output_layer = layer[l_cnt-1];
 
     uint64_t preact_mdata_size = l_cnt * sizeof(Vector);
     uint64_t act_mdata_size = l_cnt * sizeof(Vector);
+	uint64_t output_mdata_size = sizeof(Vector);
 
-    uint64_t mdata_size = preact_mdata_size + act_mdata_size;
+    uint64_t mdata_size = preact_mdata_size + act_mdata_size + output_mdata_size;
 
     uint32_t padding = data_pad(mdata_size);
 
@@ -137,14 +140,16 @@ void _ffn_init_propagation(FFNInitData *initd, FFNModel *model) {
     for (uint32_t l = 0; l < l_cnt; l++) {
         data_size += calc_vec_size(layer[l].size) * 2;
     }
+	data_size += calc_vec_size(output_layer.size);
     data_size *= FLOAT_S;
 
     void *dptr = data_alloc(mdata_size + padding + data_size);
 
     Vector *preact_ptr = (Vector *)dptr;
     Vector *act_ptr = preact_ptr + l_cnt;
+    Vector *out_ptr = act_ptr + l_cnt;
 
-    float *d_ptr = (float *)(((char *)(act_ptr + l_cnt)) + padding);
+    float *d_ptr = (float *)(((char *)(out_ptr + 1)) + padding);
 
     uint64_t d_offset = 0;
 
@@ -164,8 +169,12 @@ void _ffn_init_propagation(FFNInitData *initd, FFNModel *model) {
         d_offset += calc_vec_size(l_size);
     }
 
+	vec_init(output_layer.size, d_ptr + d_offset, out_ptr);
+
     model->propagation.preactivation = preact_ptr;
     model->propagation.activation = act_ptr;
+	model->propagation.output = out_ptr;
+
     model->propagation.data = dptr;
 }
 
@@ -303,6 +312,7 @@ void ffn_build(FFNInitData *initd, FFNModel *model) {
 
     model->parameter.cost = cost_resolve(initd->cost_fn);
     model->parameter.cost_d = cost_d_resolve(initd->cost_fn);
+	model->parameter.output_activation = activation_resolve(initd->output_fn);
 }
 
 void ffn_free(FFNModel *model) {
